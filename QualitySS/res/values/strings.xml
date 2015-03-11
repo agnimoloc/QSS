@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Quality Seguridad y Salud</string>
+    <string name="action_settings">Settings</string>
+    <string name="lbl_user">Nombre de usuario</string>
+    <string name="lbl_password">Contraseña</string>
+    <string name="btn_login">Entrar</string>
+    <string name="hint_filluser">Ingresa tu nombre de usuario</string>
+    <string name="hint_password">Ingresa tu Contraseña</string>
+    <string name="title_activity_login">Ingresar</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="ok">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="msg_get_update_file">Obteniendo datos de actualización&#8230;</string>
+    <string name="msg_connect_to_server">Contectando con servidor&#8230;</string>
+    <string name="msg_update_database">Actualizando base de datos&#8230;</string>
+    <string name="qst_not_connection_retry">No hay conexión con el servidor, ¿Desea reintentar?</string>
+    <string name="ttl_error">Error</string>
+    <string name="ttl_get_data">Obteniendo datos&#8230;</string>
+    <string name="msg_invalid_login">El usuario o la contraseña son invalidos</string>
+    <string name="ttl_invalid_login">Login Incorrecto</string>
+    <string name="title_service_list">Services</string>
+    <string name="title_service_detail">Service Detail</string>
+    <string name="tlt_service_list">Serivicios Actuales</string>
+    <string name="ttl_service_detail">Detalle del Servicio</string>
+    <string name="fld_type">Tipo de Servicio</string>
+    <string name="fld_address">Domicilio</string>
+    <string name="fld_contact">Contacto</string>
+    <string name="fld_phone">Telefono</string>
+    <string name="fld_description">Descripción</string>
+    <string name="btn_maps">Como llegar</string>
+    <string name="btn_start_service">Iniciar Servicio</string>
+    <string name="title_activity_general_review">GeneralReviewActivity</string>
+    <string name="btn_photo">Foto</string>
+    <string name="btn_comment">Nota</string>
+    <string name="btn_next">Siguiente</string>
+    <string name="ttl_general_checklist">Revisión General</string>
+    <string name="title_activity_checkpoint_comment">CheckpointCommentActivity</string>
+    <string name="lbl_checkpoint_comment">Comentario</string>
+    <string name="lbl_geo_mark_name">Aqui es</string>
+    <string name="msg_generic_error">Ups!!, hubo un error, por favor intentalo nuevamente</string>
+    <string name="msg_photo_take_successfully">Foto guardada.</string>
+    <string name="title_activity_show_photo">ShowPhotoActivity</string>
+    <string name="ttl_photo">Imagen</string>
+    <string name="img_content_description">Imagen guardada en la aplicación</string>
+    <string name="btn_take_new_photo">Tomar nueva foto</string>
+    <string name="title_activity_staff_review_list">StaffReviewListActivity</string>
+    <string name="ttl_staff_review_list">Revisión de Personal</string>
+    <string name="finish">Finalizar</string>
+    <string name="img_staff_image">Imagen del personal</string>
+    <string name="start">Iniciar</string>
+    <string name="saved">Guardado</string>
+
+</resources>
