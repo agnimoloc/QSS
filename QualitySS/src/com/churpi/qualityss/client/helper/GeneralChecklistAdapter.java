@@ -1,7 +1,6 @@
 package com.churpi.qualityss.client.helper;
 
 import com.churpi.qualityss.client.R;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbGeneralCheckpoint;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -33,7 +32,7 @@ public class GeneralChecklistAdapter extends SimpleCursorAdapter {
 		}else{
 			itemView = (LinearLayout)convertView;
 		}
-		Cursor c = getCursor();
+		/*Cursor c = getCursor();
 		
 		c.moveToPosition(position);
 		CheckBox checkbox = (CheckBox)itemView.findViewById(android.R.id.checkbox);
@@ -41,7 +40,7 @@ public class GeneralChecklistAdapter extends SimpleCursorAdapter {
 		Button button = (Button)itemView.findViewById(android.R.id.button1);
 		button.setTag(c.getInt(c.getColumnIndex(DbGeneralCheckpoint._ID)));
 		button = (Button)itemView.findViewById(android.R.id.button2);
-		button.setTag(c.getInt(c.getColumnIndex(DbGeneralCheckpoint._ID)));		
+		button.setTag(c.getInt(c.getColumnIndex(DbGeneralCheckpoint._ID)));*/		
 		return itemView;
 	}
 	

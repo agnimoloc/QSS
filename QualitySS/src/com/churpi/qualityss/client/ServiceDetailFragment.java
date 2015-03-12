@@ -55,12 +55,12 @@ public class ServiceDetailFragment extends Fragment {
 							null, null, null);
 					if(c.moveToFirst()){
 						service = new ServiceDTO();
-						service.setId(c.getInt(c.getColumnIndex(DbService._ID)));
-						service.setType(c.getString(c.getColumnIndex(DbService.CN_TYPE)));
-						service.setAddress(c.getString(c.getColumnIndex(DbService.CN_ADDRESS)));
-						service.setContact(c.getString(c.getColumnIndex(DbService.CN_CONTACT)));
-						service.setDescription(c.getString(c.getColumnIndex(DbService.CN_DESCRIPTION)));
-						service.setPhone(c.getString(c.getColumnIndex(DbService.CN_PHONE)));
+						service.setServicioId(c.getInt(c.getColumnIndex(DbService._ID)));
+						service.setTipo(c.getInt(c.getColumnIndex(DbService.CN_TYPE)));
+						service.setDomicilio(c.getString(c.getColumnIndex(DbService.CN_ADDRESS)));
+						service.setCliente(c.getString(c.getColumnIndex(DbService.CN_CUSTOMER)));
+						service.setDescripcion(c.getString(c.getColumnIndex(DbService.CN_DESCRIPTION)));
+						service.setCode(c.getString(c.getColumnIndex(DbService.CN_CODE)));
 					}
 					c.close();
 				}
@@ -78,25 +78,25 @@ public class ServiceDetailFragment extends Fragment {
 		if (service != null) {
 		
 			TextView text = (TextView)rootView.findViewById(R.id.fldType);
-			text.setText(service.getType());
+			text.setText(service.getTipo());
 		
 			text = (TextView)rootView.findViewById(R.id.fldAddress);
-			text.setText(service.getAddress());
+			text.setText(service.getDomicilio());
 			
 			text = (TextView)rootView.findViewById(R.id.fldContact);
-			text.setText(service.getContact());
+			text.setText(service.getCliente());
 			
 			text = (TextView)rootView.findViewById(R.id.fldPhone);
-			text.setText(service.getPhone());
+			text.setText(service.getCode());
 			
 			text = (TextView)rootView.findViewById(R.id.fldDescription);
-			text.setText(service.getDescription());		
+			text.setText(service.getDescripcion());		
 			
 			Button button = (Button)rootView.findViewById(android.R.id.button1);
-			button.setTag(service.getAddress());
+			button.setTag(service.getDomicilio());
 			
 			button = (Button)rootView.findViewById(android.R.id.button2);	
-			button.setTag(service.getId());
+			button.setTag(service.getServicioId());
 			
 			
 		}

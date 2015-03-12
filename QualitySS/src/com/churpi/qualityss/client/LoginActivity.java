@@ -40,7 +40,11 @@ public class LoginActivity extends Activity {
 		TextView passwordField = (TextView)findViewById(R.id.txtPassword);
 		final String account = accountField.getText().toString().trim();
 		final String password = passwordField.getText().toString();
-		DbTrans.read(v.getContext(), new DbTrans.Db() {
+		//TODO:Send authentification service
+		Intent loginActivity = new Intent(this, ServiceListActivity.class);
+    	startActivity(loginActivity);
+    	
+		/*DbTrans.read(v.getContext(), new DbTrans.Db() {
 			@Override
 			public void onDo(Context context, SQLiteDatabase db) {
 				Cursor cursor = db.query(
@@ -61,6 +65,6 @@ public class LoginActivity extends Activity {
 				}
 					
 			}
-		});
+		});*/
 	}
 }

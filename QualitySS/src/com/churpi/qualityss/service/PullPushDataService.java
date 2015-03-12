@@ -1,9 +1,13 @@
 package com.churpi.qualityss.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
@@ -11,6 +15,11 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
+import com.churpi.qualityss.client.db.QualitySSDbHelper;
+import com.churpi.qualityss.client.dto.DataDTO;
+import com.churpi.qualityss.client.helper.GsonRequest;
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
@@ -19,7 +28,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.JsonReader;
 import android.util.Log;
+import android.widget.Toast;
 
 public class PullPushDataService extends IntentService {
 	
@@ -37,17 +48,54 @@ public class PullPushDataService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		JSONObject sendData = new JSONObject();
-		VolleySingleton.getInstance(this).addToRequestQueue(new JsonObjectRequest(Config.getUrl(Config.ServerAction.GET_DATA).toString(),sendData, new Response.Listener<JSONObject>() {
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("content-type", "text/json");
+		GsonRequest<DataDTO> request = new GsonRequest<DataDTO>(
+				Config.getUrl(Config.ServerAction.GET_DATA).toString(), 
+				DataDTO.class, 
+				headers, 
+				new Response.Listener<DataDTO>(){
+
+					@Override
+					public void onResponse(DataDTO data) {
+						if(data != null){
+							sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, getString(R.string.msg_update_database), 50);
+							QualitySSDbHelper dbHelper = new QualitySSDbHelper(getBaseContext());
+							dbHelper.initDBfromValue(data);
+							
+						}else{
+							String errorMsg = getString(R.string.ttl_error);
+							Toast.makeText(getApplicationContext(), "no", Toast.LENGTH_LONG).show();
+							sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
+						}
+
+					}
+				}, 
+				new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						String errorMsg = error.getLocalizedMessage();
+						if(errorMsg == null)
+							errorMsg = error.getMessage();
+						if(errorMsg == null && error instanceof com.android.volley.TimeoutError)
+							errorMsg = com.android.volley.TimeoutError.class.getName();
+						if(errorMsg == null)
+							errorMsg = getString(R.string.ttl_error);
+
+						Log.e(ERR_CONN, errorMsg);
+						sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
+					}
+				}); 
+		/*JsonObjectRequest request = new JsonObjectRequest(Config.getUrl(Config.ServerAction.GET_DATA).toString(),null, new Response.Listener<JSONObject>() {
 			public void onResponse(JSONObject response) {
-				try {
-					JSONObject json = new JSONObject(response.toString());
-					/*String timestamp = json.getString(RESP_TIMESTAMP);
-					getDataFile(timestamp);*/    				
-				} catch (JSONException e) {
-					e.printStackTrace();
-					sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, e.getMessage(), 0);
-					return;
-				}
+				String jsonString = response.toString();
+				response = null;
+					Gson gson = new Gson();
+					DataDTO data = gson.fromJson(jsonString, DataDTO.class);
+					if(data == null){
+						Toast.makeText(getApplicationContext(), "no", Toast.LENGTH_LONG).show();
+					}
 			};
 		}, new Response.ErrorListener() {
 			@Override
@@ -63,7 +111,12 @@ public class PullPushDataService extends IntentService {
 				Log.e(ERR_CONN, errorMsg);
 				sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
 			}
-		}));
+		});*/
+		request.setRetryPolicy(new DefaultRetryPolicy(
+				50000, 
+				DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
+				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+		VolleySingleton.getInstance(this).addToRequestQueue(request);
 
 /*		VolleySingleton.getInstance(this).addToRequestQueue(new JsonArrayRequest(Config.getUrl(Config.ServerAction.GET_DATA).toString(),new Response.Listener<JSONArray>() {
 			public void onResponse(JSONArray response) {

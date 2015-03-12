@@ -8,8 +8,8 @@ public class Config {
 	
 	private static final String SERVER_URL = BuildConfig.DEBUG ?  
 			"http://192.168.1.69":"";
-	//private static final String SERVER_GET_DATA = "GiaWebSite/api/ServiceApi/GetServices?lastUpdate=null";
-	private static final String SERVER_GET_DATA = "QSSWeb/Data/GetData";
+	private static final String SERVER_GET_DATA = "GiaWebSite/api/ServiceApi/GetServices?lastUpdate=null";
+	//private static final String SERVER_GET_DATA = "QSSWeb/Data/GetData";
 	private static final String SERVER_GET_FILE = "QSSWeb/Data/GetDataFile";
 	public static final String SERVER_GET_FILE_FLD_TIMESTAMP = "timestamp";
 	public static final String SERVER_GET_DATA_FLD_LAST_UPDATE = "lastUpdate";

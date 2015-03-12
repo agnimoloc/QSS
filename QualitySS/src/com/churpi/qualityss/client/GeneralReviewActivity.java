@@ -4,8 +4,6 @@ import java.io.File;
 
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbGeneralCheckpoint;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbGeneralCheckpointResult;
 import com.churpi.qualityss.client.helper.GeneralChecklistAdapter;
 
 import android.app.Activity;
@@ -47,20 +45,20 @@ public class GeneralReviewActivity extends Activity {
 		DbTrans.read(this, new DbTrans.Db() {
 			@Override
 			public void onDo(Context context, SQLiteDatabase db) {
-				c = db.query(
+				/*c = db.query(
 						DbGeneralCheckpoint.TABLE_NAME, 
 						new String[]{DbGeneralCheckpoint._ID, DbGeneralCheckpoint.CN_NAME}, 
-						null, null, null, null, null, null);
+						null, null, null, null, null, null);*/
 				
 				
 			}
 		});		
-		String[] from = new String[]{DbGeneralCheckpoint.CN_NAME};
+		/*String[] from = new String[]{DbGeneralCheckpoint.CN_NAME};
 		int[] to = new int[]{ android.R.id.checkbox};
 		list.setAdapter(new GeneralChecklistAdapter(
 				this, 
 				R.layout.item_general_checklist, c, 
-				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
+				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));*/
 	}
 	
 	@Override
@@ -168,7 +166,7 @@ public class GeneralReviewActivity extends Activity {
 	    	DbTrans.write(this, new DbTrans.Db() {
 				@Override
 				public void onDo(Context context, SQLiteDatabase db) {
-					ContentValues values = new ContentValues();
+					/*ContentValues values = new ContentValues();
 					values.put(DbGeneralCheckpointResult.CN_SERVICE, serviceId);
 					values.put(DbGeneralCheckpointResult.CN_GENERAL_CHECKPOINT, checkpointId);
 					values.put(DbGeneralCheckpointResult.CN_COMMENT, comment);
@@ -181,7 +179,7 @@ public class GeneralReviewActivity extends Activity {
 								String.valueOf(checkpointId)});
 					if(affected == 0){
 						db.insert(DbGeneralCheckpointResult.TABLE_NAME, null, values);
-					}
+					}*/
 				}
 			});
 	    	Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();	 
