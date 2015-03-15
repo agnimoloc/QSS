@@ -6,20 +6,20 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbUser;
-import com.churpi.qualityss.client.dto.ConsignaDTO;
-import com.churpi.qualityss.client.dto.ConsignaDetalleDTO;
+import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.dto.EquipmentDTO;
-import com.churpi.qualityss.client.dto.GeneralCheckpointDTO;
+import com.churpi.qualityss.client.dto.SectorDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
-import com.churpi.qualityss.client.dto.UserDTO;
 import com.google.gson.Gson;
 
 import android.content.ContentValues;
@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 public class QualitySSDbHelper extends SQLiteOpenHelper {
 
@@ -41,11 +42,13 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(QualitySSDbContract.DbUser.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbCustomer.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbSector.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbService.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEquipment.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbEmployeeEquipment.CREATE_TABLE);
 	}
 
 	@Override
@@ -54,43 +57,95 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 
 	}
 	
-	public void initDBfromValue(DataDTO data){
+	public void updateDBfromValue(DataDTO data){
 		SQLiteDatabase db = getWritableDatabase();
 		try{
-			db.beginTransaction();
-			
-			ServiceDTO service = data.getServicios()[0];
-			ContentValues values = service.getContentValues();			
-			db.insert(DbService.TABLE_NAME, null, values);
+			db.beginTransaction();	
 			int count = 0;
-			for(ServiceEmployeeDTO serviceEmp : service.getServicioElementos()){
-				EmployeeDTO employee = serviceEmp.getElemento();
-				employee.setServicioId(service.getServicioId());
-				ContentValues eVals = employee.getContentValues();
-				count = db.update(DbEmployee.TABLE_NAME, eVals, 
+			for(CustomerDTO customer : data.getClientes()){
+				ContentValues values = customer.getContentValues();
+				count = db.update(DbCustomer.TABLE_NAME, values, 
+						DbCustomer._ID + "=?", 
+						new String[]{String.valueOf(customer.getClienteId())});
+				if(count == 0){
+					values.put(DbCustomer._ID, customer.getClienteId());
+					db.insert(DbCustomer.TABLE_NAME, null, values);
+				}
+			}
+			
+			for(SectorDTO sector : data.getSectores()){
+				ContentValues values = sector.getContentValues();
+				count = db.update(DbSector.TABLE_NAME, values, 
+						DbSector._ID + "=?", 
+						new String[]{String.valueOf(sector.getSectorId())});
+				if(count == 0){
+					values.put(DbSector._ID, sector.getSectorId());
+					db.insert(DbSector.TABLE_NAME, null, values);
+				}
+			}
+			
+			for(EmployeeDTO employee : data.getElementos()){
+				ContentValues values = employee.getContentValues();
+				
+				count = db.update(DbEmployee.TABLE_NAME, values, 
 						DbEmployee._ID + "=?", 
 						new String[]{String.valueOf(employee.getElementoId())});
 				if(count == 0){
-					db.insert(DbEmployee.TABLE_NAME, null, eVals);
+					values.put(DbEmployee._ID, employee.getElementoId());
+					db.insert(DbEmployee.TABLE_NAME, null, values);
 				}
 				
-				serviceEmp.setServicioId(service.getServicioId());
-				ContentValues sVals = serviceEmp.getContentValues();
-				db.insert(DbServiceEmployee.TABLE_NAME, null, sVals);				
-				
 				for(EquipmentDTO equipment : employee.getEquipo()){
-					equipment.setElementoId(employee.getElementoId());
 					ContentValues eEqui = equipment.getContentValues();
 					count = db.update(DbEquipment.TABLE_NAME, eEqui, 
 							DbEquipment._ID + "=?", 
 							new String[]{String.valueOf(equipment.getEquipoId())});
 					if(count == 0){
+						values.put(DbEquipment._ID, equipment.getEquipoId());
 						db.insert(DbEquipment.TABLE_NAME, null, eEqui);
 					}
-				}												
+				}
+				
+				
+				db.delete(DbEmployeeEquipment.TABLE_NAME, 
+						DbEmployeeEquipment.CN_EMPLOYEE +"=?", 
+						new String[]{String.valueOf(employee.getElementoId())});
+				
+				for(EquipmentDTO equipment : employee.getEquipo()){
+					ContentValues vEqui = new ContentValues();
+					vEqui.put(DbEmployeeEquipment.CN_EMPLOYEE, employee.getElementoId());
+					vEqui.put(DbEmployeeEquipment.CN_EQUIPMENT, equipment.getEquipoId());
+					db.insert(DbEmployeeEquipment.TABLE_NAME, null, vEqui);
+				}
+				
+			}
+			
+			for(ServiceDTO service : data.getServicios()){
+				ContentValues values = service.getContentValues();
+				count = db.update(DbService.TABLE_NAME, values, 
+						DbEmployee._ID + "=?", 
+						new String[]{String.valueOf(service.getServicioId())});
+				if(count==0){
+					values.put(DbService._ID, service.getServicioId());
+					db.insert(DbService.TABLE_NAME, null, values);
+				}
+				
+				db.delete(DbServiceEmployee.TABLE_NAME, 
+						DbServiceEmployee.CN_SERVICE +"=?", 
+						new String[]{String.valueOf(service.getServicioId())});
+				
+				for(ServiceEmployeeDTO serviceEmp : service.getServicioElementos()){					
+					serviceEmp.setServicioId(service.getServicioId());
+					ContentValues sVals = serviceEmp.getContentValues();
+					
+					db.insert(DbServiceEmployee.TABLE_NAME, null, sVals);														
+				}
+				
 			}
 			db.setTransactionSuccessful();
 			sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, "", 100);
+		}catch(Exception ex){
+			Toast.makeText(context, "eerr", Toast.LENGTH_LONG).show();
 		}finally{
 			db.endTransaction();
 		}

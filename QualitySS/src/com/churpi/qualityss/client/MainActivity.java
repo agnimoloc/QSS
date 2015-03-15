@@ -48,11 +48,11 @@ public class MainActivity extends Activity {
 				refreshUserInfo(description, progress);
 				
 				if(progress == 100){
-					SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+					SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
 					SharedPreferences.Editor editor = pref.edit();
 					editor.putBoolean(Constants.PREF_FILLED_DB, true);
 					editor.commit();
-					openLoginActivity();
+					finishOK();
 				}
 			}else if(status.compareTo(Constants.PULL_PUSH_DATA_FAIL)==0){
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
@@ -66,12 +66,10 @@ public class MainActivity extends Activity {
 						startService(getData);
 					}
 				});
-
 				dialogBuilder.setNegativeButton(R.string.cancel, new OnClickListener() {
-
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						quit();						
+						finishCancel();			
 					}
 				});
 				AlertDialog alert = dialogBuilder.create();
@@ -83,109 +81,43 @@ public class MainActivity extends Activity {
 	
 	long enqueue;
 	
-	private void quit(){
-		this.finish();
-        System.exit(0);
-	}
-	
-	BroadcastReceiver receiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                Query query = new Query();
-                query.setFilterById(enqueue);
-                Cursor c = dm.query(query);
-                if (c.moveToFirst()) {
-                    int columnIndex = c
-                            .getColumnIndex(DownloadManager.COLUMN_STATUS);
-                    if (DownloadManager.STATUS_SUCCESSFUL == c
-                            .getInt(columnIndex)) {
-                        
-                        String filenameString = c
-                                .getString(c
-                                        .getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                        
-                        File source = new File(filenameString);
-                        
-                        File dest = new File (context.getDir(Constants.JSON_DIR, Context.MODE_PRIVATE), Constants.JSON_NAME);
-                        if(dest.exists())
-                        	dest.delete();
-                        FileInputStream fis;
-                        FileOutputStream fos;
-						try {
-							fis = new FileInputStream(source);
-	                        fos = new FileOutputStream(dest);
-	                        
-	                        byte[] buf = new byte[1024];
-	                        int len;
-	                        while ((len = fis.read(buf)) > 0) {
-	                            fos.write(buf, 0, len);
-	                        }
-	                        fis.close();
-	                        fos.close();
-	                        source.delete();
-						} catch (FileNotFoundException e) {
-							Alerts.showGenericError(context);
-							e.printStackTrace();
-						} catch (IOException e) {
-							Alerts.showGenericError(context);
-							e.printStackTrace();
-						}
-						sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, getString(R.string.msg_update_database), 70);
-		        		QualitySSDbHelper dbHelper = new QualitySSDbHelper(context);
-		        		dbHelper.loadDataFromJSON();
-
-                    }
-                }
-            }
-		}
-	};
-		
+			
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(dataReceiver, new IntentFilter(Constants.PULL_PUSH_DATA_ACTION));
-        if(getIntent().getAction() == Constants.END_APPLICATION){
-        	quit();
-        }else{
-	        setContentView(R.layout.activity_main);	   	        
-	        if(!isDBFilled()){
-		        if(savedInstanceState == null){
-	        		Intent getdata = new Intent(this,PullPushDataService.class);
-	        		startService(getdata);
-	        		/*QualitySSDbHelper dbHelper = new QualitySSDbHelper(this);
-	        		dbHelper.loadDataFromJSON();*/
-	        	}else{
-	        		TextView label1 = (TextView)findViewById(R.id.textView1);
-	        		label1.setText(savedInstanceState.getString(STATE_STATUS));
-	        		TextView label2 = (TextView)findViewById(R.id.lblType);
-	        		label2.setText(savedInstanceState.getString(STATE_DESCRIPTION));
-	        		ProgressBar bar = (ProgressBar)findViewById(R.id.progressBar2);
-	        		bar.setProgress(savedInstanceState.getInt(STATE_PROGRESS));
-	        	}
-	        }else{
-	        	openLoginActivity();
-	        }
-        }
+	    setContentView(R.layout.activity_main);	   	        
+	    if(!isDBFilled()){
+	    	if(savedInstanceState == null){
+	    		Intent getdata = new Intent(this,PullPushDataService.class);
+	    		startService(getdata);
+	    	}else{
+	    		TextView label1 = (TextView)findViewById(R.id.textView1);
+	    		label1.setText(savedInstanceState.getString(STATE_STATUS));
+	    		TextView label2 = (TextView)findViewById(R.id.lblType);
+	    		label2.setText(savedInstanceState.getString(STATE_DESCRIPTION));
+	    		ProgressBar bar = (ProgressBar)findViewById(R.id.progressBar2);
+	    		bar.setProgress(savedInstanceState.getInt(STATE_PROGRESS));
+	    	}
+	    }else{
+	    	finishOK();
+	    }
+    }
+    
+    private void finishOK(){
+    	setResult(RESULT_OK);
+    	finish();
+    }
+    private void finishCancel(){
+    	finish();
     }
     
     @Override
     protected void onDestroy() {
-    	unregisterReceiver(receiver);
-    	unregisterReceiver(dataReceiver);
-    	
+    	unregisterReceiver(dataReceiver);    	
     	super.onDestroy();
     }
-    
-    private void openLoginActivity(){
-    	Intent loginActivity = new Intent(this, LoginActivity.class);
-    	startActivity(loginActivity);
-    }
-    
+        
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	
@@ -201,7 +133,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean isDBFilled(){    	
-    	SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+    	SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
     	return pref.getBoolean(Constants.PREF_FILLED_DB, false);    	
     }
     
@@ -211,16 +143,5 @@ public class MainActivity extends Activity {
 		ProgressBar bar = (ProgressBar)findViewById(R.id.progressBar2);
 		bar.setProgress(progress);
     }
-    
-    private void sendBroadCastResult(String statusDescription, String description, int progress){
-		Intent status = new Intent();
-		status.setAction(Constants.PULL_PUSH_DATA_ACTION);
-		status.putExtra(Constants.PULL_PUSH_DATA_STATUS, statusDescription);
-		status.putExtra(Constants.PULL_PUSH_DATA_DESCRIPTION, description);
-		status.putExtra(Constants.PULL_PUSH_DATA_PROGRESS, progress);
-		status.putExtra(Constants.PULL_PUSH_DATA_DATA, 0);
-		sendBroadcast(status);
-		
-	}
     
 }

@@ -4,5 +4,7 @@
     <dimen name="activity_horizontal_margin">10dp</dimen>
     <dimen name="activity_vertical_margin">10dp</dimen>
     <dimen name="activity_top_margin">10dp</dimen>
+    <dimen name="image_selector">100dp</dimen>
+    <dimen name="staff_detail">200dp</dimen>
 
 </resources>

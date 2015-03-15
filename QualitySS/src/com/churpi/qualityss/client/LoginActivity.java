@@ -1,16 +1,24 @@
 package com.churpi.qualityss.client;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbUser;
+import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +26,12 @@ import android.widget.Toast;
 
 public class LoginActivity extends Activity {
 
+	private final int REQUEST_MAIN_ACTION = 1;
+	
+	private final int VALID_USER = 1;
+	private final int VALID_USER_PASSWORD =2;
+	private final int VALID_NONE = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -28,11 +42,12 @@ public class LoginActivity extends Activity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		Toast.makeText(this, "Saliendo", Toast.LENGTH_LONG).show();
-		Intent startMain = new Intent(this, MainActivity.class);
-	    startMain.setAction(Constants.END_APPLICATION);
-	    startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	    startMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    startActivity(startMain);
+		quit();
+	}
+	
+	private void quit(){
+		this.finish();
+        System.exit(0);
 	}
 	
 	public void onClick_Login(View v){
@@ -40,31 +55,80 @@ public class LoginActivity extends Activity {
 		TextView passwordField = (TextView)findViewById(R.id.txtPassword);
 		final String account = accountField.getText().toString().trim();
 		final String password = passwordField.getText().toString();
-		//TODO:Send authentification service
-		Intent loginActivity = new Intent(this, ServiceListActivity.class);
-    	startActivity(loginActivity);
-    	
-		/*DbTrans.read(v.getContext(), new DbTrans.Db() {
-			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
-				Cursor cursor = db.query(
-						DbUser.TABLE_NAME, 
-						new String[]{DbUser._ID,DbUser.CN_NAME, DbUser.CN_PASSWORD}, 
-						DbUser.CN_ACCOUNT +"=? AND "+ DbUser.CN_PASSWORD +"=?", 
-						new String[]{account, password}, 
-						null, null, null, "1");
-				if(cursor.moveToFirst()){
-					Intent loginActivity = new Intent(context, ServiceListActivity.class);
-			    	startActivity(loginActivity);
-				}else{
-					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-					dialogBuilder.setTitle(R.string.ttl_invalid_login);
-					dialogBuilder.setMessage(R.string.msg_invalid_login);
-					dialogBuilder.setPositiveButton(R.string.ok, null);
-					dialogBuilder.create().show();
-				}
-					
+		int valid = validateLocal(account, password);
+		if(valid == VALID_NONE){
+		
+			StringRequest request = new StringRequest(
+				Config.getUrl(Config.ServerAction.GET_AUTHENTICATE, account, password)
+				, new Response.Listener<String>() {
+					@Override
+					public void onResponse(String employeeIdStr) {
+						int employeeId = Integer.parseInt(employeeIdStr);
+						if(employeeId != 0){
+							SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+							Editor editor = pref.edit();
+							editor.putString(Constants.PREF_ACCOUNT, account);
+							editor.putInt(Constants.PREF_PASSHASH, password.hashCode());
+							editor.putInt(Constants.PREF_EMPLOYEE, employeeId);
+							editor.commit();							
+							startMainActivity();
+						}else{
+							Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
+						}
+					}
+				}, new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						String errorMsg = error.getLocalizedMessage();
+						if(errorMsg == null){
+							errorMsg = error.getMessage();
+						}if(errorMsg == null && error instanceof com.android.volley.TimeoutError){
+							errorMsg = com.android.volley.TimeoutError.class.getName();
+						}if(errorMsg == null){
+							errorMsg = getString(R.string.ttl_error);
+						}
+
+						Log.e("Login connection error", errorMsg);
+						Toast.makeText(getBaseContext(), getString(R.string.msg_error_connection), Toast.LENGTH_LONG).show();
+					}
+				});
+			request.setRetryPolicy(new DefaultRetryPolicy(
+				5000, 
+				DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
+				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+			VolleySingleton.getInstance(this).addToRequestQueue(request);    
+		} else if(valid == VALID_USER ){
+			Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
+		} else if(valid == VALID_USER_PASSWORD){
+			startMainActivity();
+		}
+	}
+	
+	private int validateLocal(String account, String password){
+		SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
+		String savedAccount =  pref.getString(Constants.PREF_ACCOUNT, null);
+		int savedPassHash =  pref.getInt(Constants.PREF_PASSHASH, 0);
+		if(savedAccount != null && account.compareTo(savedAccount)==0){
+			if(password.hashCode() == savedPassHash){
+				return VALID_USER_PASSWORD;
 			}
-		});*/
+			return VALID_USER;
+		}
+		return VALID_NONE;
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == REQUEST_MAIN_ACTION && resultCode == RESULT_OK){
+			Intent loginActivity = new Intent(this, SectorListActivity.class);
+			startActivity(loginActivity);
+		}
+    	
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	private void startMainActivity(){
+		Intent intentMain = new Intent(getBaseContext(), MainActivity.class);
+		startActivityForResult(intentMain, REQUEST_MAIN_ACTION);						
 	}
 }

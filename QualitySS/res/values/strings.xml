@@ -20,13 +20,9 @@
     <string name="ttl_get_data">Obteniendo datos&#8230;</string>
     <string name="msg_invalid_login">El usuario o la contraseña son invalidos</string>
     <string name="ttl_invalid_login">Login Incorrecto</string>
-    <string name="title_service_list">Services</string>
-    <string name="title_service_detail">Service Detail</string>
-    <string name="tlt_service_list">Serivicios Actuales</string>
-    <string name="ttl_service_detail">Detalle del Servicio</string>
     <string name="fld_type">Tipo de Servicio</string>
     <string name="fld_address">Domicilio</string>
-    <string name="fld_contact">Contacto</string>
+    <string name="fld_customer">Cliente</string>
     <string name="fld_phone">Telefono</string>
     <string name="fld_description">Descripción</string>
     <string name="btn_maps">Como llegar</string>
@@ -45,11 +41,21 @@
     <string name="ttl_photo">Imagen</string>
     <string name="img_content_description">Imagen guardada en la aplicación</string>
     <string name="btn_take_new_photo">Tomar nueva foto</string>
-    <string name="title_activity_staff_review_list">StaffReviewListActivity</string>
+    <string name="title_activity_staff_review_list">Revisión de Elementos</string>
     <string name="ttl_staff_review_list">Revisión de Personal</string>
     <string name="finish">Finalizar</string>
     <string name="img_staff_image">Imagen del personal</string>
     <string name="start">Iniciar</string>
     <string name="saved">Guardado</string>
+    <string name="msg_error_connection">Problemas para conectarse al servidor, favor intente nuevamente</string>
+    <string name="img_service">Imagen del servicio a realizar</string>
+    <string name="title_activity_service_grid">Serivicios Actuales</string>
+    <string name="title_activity_sector_list">Sectores</string>
+    <string name="title_activity_service_detail">Detalle del Servicio</string>
+    <string name="fld_code">Code</string>
+    <string name="inst_select_service">Selecciona un servicio</string>
+    <string name="title_activity_sector_service">Sectores y Servicios</string>
+    <string name="title_element_list">Elements</string>
+    <string name="title_element_detail">Element Detail</string>
 
 </resources>

@@ -1,28 +1,45 @@
 package com.churpi.qualityss.client.dto;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 public class EmployeeDTO {
 	int ElementoId;
 	String Code;
 	String Nombre;
 	String Matricula;
-	EquipmentDTO[] Equipo;
-	int ServicioId;
-	
+	EquipmentDTO[] Equipo;	
 	
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
-		
-		values.put(DbEmployee._ID, ElementoId);
+	
 		values.put(DbEmployee.CN_CODE, Code);
 		values.put(DbEmployee.CN_NAME, Nombre);
 		values.put(DbEmployee.CN_PLATE, Matricula);
-		values.put(DbEmployee.CN_SERVICE, ServicioId);
 		
 		return values;
+	}
+	
+	public void fillFromCursor(Cursor c) {
+		int index = c.getColumnIndex(DbEmployee._ID);
+		if(index != -1){
+			ElementoId = c.getInt(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_CODE);
+		if(index != -1){
+			Code = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_NAME);
+		if(index != -1){
+			Nombre = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_PLATE);
+		if(index != -1){
+			Matricula = c.getString(index);
+		}
 	}
 	
 	public int getElementoId() {
@@ -54,14 +71,6 @@ public class EmployeeDTO {
 	}
 	public void setEquipo(EquipmentDTO[] equipo) {
 		Equipo = equipo;
-	}
-
-	public int getServicioId() {
-		return ServicioId;
-	}
-
-	public void setServicioId(int servicioId) {
-		ServicioId = servicioId;
 	}
 	
 }
