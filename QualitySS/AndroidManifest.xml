@@ -79,6 +79,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.churpi.qualityss.client.SectorListActivity" />
         </activity>
+        <activity
+            android:name=".StaffInventoryActivity"
+            android:label="@string/title_activity_staff_inventory" >
+        </activity>
+        <activity
+            android:name=".IdentifyElementActivity"
+            android:label="@string/title_activity_identify_element" >
+        </activity>
     </application>
 
 </manifest>

@@ -67,7 +67,7 @@ public class Alerts {
 			
 		});
 		
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		
 		
 		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);;
 		ScrollView layout = (ScrollView)inflater.inflate(R.layout.dialog_service_detail, null);
@@ -85,6 +85,8 @@ public class Alerts {
 		text = (TextView)layout.findViewById(R.id.fldCustomer);
 		text.setText(mCustomer.getDescripcion());
 		
+		//AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogApptheme);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setView(layout);
 		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {			
 			@Override
@@ -112,6 +114,8 @@ public class Alerts {
 		
 		builder.setTitle(R.string.title_activity_service_detail);
 		
-		builder.create().show();
+		AlertDialog dialog = builder.create();
+		
+		dialog.show();
 	}
 }

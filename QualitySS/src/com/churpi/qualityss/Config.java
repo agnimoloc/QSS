@@ -18,6 +18,7 @@ public class Config {
 	public class ServerAction{
 		public static final int GET_DATA = 0;
 		public static final int GET_AUTHENTICATE = 1;
+		public static final int GET_BARCODE = 2;
 	}
 	
 	public static String getUrl(int serverAction, String... args){
@@ -29,6 +30,9 @@ public class Config {
 			builder.appendEncodedPath(SERVER_AUTHENTICATE);
 			builder.appendQueryParameter("userName", args[0]);
 			builder.appendQueryParameter("password", args[1]);
+		}else if(serverAction == ServerAction.GET_BARCODE){
+			builder.appendEncodedPath(SERVER_AUTHENTICATE);
+			builder.appendQueryParameter("code", args[0]);
 		}
 		return builder.build().toString();
 	}

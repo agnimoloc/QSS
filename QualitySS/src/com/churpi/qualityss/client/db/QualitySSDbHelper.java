@@ -49,6 +49,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbServiceEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEquipment.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEmployeeEquipment.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbEmployeeEquipmentInventory.CREATE_TABLE);
 	}
 
 	@Override

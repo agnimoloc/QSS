@@ -5,6 +5,8 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 public class EmployeeDTO {
 	int ElementoId;
@@ -71,6 +73,5 @@ public class EmployeeDTO {
 	}
 	public void setEquipo(EquipmentDTO[] equipo) {
 		Equipo = equipo;
-	}
-	
+	}		
 }

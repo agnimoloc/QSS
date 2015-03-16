@@ -4,20 +4,19 @@ import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.helper.ElementListAdapter;
-import com.churpi.qualityss.client.helper.StaffReviewAdapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 public class StaffReviewListActivity extends Activity {
 
@@ -47,6 +46,8 @@ public class StaffReviewListActivity extends Activity {
 						CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
 			}
 		});
+		
+		grid.setOnItemClickListener(onSelected);
 	}
 	
 	@Override
@@ -56,10 +57,34 @@ public class StaffReviewListActivity extends Activity {
 		super.onDestroy();
 	}
 	
-	public void onClick_Start(View v){
-		int employeeId = (Integer)v.getTag();
-		if(employeeId==1){
+	private AdapterView.OnItemClickListener onSelected = new AdapterView.OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			c.moveToPosition(position);
+			int employeeId = c.getInt(c.getColumnIndex(DbEmployee._ID));
+			String name = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
+			Intent intent = new Intent(getBaseContext(), IdentifyElementActivity.class);			
+			intent.putExtra(IdentifyElementActivity.EMPLOYEE_ID, employeeId);			
+			intent.putExtra(IdentifyElementActivity.EMPLOYEE_NAME, name);
 			
+			startActivityForResult(intent, 0);			
 		}
-	}
+	};
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		if(requestCode == 0){
+			if(resultCode == RESULT_OK){
+				int employeeId = data.getIntExtra(IdentifyElementActivity.EMPLOYEE_ID, -1);
+				String name = data.getStringExtra(IdentifyElementActivity.EMPLOYEE_NAME);
+				Intent intent = new Intent(getBaseContext(), StaffInventoryActivity.class);			
+				intent.putExtra(StaffInventoryActivity.EMPLOYEE_ID, employeeId);			
+				intent.putExtra(StaffInventoryActivity.EMPLOYEE_NAME, name);
+				startActivity(intent);
+			}
+		}
+
+	};
 }

@@ -133,4 +133,23 @@ public final class QualitySSDbContract {
 				"PRIMARY KEY (" + CN_SERVICE + "," + CN_GENERAL_CHECKPOINT + "));";
 	}*/
 	
+	
+	public static abstract class DbEmployeeEquipmentInventory implements BaseColumns {
+		public static final String TABLE_NAME = "employee_equipment_inventory";
+		public static final String CN_EMPLOYEE = "employeeId";
+		public static final String CN_EQUIPMENT = "equipmentId";
+		public static final String CN_CHECKED = "checked";
+		
+		public static final String CREATE_TABLE = 
+				"CREATE TABLE " + TABLE_NAME + "("+ 
+				CN_EMPLOYEE + " INTEGER, " +
+				CN_EQUIPMENT + " INTEGER, " +
+				CN_CHECKED + " INTEGER, " +
+				"FOREIGN KEY(" + CN_EQUIPMENT + ") " + 
+				"REFERENCES "+ DbEquipment.TABLE_NAME + "(" + DbEquipment._ID + ")," +
+				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
+				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "), "+ 
+				"PRIMARY KEY (" + CN_EQUIPMENT + "," + CN_EMPLOYEE + "));";
+	}	
+	
 }
