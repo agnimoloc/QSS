@@ -86,12 +86,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerReceiver(dataReceiver, new IntentFilter(Constants.PULL_PUSH_DATA_ACTION));
-	    setContentView(R.layout.activity_main);	   	        
+	    setContentView(R.layout.activity_main);
+		Intent getdata = new Intent(this,PullPushDataService.class);
+		startService(getdata);
+
 	    if(!isDBFilled()){
-	    	if(savedInstanceState == null){
-	    		Intent getdata = new Intent(this,PullPushDataService.class);
-	    		startService(getdata);
-	    	}else{
+	    	if(savedInstanceState != null){
 	    		TextView label1 = (TextView)findViewById(R.id.textView1);
 	    		label1.setText(savedInstanceState.getString(STATE_STATUS));
 	    		TextView label2 = (TextView)findViewById(R.id.lblType);

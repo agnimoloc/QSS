@@ -7,18 +7,24 @@ import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -33,10 +39,26 @@ public class LoginActivity extends Activity {
 	private final int VALID_USER_PASSWORD =2;
 	private final int VALID_NONE = 0;
 	
+	
+	
+	UpdateDataReciever updateRecievier;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);	
+		setContentView(R.layout.activity_login);
+		
+		updateRecievier = new UpdateDataReciever(this);
+        registerReceiver(updateRecievier, new IntentFilter(Constants.UPDATE_DATA_ACTION) );		    	
+
+	}
+	
+	@Override
+	protected void onDestroy() {
+		updateRecievier.dispose();
+		unregisterReceiver(updateRecievier);
+		
+		super.onDestroy();
 	}
 	
 	@Override
@@ -127,6 +149,8 @@ public class LoginActivity extends Activity {
 		if(requestCode == REQUEST_MAIN_ACTION && resultCode == RESULT_OK){
 			Intent loginActivity = new Intent(this, SectorListActivity.class);
 			startActivity(loginActivity);
+			
+			updateRecievier.start();
 		}
     	
 		super.onActivityResult(requestCode, resultCode, data);

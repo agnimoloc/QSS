@@ -39,6 +39,10 @@ public final class QualitySSDbContract {
 		public static final String CN_PHONE_1 = "phone1";
 		public static final String CN_PHONE_2 = "phone2";
 		
+		/** this constants is only for queries is not store in db **/
+		public static final String CN_STATE_NAME = "stateName";
+		public static final String CN_TOWN_NAME = "townName";
+		
 		
 		public static final String CREATE_TABLE = 
 				"CREATE TABLE " + TABLE_NAME + "(" 

@@ -34,24 +34,23 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 			layout = (FrameLayout) mLayoutInflater.inflate(
 					R.layout.item_service, 
 					parent, false); 
-
-			ImageView img = (ImageView)layout.findViewById(android.R.id.button1);
-			
-			Cursor c = getCursor();
-			c.moveToPosition(position);
-			int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
-
-			File dir = new File(
-					mContext.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE), 
-					"IMGSRV_" + String.valueOf(serviceId) + ".jpg");
-			if(dir.exists()){
-				img.setImageURI(Uri.fromFile(dir));
-			}else{
-				img.setImageResource(R.drawable.ic_launcher);
-			}			
 		}else{
 			layout = (FrameLayout)convertView;
 		}		
+		ImageView img = (ImageView)layout.findViewById(android.R.id.button1);
+		
+		Cursor c = getCursor();
+		c.moveToPosition(position);
+		int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
+
+		File dir = new File(
+				mContext.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE), 
+				"IMGSRV_" + String.valueOf(serviceId) + ".jpg");
+		if(dir.exists()){
+			img.setImageURI(Uri.fromFile(dir));
+		}else{
+			img.setImageResource(R.drawable.no_image_service);
+		}			
 		return layout;
 	}
 }

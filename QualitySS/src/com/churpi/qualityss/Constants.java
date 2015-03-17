@@ -5,6 +5,9 @@ public final class Constants {
 	public static final String PULL_PUSH_DATA_ACTION = 
 			"com.churpi.qualityss.service.PUSHPULLDATA";
 
+	public static final String UPDATE_DATA_ACTION = 
+			"com.churpi.qualityss.service.UPDATEDATA";
+
 	public static final String PULL_PUSH_DATA_REFRESH = 
 			"com.churpi.qualityss.service.PUSHPULLDATA_FINISH";
 
@@ -32,6 +35,7 @@ public final class Constants {
 	public static final String PREF_ACCOUNT = "CURRENT_ACCOUNT";
 	public static final String PREF_PASSHASH = "CURRENT_PASSHASH";
 	public static final String PREF_EMPLOYEE = "CURRENT_EMPLOYEE";
+	public static final String PREF_CHANGESET = "CURRENT_CHANGESET";
 	
 	public static final String JSON_DIR = "DB";
 	public static final String JSON_NAME = "db.json";

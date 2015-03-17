@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -19,9 +20,12 @@ import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.StaffInventoryActivity;
 import com.churpi.qualityss.client.StaffReviewListActivity;
+import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.dto.AddressDTO;
 import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 
@@ -44,6 +48,7 @@ public class Alerts {
 		
 		final ServiceDTO mService = new ServiceDTO();
 		final CustomerDTO mCustomer = new CustomerDTO();
+		final AddressDTO mAddress = new AddressDTO();
 		
 		DbTrans.read(context, new DbTrans.Db(){
 
@@ -63,7 +68,13 @@ public class Alerts {
 						if(c.getCount() != 0){
 							c.moveToFirst();
 							mCustomer.fillFromCursor(c);
-							c.close();				
+						}
+						c.close();
+						c = db.rawQuery(DbQuery.GET_ADDRESS, 
+								new String[]{String.valueOf(mService.getDomicilio().getDomicilioId())});
+						if(c.getCount() != 0){
+							c.moveToFirst();
+							mAddress.fillFromCursor(c);
 						}
 				}finally{
 					if(c != null){
@@ -84,7 +95,7 @@ public class Alerts {
 		text.setText(mService.getCode());
 		
 		text = (TextView)layout.findViewById(R.id.fldAddress);
-		text.setText(mService.getDomicilioString());
+		text.setText(mAddress.getDomicilioString());
 
 		text = (TextView)layout.findViewById(R.id.fldDescription);
 		text.setText(mService.getDescripcion());
@@ -135,6 +146,15 @@ public class Alerts {
 		builder.setNeutralButton(R.string.btn_maps, new DialogInterface.OnClickListener() {			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				
+				Uri uri = Uri.parse("geo:0,0")
+									.buildUpon()
+									.appendQueryParameter("q", mAddress.getMapsAddress())
+									.build();		
+				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				context.startActivity(intent);
+						
+				
 				dialog.cancel();				
 			}
 		});

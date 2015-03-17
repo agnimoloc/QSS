@@ -11,12 +11,13 @@
     tools:context="com.churpi.qualityss.client.CheckpointCommentActivity" >
 
     <TextView
+        android:id="@android:id/text1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/lbl_checkpoint_comment" />
 
     <EditText
-        android:id="@android:id/text1"
+        android:id="@android:id/text2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"

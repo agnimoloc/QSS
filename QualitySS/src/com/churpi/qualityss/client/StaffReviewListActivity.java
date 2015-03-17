@@ -8,7 +8,9 @@ import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.helper.ElementListAdapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -89,4 +91,30 @@ public class StaffReviewListActivity extends Activity {
 		}
 
 	};
+	
+	public void onClick_finish(View v){
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setTitle(R.string.ttl_finish_service);
+		dialogBuilder.setMessage(R.string.msg_finish_service);
+		dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				//TODO: send data
+				Intent intent = new Intent(getApplicationContext(), SectorListActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				dialog.dismiss();
+				
+			}
+		});
+		dialogBuilder.create().show();		
+	}
 }

@@ -21,16 +21,21 @@ import com.churpi.qualityss.client.helper.GsonRequest;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
+import android.app.AlarmManager;
 import android.app.DownloadManager;
+import android.app.PendingIntent;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.util.JsonReader;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,7 +46,8 @@ public class PullPushDataService extends IntentService {
 
 	private static final String ERR_CONN = "CONNECTION";
 
-	private long enqueue;
+	private static long enqueue;
+
 
 
 	public PullPushDataService() {
@@ -50,10 +56,19 @@ public class PullPushDataService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+	
+		String changeSet = getChangeset(); 
+		if(changeSet== null){
+			updateData(getBaseContext(), changeSet);
+		}
+	}
+		
+	
+	public static void updateData(final Context context, String changeSet){
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("content-type", "text/json");
 		GsonRequest<DataDTO> request = new GsonRequest<DataDTO>(
-				Config.getUrl(Config.ServerAction.GET_DATA).toString(), 
+				Config.getUrl(Config.ServerAction.GET_DATA, changeSet).toString(), 
 				DataDTO.class, 
 				headers, 
 				new Response.Listener<DataDTO>(){
@@ -61,15 +76,14 @@ public class PullPushDataService extends IntentService {
 					@Override
 					public void onResponse(DataDTO data) {
 						if(data != null){
-							sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, getString(R.string.msg_update_database), 50);
-							setChangeset(data.getChangeset());
-							QualitySSDbHelper dbHelper = new QualitySSDbHelper(getBaseContext());
+							sendBroadCastResult(context, Constants.PULL_PUSH_DATA_REFRESH, context.getString(R.string.msg_update_database), 50);
+							setChangeset(context, data.getChangeset());
+							QualitySSDbHelper dbHelper = new QualitySSDbHelper(context);
 							dbHelper.updateDBfromValue(data);
-
 						}else{
-							String errorMsg = getString(R.string.ttl_error);
-							Toast.makeText(getApplicationContext(), "no", Toast.LENGTH_LONG).show();
-							sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
+							String errorMsg = context.getString(R.string.ttl_error);
+							Toast.makeText(context, "no", Toast.LENGTH_LONG).show();
+							sendBroadCastResult(context, Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
 						}
 
 					}
@@ -83,34 +97,41 @@ public class PullPushDataService extends IntentService {
 						if(errorMsg == null && error instanceof com.android.volley.TimeoutError)
 							errorMsg = com.android.volley.TimeoutError.class.getName();
 						if(errorMsg == null)
-							errorMsg = getString(R.string.ttl_error);
+							errorMsg = context.getString(R.string.ttl_error);
 
 						Log.e(ERR_CONN, errorMsg);
-						sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
+						sendBroadCastResult(context, Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
 					}
 				}); 
 		request.setRetryPolicy(new DefaultRetryPolicy(
 				50000, 
 				DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
 				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-		VolleySingleton.getInstance(this).addToRequestQueue(request);
-
+		VolleySingleton.getInstance(context).addToRequestQueue(request);
 	}
 	
-	private void setChangeset(String changeset){
-		SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
+	private static void setChangeset(Context context, String changeset){
+		SharedPreferences pref = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
 		Editor editor = pref.edit();
+		editor.putString(Constants.PREF_CHANGESET, changeset);
 		editor.commit();
 	}
+	private String getChangeset(){
+		SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
+		if(pref.contains(Constants.PREF_CHANGESET)){
+			return pref.getString(Constants.PREF_CHANGESET, null);
+		}
+		return null;
+	}
 
-	private void sendBroadCastResult(String statusDescription, String description, int progress){
+	private static void sendBroadCastResult(Context context, String statusDescription, String description, int progress){
 		Intent status = new Intent();
 		status.setAction(Constants.PULL_PUSH_DATA_ACTION);
 		status.putExtra(Constants.PULL_PUSH_DATA_STATUS, statusDescription);
 		status.putExtra(Constants.PULL_PUSH_DATA_DESCRIPTION, description);
 		status.putExtra(Constants.PULL_PUSH_DATA_PROGRESS, progress);
 		status.putExtra(Constants.PULL_PUSH_DATA_DATA, enqueue);
-		sendBroadcast(status);
+		context.sendBroadcast(status);
 
 	}
 }

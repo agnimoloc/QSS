@@ -36,7 +36,8 @@
 
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login" >
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoTitle" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -90,7 +91,11 @@
         <activity
             android:name=".StaffReviewActivity"
             android:label="@string/title_activity_staff_review" >
-        </activity>        
+        </activity>
+        <activity
+            android:name=".SurveyActivity"
+            android:label="@string/title_activity_survey" >
+        </activity>
     </application>
 
 </manifest>

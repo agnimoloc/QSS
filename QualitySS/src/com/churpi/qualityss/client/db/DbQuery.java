@@ -1,5 +1,6 @@
 package com.churpi.qualityss.client.db;
 
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
@@ -11,6 +12,10 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbSection;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbTown;
 
 public class DbQuery {
 	
@@ -63,5 +68,28 @@ public class DbQuery {
 			+ "rq." + DbReviewQuestion.CN_SERVICE + " = ra." + DbReviewQuestionAnswer.CN_SERVICE + " AND "
 			+ "ra." +  DbReviewQuestionAnswer.CN_EMPLOYEE + " = ? "
 			+ " WHERE rq." + DbReviewQuestion.CN_SERVICE + " = ?"; 
+	public static final String STAFF_SURVEY = 
+			"SELECT q." + DbQuestion._ID 
+					+ ", q." + DbQuestion.CN_DESCRIPTION +", "
+					+ "CASE WHEN sa." + DbSurveyQuestionAnswer.CN_RESULT + " IS NULL "
+					+ "THEN '' ELSE sa." + DbSurveyQuestionAnswer.CN_RESULT + " "
+					+ "END AS " + DbSurveyQuestionAnswer.CN_RESULT + " "					
+			+ "FROM " + DbSurveyQuestion.TABLE_NAME + " sq "
+			+ "INNER JOIN " + DbQuestion.TABLE_NAME + " q ON "
+			+ "q." + DbQuestion._ID + " = sq." + DbSurveyQuestion.CN_QUESTION + " "
+			+ "LEFT JOIN " + DbSurveyQuestionAnswer.TABLE_NAME + " sa ON "
+			+ "q." + DbQuestion._ID + " = sa." + DbSurveyQuestionAnswer.CN_QUESTION + " AND "
+			+ "sq." + DbSurveyQuestion.CN_SERVICE + " = sa." + DbSurveyQuestionAnswer.CN_SERVICE + " AND "
+			+ "sa." +  DbSurveyQuestionAnswer.CN_EMPLOYEE + " = ? "
+			+ " WHERE sq." + DbSurveyQuestion.CN_SERVICE + " = ?"; 
 	
+	public static final String GET_ADDRESS = 
+			"SELECT a.*, s." + DbState.CN_NAME + " AS " + DbAddress.CN_STATE_NAME + ", "
+					+ "t." + DbTown.CN_NAME + " AS " + DbAddress.CN_TOWN_NAME + " "
+			+ "FROM " + DbAddress.TABLE_NAME + " a "
+			+ "INNER JOIN " + DbState.TABLE_NAME + " s ON "
+					+ "s." + DbState._ID + " = a." + DbAddress.CN_STATE + " "
+			+ "INNER JOIN " + DbTown.TABLE_NAME + " t ON "
+					+ "t." + DbTown._ID + " = a." + DbAddress.CN_TOWN + " "
+			+ "WHERE a." + DbAddress._ID + " = ?";
 }

@@ -45,10 +45,11 @@ public class ServiceDTO {
 		if(index != -1){
 			Descripcion = c.getString(index);
 		}
-		/*index = c.getColumnIndex(DbService.CN_ADDRESS);
+		index = c.getColumnIndex(DbService.CN_ADDRESS);
 		if(index != -1){
-			Domicilio = c.getString(index);
-		}*/
+			Domicilio = new AddressDTO();
+			Domicilio.setDomicilioId(c.getInt(index));
+		}
 		index = c.getColumnIndex(DbService.CN_CUSTOMER);
 		if(index != -1){
 			ClienteId = c.getInt(index);
@@ -164,12 +165,4 @@ public class ServiceDTO {
 	public void setServicioEquipo(EquipmentDTO[] servicioEquipo) {
 		ServicioEquipo = servicioEquipo;
 	}
-	public String getDomicilioString() {
-		//TODO:get address
-		return "dom";
-	}
-
-	
-	
-	
 }

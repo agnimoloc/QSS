@@ -9,10 +9,22 @@ import android.widget.TextView;
 public class CheckpointCommentActivity extends Activity {
 
 	public static final String FLD_COMMENT = "comment";
+	public static final String FLD_TEXT = "text";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_checkpoint_comment);
+		
+		Bundle extras = getIntent().getExtras();
+		if(extras.containsKey(FLD_COMMENT)){
+			TextView text = (TextView)findViewById(android.R.id.text2);		
+			text.setText(extras.getString(FLD_COMMENT));	
+		}
+		if(extras.containsKey(FLD_TEXT)){
+			TextView text = (TextView)findViewById(android.R.id.text1);		
+			text.setText(extras.getString(FLD_TEXT));	
+		}		
 	}
 	
 	public void onClick_Cancel(View v){
@@ -21,7 +33,7 @@ public class CheckpointCommentActivity extends Activity {
 	}
 	
 	public void onClick_Ok(View v){
-		TextView text = (TextView)findViewById(android.R.id.text1);		
+		TextView text = (TextView)findViewById(android.R.id.text2);		
 		Intent intent = new Intent();
 		intent.putExtra(FLD_COMMENT, text.getText().toString());
 		Activity activity =getParent(); 

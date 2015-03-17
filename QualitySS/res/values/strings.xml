@@ -32,7 +32,7 @@
     <string name="btn_comment">Nota</string>
     <string name="btn_next">Siguiente</string>
     <string name="ttl_general_checklist">Revisión General</string>
-    <string name="title_activity_checkpoint_comment">CheckpointCommentActivity</string>
+    <string name="title_activity_checkpoint_comment">Responder preguntas</string>
     <string name="lbl_checkpoint_comment">Comentario</string>
     <string name="lbl_geo_mark_name">Aqui es</string>
     <string name="msg_generic_error">Ups!!, hubo un error, por favor intentalo nuevamente</string>
@@ -79,5 +79,8 @@
     <string name="excelent">Excelente</string>
     <string name="title_activity_service_inventory">Inventario del Servicio</string>
     <string name="previous">Atras</string>
-
+    <string name="title_activity_survey">Questionario</string>
+    <string name="inst_survey">Selecciona la pregunta para contestarla</string>
+    <string name="ttl_finish_service">Finalizar Servicio</string>
+	<string name="msg_finish_service">¿Esta completamente seguro de finalizar el servicio y enviar los resultados?</string>
 </resources>

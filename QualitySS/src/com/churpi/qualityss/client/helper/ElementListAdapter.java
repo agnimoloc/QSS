@@ -36,32 +36,31 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 			layout = (LinearLayout) mLayoutInflater.inflate(
 					R.layout.item_staff_review, 
 					parent, false); 
-
-			ImageView img = (ImageView)layout.findViewById(android.R.id.icon);
-			
-			Cursor c = getCursor();
-			c.moveToPosition(position);
-			EmployeeDTO employee = new EmployeeDTO();
-			employee.fillFromCursor(c);
-
-			File dir = new File(
-					mContext.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 
-					"IMGEMP_" + String.valueOf(employee.getElementoId()) + ".jpg");
-			if(dir.exists()){
-				img.setImageURI(Uri.fromFile(dir));
-			}else{
-				img.setImageResource(R.drawable.ic_launcher);
-			}
-			
-			TextView text = (TextView)layout.findViewById(android.R.id.text1);
-			text.setText(employee.getCode());
-			text = (TextView)layout.findViewById(android.R.id.text2);
-			text.setText(employee.getNombre());
-			text = (TextView)layout.findViewById(android.R.id.content);
-			text.setText(employee.getMatricula());			
 		}else{
 			layout = (LinearLayout)convertView;
 		}		
+		ImageView img = (ImageView)layout.findViewById(android.R.id.icon);
+		
+		Cursor c = getCursor();
+		c.moveToPosition(position);
+		EmployeeDTO employee = new EmployeeDTO();
+		employee.fillFromCursor(c);
+
+		File dir = new File(
+				mContext.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 
+				"IMGEMP_" + String.valueOf(employee.getElementoId()) + ".jpg");
+		if(dir.exists()){
+			img.setImageURI(Uri.fromFile(dir));
+		}else{
+			img.setImageResource(R.drawable.no_image_element);
+		}
+		
+		TextView text = (TextView)layout.findViewById(android.R.id.text1);
+		text.setText(employee.getCode());
+		text = (TextView)layout.findViewById(android.R.id.text2);
+		text.setText(employee.getNombre());
+		text = (TextView)layout.findViewById(android.R.id.content);
+		text.setText(employee.getMatricula());	
 		return layout;
 	}
 }
