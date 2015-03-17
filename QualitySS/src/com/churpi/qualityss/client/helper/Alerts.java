@@ -1,16 +1,23 @@
 package com.churpi.qualityss.client.helper;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
+import com.churpi.qualityss.client.StaffInventoryActivity;
 import com.churpi.qualityss.client.StaffReviewListActivity;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
@@ -77,7 +84,7 @@ public class Alerts {
 		text.setText(mService.getCode());
 		
 		text = (TextView)layout.findViewById(R.id.fldAddress);
-		text.setText(mService.getDomicilio());
+		text.setText(mService.getDomicilioString());
 
 		text = (TextView)layout.findViewById(R.id.fldDescription);
 		text.setText(mService.getDescripcion());
@@ -98,9 +105,29 @@ public class Alerts {
 		builder.setPositiveButton(R.string.btn_start_service, new DialogInterface.OnClickListener() {			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();				
-				Intent intent = new Intent(context, StaffReviewListActivity.class);
-				intent.putExtra(StaffReviewListActivity.FLD_SERVICE_ID, mService.getServicioId());
+				dialog.cancel();	
+				if(mService.getFechaRevision() == null){
+					DbTrans.write(context, new DbTrans.Db() {
+						@Override
+						public void onDo(Context context, SQLiteDatabase db) {
+							ContentValues values = new ContentValues();
+							SharedPreferences pref = context.getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+							int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
+							values.put(DbService.CN_EMPLOYEEREVIEW, userEmployeeId);
+							values.put(DbService.CN_DATETIME, DateHelper.getCurrentTime());
+							
+							db.update(DbService.TABLE_NAME, 
+									values, 
+									DbService._ID +"=?", 
+									new String[]{String.valueOf(mService.getServicioId())});
+						}
+					});
+				}
+				
+				Intent intent = new Intent(context, StaffInventoryActivity.class);
+				intent.putExtra(StaffInventoryActivity.ID, mService.getServicioId());
+				intent.putExtra(StaffInventoryActivity.NAME, mService.getDescripcion());
+				intent.setAction(StaffInventoryActivity.ACTION_SERVICE);
 				context.startActivity(intent);
 			}			
 		});

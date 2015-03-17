@@ -79,9 +79,11 @@ public class StaffReviewListActivity extends Activity {
 			if(resultCode == RESULT_OK){
 				int employeeId = data.getIntExtra(IdentifyElementActivity.EMPLOYEE_ID, -1);
 				String name = data.getStringExtra(IdentifyElementActivity.EMPLOYEE_NAME);
-				Intent intent = new Intent(getBaseContext(), StaffInventoryActivity.class);			
-				intent.putExtra(StaffInventoryActivity.EMPLOYEE_ID, employeeId);			
-				intent.putExtra(StaffInventoryActivity.EMPLOYEE_NAME, name);
+				Intent intent = new Intent(getBaseContext(), StaffInventoryActivity.class);
+				intent.putExtra(StaffInventoryActivity.SERVICE_ID, serviceId);
+				intent.putExtra(StaffInventoryActivity.ID, employeeId);			
+				intent.putExtra(StaffInventoryActivity.NAME, name);
+				intent.setAction(StaffInventoryActivity.ACTION_EMPLOYEE);
 				startActivity(intent);
 			}
 		}

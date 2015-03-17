@@ -55,8 +55,9 @@ public class SectorDetailFragment extends Fragment {
 				@Override
 				public void onDo(Context context, SQLiteDatabase db) {
 					int sectorId = getArguments().getInt(ARG_ITEM_ID);
-					c = db.query(DbService.TABLE_NAME, null, 
-							DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)}, 
+					c = db.query(DbService.TABLE_NAME, new String[]{DbService._ID}, 
+							DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
+							//null,null,
 							null, null, null);
 				}
 			});

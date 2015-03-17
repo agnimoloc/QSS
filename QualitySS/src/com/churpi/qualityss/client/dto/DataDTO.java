@@ -2,10 +2,14 @@ package com.churpi.qualityss.client.dto;
 
 public class DataDTO {
 	String changeset;
+	String ImageBaseUrl;
+	StateDTO[] Estados;
+	TownDTO[] Municipios;
 	CustomerDTO[] Clientes;
 	SectorDTO[] Sectores;
 	EmployeeDTO[] Elementos;
 	ServiceDTO[] Servicios;
+	SectionDTO[] Secciones;
 
 	public ServiceDTO[] getServicios() {
 		return Servicios;
@@ -45,6 +49,38 @@ public class DataDTO {
 
 	public void setSectores(SectorDTO[] sectores) {
 		Sectores = sectores;
+	}
+
+	public SectionDTO[] getSecciones() {
+		return Secciones;
+	}
+
+	public void setSecciones(SectionDTO[] secciones) {
+		Secciones = secciones;
+	}
+
+	public String getImageBaseUrl() {
+		return ImageBaseUrl;
+	}
+
+	public void setImageBaseUrl(String imageBaseUrl) {
+		ImageBaseUrl = imageBaseUrl;
+	}
+
+	public StateDTO[] getEstados() {
+		return Estados;
+	}
+
+	public void setEstados(StateDTO[] estados) {
+		Estados = estados;
+	}
+
+	public TownDTO[] getMunicipios() {
+		return Municipios;
+	}
+
+	public void setMunicipios(TownDTO[] municipios) {
+		Municipios = municipios;
 	}	
 	
 	

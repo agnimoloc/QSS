@@ -11,6 +11,7 @@ import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -57,7 +58,9 @@ public class LoginActivity extends Activity {
 		final String password = passwordField.getText().toString();
 		int valid = validateLocal(account, password);
 		if(valid == VALID_NONE){
-		
+			final ProgressDialog progress = ProgressDialog.show(this, 
+					getString(R.string.msg_authenitcate), 
+					getString(R.string.msg_verify_user)); 
 			StringRequest request = new StringRequest(
 				Config.getUrl(Config.ServerAction.GET_AUTHENTICATE, account, password)
 				, new Response.Listener<String>() {
@@ -75,6 +78,7 @@ public class LoginActivity extends Activity {
 						}else{
 							Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
 						}
+						progress.dismiss();
 					}
 				}, new Response.ErrorListener() {
 					@Override
@@ -90,6 +94,7 @@ public class LoginActivity extends Activity {
 
 						Log.e("Login connection error", errorMsg);
 						Toast.makeText(getBaseContext(), getString(R.string.msg_error_connection), Toast.LENGTH_LONG).show();
+						progress.dismiss();
 					}
 				});
 			request.setRetryPolicy(new DefaultRetryPolicy(
