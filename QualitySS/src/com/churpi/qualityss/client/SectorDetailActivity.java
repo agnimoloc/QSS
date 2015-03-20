@@ -1,10 +1,14 @@
 package com.churpi.qualityss.client;
 
+import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.client.helper.SavedActivityManager;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Activity;
-
 import android.view.MenuItem;
+import android.widget.Toast;
 
 /**
  * An activity representing a single Sector detail screen. This activity is only
@@ -43,6 +47,16 @@ public class SectorDetailActivity extends Activity {
 			fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
 					.add(R.id.sector_detail_container, fragment).commit();
+		}
+		
+		if(SavedActivityManager.navigate(this)){
+			SharedPreferences pref = Constants.getPref(this);
+			int sectorId = pref.getInt(Constants.PREF_SECTOR_ID, 0);
+			int serviceId = pref.getInt(Constants.PREF_SERVICE_ID, 0);
+			//openSectorDetail(sectorId);
+			Toast.makeText(this, "abrir actividad", Toast.LENGTH_LONG).show();
+		}else{
+			SavedActivityManager.saveActivity(this);
 		}
 	}
 

@@ -111,13 +111,13 @@ public class PullPushDataService extends IntentService {
 	}
 	
 	private static void setChangeset(Context context, String changeset){
-		SharedPreferences pref = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
-		Editor editor = pref.edit();
-		editor.putString(Constants.PREF_CHANGESET, changeset);
-		editor.commit();
+		Constants.getPref(context)
+				.edit()
+				.putString(Constants.PREF_CHANGESET, changeset)
+				.commit();
 	}
 	private String getChangeset(){
-		SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
+		SharedPreferences pref = Constants.getPref(getBaseContext());
 		if(pref.contains(Constants.PREF_CHANGESET)){
 			return pref.getString(Constants.PREF_CHANGESET, null);
 		}

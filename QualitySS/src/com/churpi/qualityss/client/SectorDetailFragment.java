@@ -55,9 +55,8 @@ public class SectorDetailFragment extends Fragment {
 				@Override
 				public void onDo(Context context, SQLiteDatabase db) {
 					int sectorId = getArguments().getInt(ARG_ITEM_ID);
-					c = db.query(DbService.TABLE_NAME, new String[]{DbService._ID}, 
+					c = db.query(DbService.TABLE_NAME, new String[]{DbService._ID, DbService.CN_STATUS}, 
 							DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
-							//null,null,
 							null, null, null);
 				}
 			});
@@ -89,7 +88,6 @@ public class SectorDetailFragment extends Fragment {
 				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));		
 
 		grid.setOnItemClickListener(new OnItemClickListener(){
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
@@ -97,11 +95,18 @@ public class SectorDetailFragment extends Fragment {
 				c.moveToPosition(position);
 				int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
 				
-				Alerts.showServiceDetail(getActivity(), serviceId);				
+				//Alerts.showServiceDetail(getActivity(), serviceId);
+				openServiceDetail(serviceId);
 			}
 			
 		});
 		
 		return rootView;
+	}
+	
+	private void openServiceDetail(int serviceId){
+		Intent intent = new Intent(getActivity(), ServiceDetailActivity.class);
+		intent.putExtra(ServiceDetailActivity.SERVICE_ID, serviceId);
+		startActivity(intent);
 	}
 }

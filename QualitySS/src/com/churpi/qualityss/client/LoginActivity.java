@@ -7,6 +7,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.helper.SavedActivityManager;
 import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
@@ -49,8 +50,8 @@ public class LoginActivity extends Activity {
 		setContentView(R.layout.activity_login);
 		
 		updateRecievier = new UpdateDataReciever(this);
-        registerReceiver(updateRecievier, new IntentFilter(Constants.UPDATE_DATA_ACTION) );		    	
-
+        registerReceiver(updateRecievier, new IntentFilter(Constants.UPDATE_DATA_ACTION) );
+        
 	}
 	
 	@Override
@@ -90,7 +91,7 @@ public class LoginActivity extends Activity {
 					public void onResponse(String employeeIdStr) {
 						int employeeId = Integer.parseInt(employeeIdStr);
 						if(employeeId != 0){
-							SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+							SharedPreferences pref = Constants.getPref(getBaseContext());
 							Editor editor = pref.edit();
 							editor.putString(Constants.PREF_ACCOUNT, account);
 							editor.putInt(Constants.PREF_PASSHASH, password.hashCode());
@@ -132,7 +133,7 @@ public class LoginActivity extends Activity {
 	}
 	
 	private int validateLocal(String account, String password){
-		SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
+		SharedPreferences pref = Constants.getPref(this);
 		String savedAccount =  pref.getString(Constants.PREF_ACCOUNT, null);
 		int savedPassHash =  pref.getInt(Constants.PREF_PASSHASH, 0);
 		if(savedAccount != null && account.compareTo(savedAccount)==0){
@@ -147,8 +148,8 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == REQUEST_MAIN_ACTION && resultCode == RESULT_OK){
-			Intent loginActivity = new Intent(this, SectorListActivity.class);
-			startActivity(loginActivity);
+			Intent sectorActivity = new Intent(this, SectorListActivity.class);
+			startActivity(sectorActivity);
 			
 			updateRecievier.start();
 		}

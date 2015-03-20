@@ -122,7 +122,7 @@ public class Alerts {
 						@Override
 						public void onDo(Context context, SQLiteDatabase db) {
 							ContentValues values = new ContentValues();
-							SharedPreferences pref = context.getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+							SharedPreferences pref = Constants.getPref(context);
 							int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
 							values.put(DbService.CN_EMPLOYEEREVIEW, userEmployeeId);
 							values.put(DbService.CN_DATETIME, DateHelper.getCurrentTime());

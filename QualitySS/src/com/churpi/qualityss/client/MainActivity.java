@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
 				refreshUserInfo(description, progress);
 				
 				if(progress == 100){
-					SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+					SharedPreferences pref = Constants.getPref(context);
 					SharedPreferences.Editor editor = pref.edit();
 					editor.putBoolean(Constants.PREF_FILLED_DB, true);
 					editor.commit();
@@ -133,7 +133,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean isDBFilled(){    	
-    	SharedPreferences pref = getSharedPreferences(Constants.PREFERENCES,Context.MODE_PRIVATE);
+    	SharedPreferences pref = Constants.getPref(getBaseContext());
     	return pref.getBoolean(Constants.PREF_FILLED_DB, false);    	
     }
     

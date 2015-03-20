@@ -83,4 +83,5 @@
     <string name="inst_survey">Selecciona la pregunta para contestarla</string>
     <string name="ttl_finish_service">Finalizar Servicio</string>
 	<string name="msg_finish_service">¿Esta completamente seguro de finalizar el servicio y enviar los resultados?</string>
+	<string name="btn_documents">Ver documentos</string>
 </resources>

@@ -5,6 +5,7 @@ import java.io.File;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.dto.ServiceDTO;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -42,6 +43,19 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 		Cursor c = getCursor();
 		c.moveToPosition(position);
 		int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
+		String status = null;
+		if(!c.isNull(c.getColumnIndex(DbService.CN_STATUS))){
+			status = c.getString(c.getColumnIndex(DbService.CN_STATUS));
+		}
+		
+		if(status != null && ServiceDTO.ServiceStatus.CURRENT.compareTo(status)==0){
+			layout.setBackgroundColor(mContext.getResources().getColor(R.color.started));
+		} else if(status != null && ServiceDTO.ServiceStatus.FINALIZED.compareTo(status)==0){
+			layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
+		} else if(status != null && ServiceDTO.ServiceStatus.SENT.compareTo(status)==0){
+			layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
+		}
+		
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE), 

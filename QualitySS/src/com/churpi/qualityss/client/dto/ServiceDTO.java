@@ -6,6 +6,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 public class ServiceDTO {
+	
+	
+	public class ServiceStatus{
+		public final static String CURRENT = "C";
+		public final static String FINALIZED = "F";
+		public final static String SENT = "S";
+	}
+	
 	int ServicioId;
 	String Code;
 	String Descripcion;
@@ -18,7 +26,9 @@ public class ServiceDTO {
 	int ElementoRevisionId;
 	String FechaRevision;
 	String UltimaRevision;
+	String Status;
 	EquipmentDTO[] ServicioEquipo;
+	
 	
 	
 	public ContentValues getContentValues(){
@@ -69,7 +79,11 @@ public class ServiceDTO {
 		index = c.getColumnIndex(DbService.CN_LASTREVIEW);
 		if(index != -1){
 			UltimaRevision = c.getString(index);
-		}		
+		}	
+		index = c.getColumnIndex(DbService.CN_STATUS);
+		if(index != -1){
+			Status = c.getString(index);
+		}	
 	}
 	
 	public int getServicioId() {
@@ -165,4 +179,20 @@ public class ServiceDTO {
 	public void setServicioEquipo(EquipmentDTO[] servicioEquipo) {
 		ServicioEquipo = servicioEquipo;
 	}
+	public String getStatus() {
+		return Status;
+	}
+	public void setStatus(String status) {
+		Status = status;
+	}
+	public boolean canOpen() {
+		
+		return true;
+	}
+	public boolean canStart() {
+		if(Status == null)
+			return true;
+		return false;
+	}
+	
 }

@@ -26,9 +26,10 @@ public class DbQuery {
 				" AND se." + DbServiceEmployee.CN_SERVICE + " = ?";
 	public static final String STAFF_INVENTORY = 
 			"SELECT e." + DbEquipment._ID + ", "
-					+ "CASE WHEN ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "
+					/*+ "CASE WHEN ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "
 					+ "THEN 0 ELSE ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
-					+ "END AS " + DbEmployeeEquipmentInventory.CN_CHECKED
+					+ "END AS " + DbEmployeeEquipmentInventory.CN_CHECKED*/
+					+ DbEmployeeEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
 			+ "FROM " + DbEmployeeEquipment.TABLE_NAME + " ee "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
@@ -39,9 +40,10 @@ public class DbQuery {
 			+ " WHERE ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ?";
 	public static final String SERVICE_INVENTORY = 
 			"SELECT e." + DbEquipment._ID + ", "
-					+ "CASE WHEN ei." + DbServiceEquipmentInventory.CN_CHECKED + " IS NULL "
+					/*+ "CASE WHEN ei." + DbServiceEquipmentInventory.CN_CHECKED + " IS NULL "
 					+ "THEN 0 ELSE ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
-					+ "END AS " + DbServiceEquipmentInventory.CN_CHECKED
+					+ "END AS " + DbServiceEquipmentInventory.CN_CHECKED*/
+					+ DbServiceEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
 			+ "FROM " + DbServiceEquipment.TABLE_NAME + " ee "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
@@ -55,9 +57,10 @@ public class DbQuery {
 			"SELECT q." + DbQuestion._ID 
 					+ ", q." + DbQuestion.CN_DESCRIPTION +", "
 					+ "s." + DbSection.CN_DESCRIPTION + " AS " + DbReviewQuestion.CN_SECTION_NAME +", "
-					+ "CASE WHEN ra." + DbReviewQuestionAnswer.CN_RESULT + " IS NULL "
+					/*+ "CASE WHEN ra." + DbReviewQuestionAnswer.CN_RESULT + " IS NULL "
 					+ "THEN 'B' ELSE ra." + DbReviewQuestionAnswer.CN_RESULT + " "
-					+ "END AS " + DbReviewQuestionAnswer.CN_RESULT + " "					
+					+ "END AS " + DbReviewQuestionAnswer.CN_RESULT + " "*/
+					+ DbReviewQuestionAnswer.CN_RESULT + " "
 			+ "FROM " + DbReviewQuestion.TABLE_NAME + " rq "
 			+ "INNER JOIN " + DbQuestion.TABLE_NAME + " q ON "
 			+ "q." + DbQuestion._ID + " = rq." + DbReviewQuestion.CN_QUESTION + " "

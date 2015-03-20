@@ -1,5 +1,8 @@
 package com.churpi.qualityss;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 public final class Constants {
 
 	public static final String PULL_PUSH_DATA_ACTION = 
@@ -30,12 +33,18 @@ public final class Constants {
 	public static final String PULL_PUSH_DATA_DATA = 
 			"com.churpi.qualityss.service.PUSHPULLDATA";
 	
-	public static final String PREFERENCES = "QSSPREF";
+	private static final String PREFERENCES = "QSSPREF";
 	public static final String PREF_FILLED_DB = "FILLEDDB";
 	public static final String PREF_ACCOUNT = "CURRENT_ACCOUNT";
 	public static final String PREF_PASSHASH = "CURRENT_PASSHASH";
 	public static final String PREF_EMPLOYEE = "CURRENT_EMPLOYEE";
 	public static final String PREF_CHANGESET = "CURRENT_CHANGESET";
+	public static final String PREF_ACTIVITY = "CURRENT_ACTIVITY";
+	public static final String PREF_SECTOR_ID = "SECTOR_ID";
+	public static final String PREF_SERVICE_ID = "SERVICE_ID";
+	public static final String PREF_EMPLOYEE_ID = "EMPLOYEE_ID";
+	public static final String PREF_EMPLOYEE_NAME = "EMPLOYEE_NAME";
+	
 	
 	public static final String JSON_DIR = "DB";
 	public static final String JSON_NAME = "db.json";
@@ -45,5 +54,11 @@ public final class Constants {
 	
 	public static final String IMG_SERVICE = "imgServ";
 	public static final String IMG_EMPLOYEE = "imgEmp";
+
+	
+	
+	public static SharedPreferences getPref(Context context){
+		return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+	}
 	
 }

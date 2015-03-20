@@ -105,6 +105,7 @@ public class SectorListFragment extends ListFragment {
 		}
 		super.onDestroy();
 	}
+	
 
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {

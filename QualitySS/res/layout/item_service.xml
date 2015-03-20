@@ -8,6 +8,7 @@
         android:id="@android:id/button1"
         android:layout_width="@dimen/image_selector"
         android:layout_height="@dimen/image_selector"
+        android:layout_margin="@dimen/image_border"
         android:contentDescription="@string/img_service"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_launcher" />

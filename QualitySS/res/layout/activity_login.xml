@@ -37,7 +37,8 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/hint_filluser"
-        android:inputType="text" >
+        android:inputType="text"
+        android:text="1" >
 
         <requestFocus />
     </EditText>
@@ -54,7 +55,8 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/hint_password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:text="1" />
 
     <Button
         android:id="@android:id/button1"

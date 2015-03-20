@@ -111,6 +111,7 @@ public final class QualitySSDbContract {
 		public static final String CN_EMPLOYEEREVIEW = "employeeReviewId";
 		public static final String CN_DATETIME = "dateReview";
 		public static final String CN_LASTREVIEW = "dateLast";
+		public static final String CN_STATUS = "status";
 		
 		public static final String CREATE_TABLE = "CREATE TABLE " +
 				TABLE_NAME + "("
@@ -122,7 +123,8 @@ public final class QualitySSDbContract {
 				+ CN_SECTOR + " INTEGER,"
 				+ CN_EMPLOYEEREVIEW + " INTEGER," 
 				+ CN_DATETIME + " TEXT," 
-				+ CN_LASTREVIEW + " TEXT," 
+				+ CN_LASTREVIEW + " TEXT,"
+				+ CN_STATUS + " TEXT," 
 				+ "FOREIGN KEY(" + CN_ADDRESS + ") " 
 				+ "REFERENCES "+ DbAddress.TABLE_NAME + "(" + DbAddress._ID + ")," 
 				+ "FOREIGN KEY(" + CN_CUSTOMER + ") " 
