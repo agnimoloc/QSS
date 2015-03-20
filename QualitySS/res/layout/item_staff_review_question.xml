@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/radio_height"
+        android:layout_gravity="end"
+        android:gravity="end"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/checkBox1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="onClick_radio"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:tag="B"
+            android:text="@string/bad"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <RadioButton
+            android:id="@+id/checkBox2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="onClick_radio"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:tag="G"
+            android:text="@string/good"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+        
+        <RadioButton
+            android:id="@+id/checkBox3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="onClick_radio"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:tag="E"
+            android:text="@string/excelent"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RadioGroup>
+
+</LinearLayout>

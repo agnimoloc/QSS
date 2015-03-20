@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="apptheme_color">#cc0000</color>
+    <color name="started">#f0ad4e</color>
+    <color name="finalized">#5cb85c</color>
+    <color name="sent">#428bca</color>
+</resources>
