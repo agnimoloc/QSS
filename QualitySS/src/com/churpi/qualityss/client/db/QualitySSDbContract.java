@@ -1,5 +1,8 @@
 package com.churpi.qualityss.client.db;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
 public final class QualitySSDbContract {
@@ -93,12 +96,43 @@ public final class QualitySSDbContract {
 		public static final String CN_CODE = "code";
 		public static final String CN_NAME = "name";
 		public static final String CN_PLATE = "plate";
+		public static final String CN_STATUS = "status";
 		
 		public static final String CREATE_TABLE = "CREATE TABLE " +
 				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY," +
 				CN_CODE  + " TEXT, " +
 				CN_NAME  + " TEXT, " +
-				CN_PLATE  + " TEXT);";
+				CN_PLATE  + " TEXT, " +
+				CN_STATUS + " TEXT);";
+		
+		public class EmployeeStatus{
+			public final static String CURRENT = "C";
+			public final static String FINALIZED = "F";
+			public final static String SENT = "S";
+		}
+		
+		public static void setStatus(SQLiteDatabase db, int employeeId, String status){
+			String whereClause = DbEmployee._ID + "=?";
+			String[] whereArgs = new String[]{String.valueOf(employeeId)}; 
+			Cursor cur = db.query(DbEmployee.TABLE_NAME, 
+					new String[]{DbEmployee.CN_STATUS},
+					whereClause, whereArgs,
+					null,null,null);
+			try{
+				if(cur.moveToFirst() ){
+					int columnIndex = cur.getColumnIndex(DbEmployee.CN_STATUS);
+					String currentStatus = cur.getString(columnIndex);
+					ContentValues values = new ContentValues();
+					values.put(DbEmployee.CN_STATUS, status);
+
+					if(cur.isNull(columnIndex) || currentStatus.compareTo(status) != 0){
+						db.update(DbEmployee.TABLE_NAME, values, whereClause, whereArgs);
+					}
+				}
+			}finally{
+				cur.close();
+			}
+		}
 	}
 		
 	public static abstract class DbService implements BaseColumns {

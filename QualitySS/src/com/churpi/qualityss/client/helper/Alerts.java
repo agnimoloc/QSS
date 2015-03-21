@@ -1,8 +1,5 @@
 package com.churpi.qualityss.client.helper;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,10 +16,8 @@ import android.widget.TextView;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.StaffInventoryActivity;
-import com.churpi.qualityss.client.StaffReviewListActivity;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.dto.AddressDTO;
@@ -44,7 +39,7 @@ public class Alerts {
 		dialogBuilder.create().show();
 	}
 	
-	public static void showServiceDetail(final Context context, final int serviceId){
+	/*public static void showServiceDetail(final Context context, final int serviceId){
 		
 		final ServiceDTO mService = new ServiceDTO();
 		final CustomerDTO mCustomer = new CustomerDTO();
@@ -53,7 +48,7 @@ public class Alerts {
 		DbTrans.read(context, new DbTrans.Db(){
 
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				Cursor c = null;
 				try{
 						c = db.query(DbService.TABLE_NAME, null, 
@@ -80,9 +75,9 @@ public class Alerts {
 					if(c != null){
 						c.close();
 					}
-				}				
+				}		
+				return null;
 			}
-			
 		});
 		
 		
@@ -120,7 +115,7 @@ public class Alerts {
 				if(mService.getFechaRevision() == null){
 					DbTrans.write(context, new DbTrans.Db() {
 						@Override
-						public void onDo(Context context, SQLiteDatabase db) {
+						public Object onDo(Context context, SQLiteDatabase db) {
 							ContentValues values = new ContentValues();
 							SharedPreferences pref = Constants.getPref(context);
 							int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
@@ -131,6 +126,7 @@ public class Alerts {
 									values, 
 									DbService._ID +"=?", 
 									new String[]{String.valueOf(mService.getServicioId())});
+							return null;
 						}
 					});
 				}
@@ -164,5 +160,5 @@ public class Alerts {
 		AlertDialog dialog = builder.create();
 		
 		dialog.show();
-	}
+	}*/
 }

@@ -2,10 +2,12 @@ package com.churpi.qualityss.client;
 
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
+import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.helper.InventoryListAdapter;
 
 import android.app.Activity;
@@ -57,29 +59,27 @@ public class StaffInventoryActivity extends Activity {
 			text.setText(String.format(getString(R.string.inst_equipment_exist_service, mName)));
 		}
 			
-		
-		final ListView list = (ListView)findViewById(R.id.listView1);
-		DbTrans.read(this, new DbTrans.Db(){
+		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
 
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
-					c = db.rawQuery(DbQuery.STAFF_INVENTORY, 
+					return db.rawQuery(DbQuery.STAFF_INVENTORY, 
 							new String[]{String.valueOf(mId)});
 				}else{
-					c = db.rawQuery(DbQuery.SERVICE_INVENTORY, 
+					return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
 							new String[]{String.valueOf(mId)});
 				}
-				
-				String[] from = new String[]{DbEquipment.CN_DESCRIPTION};
-				int[] to = new int[]{ android.R.id.text1, R.id.checkBox1, R.id.checkBox2};
-				
-				list.setAdapter(new InventoryListAdapter(
-						context, R.layout.item_inventory, c,
-						from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
 			}
 			
 		});
+		String[] from = new String[]{DbEquipment.CN_DESCRIPTION};
+		int[] to = new int[]{ android.R.id.text1, R.id.checkBox1, R.id.checkBox2};
+		
+		ListView list = (ListView)findViewById(R.id.listView1);
+		list.setAdapter(new InventoryListAdapter(
+				this, R.layout.item_inventory, c,
+				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
 		
 	}
 	
@@ -106,9 +106,11 @@ public class StaffInventoryActivity extends Activity {
 	private void updateInventory(final int equipmentId, final int checked){
 		DbTrans.write(this, new DbTrans.Db() {			
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				ContentValues values = new ContentValues();
 				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+					DbEmployee.setStatus(db, mId, DbEmployee.EmployeeStatus.CURRENT);
+					
 					values.put(DbEmployeeEquipmentInventory.CN_CHECKED, checked);
 					int count = db.update(DbEmployeeEquipmentInventory.TABLE_NAME, 
 							values, 
@@ -133,6 +135,7 @@ public class StaffInventoryActivity extends Activity {
 						db.insert(DbServiceEquipmentInventory.TABLE_NAME, null, values);
 					}
 				}
+				return null;
 			}
 		});
 	}

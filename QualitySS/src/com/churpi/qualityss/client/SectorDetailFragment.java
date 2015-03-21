@@ -1,11 +1,7 @@
 package com.churpi.qualityss.client;
 
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
-import com.churpi.qualityss.client.dto.CustomerDTO;
-import com.churpi.qualityss.client.dto.ServiceDTO;
-import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.client.helper.ServiceListAdapter;
 
 import android.os.Bundle;
@@ -21,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
-import android.widget.TextView;
 
 /**
  * A fragment representing a single Sector detail screen. This fragment is
@@ -34,8 +29,13 @@ public class SectorDetailFragment extends Fragment {
 	 * represents.
 	 */
 	public static final String ARG_ITEM_ID = "sector_id";
+	
+	private final int REQUEST_SERVICEDETAIL = 0;
 
 	Cursor c = null;
+	ServiceListAdapter adapter = null;
+	
+	int sectorId;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -49,20 +49,20 @@ public class SectorDetailFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 
 		if (getArguments().containsKey(ARG_ITEM_ID)) {
-			
-			DbTrans.read(getActivity(), new DbTrans.Db() {
-				
-				@Override
-				public void onDo(Context context, SQLiteDatabase db) {
-					int sectorId = getArguments().getInt(ARG_ITEM_ID);
-					c = db.query(DbService.TABLE_NAME, new String[]{DbService._ID, DbService.CN_STATUS}, 
-							DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
-							null, null, null);
-				}
-			});
-			
-			
+			sectorId = getArguments().getInt(ARG_ITEM_ID);
+			c = initCursor();
 		}
+	}
+	
+	private Cursor initCursor(){
+		return (Cursor)DbTrans.read(getActivity(), new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, SQLiteDatabase db) {				
+				return db.query(DbService.TABLE_NAME, new String[]{DbService._ID, DbService.CN_STATUS}, 
+						DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
+						null, null, null);
+			}
+		});		
 	}
 	
 	@Override
@@ -82,10 +82,11 @@ public class SectorDetailFragment extends Fragment {
 		GridView grid = (GridView)rootView.findViewById(R.id.gridView1);
 		String[] from = new String[]{DbService._ID};
 		int[] to = new int[]{ android.R.id.text1};
-		grid.setAdapter(new ServiceListAdapter(
+		adapter = new ServiceListAdapter(
 				getActivity(), 
 				R.layout.item_service, c, 
-				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));		
+				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+		grid.setAdapter(adapter);		
 
 		grid.setOnItemClickListener(new OnItemClickListener(){
 			@Override
@@ -107,6 +108,17 @@ public class SectorDetailFragment extends Fragment {
 	private void openServiceDetail(int serviceId){
 		Intent intent = new Intent(getActivity(), ServiceDetailActivity.class);
 		intent.putExtra(ServiceDetailActivity.SERVICE_ID, serviceId);
-		startActivity(intent);
+		startActivityForResult(intent, REQUEST_SERVICEDETAIL);
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == REQUEST_SERVICEDETAIL){
+			c = initCursor();
+			Cursor oldCur = adapter.swapCursor(c);
+			oldCur.close();
+			oldCur = null;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 }

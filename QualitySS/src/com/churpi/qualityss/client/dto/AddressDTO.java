@@ -1,7 +1,6 @@
 package com.churpi.qualityss.client.dto;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 
 import android.content.ContentValues;
 import android.database.Cursor;

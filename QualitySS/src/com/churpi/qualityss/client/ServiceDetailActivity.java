@@ -49,7 +49,7 @@ public class ServiceDetailActivity extends Activity {
 		DbTrans.read(this, new DbTrans.Db(){
 
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				Cursor c = null;
 				try{
 					c = db.query(DbService.TABLE_NAME, null, 
@@ -76,7 +76,8 @@ public class ServiceDetailActivity extends Activity {
 					if(c != null){
 						c.close();
 					}
-				}				
+				}		
+				return null;
 			}
 
 		});
@@ -116,7 +117,7 @@ public class ServiceDetailActivity extends Activity {
 			if(mService.canStart()){
 				DbTrans.write(this, new DbTrans.Db() {
 					@Override
-					public void onDo(Context context, SQLiteDatabase db) {
+					public Object onDo(Context context, SQLiteDatabase db) {
 						ContentValues values = new ContentValues();
 						SharedPreferences pref = Constants.getPref(context);
 						int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
@@ -126,6 +127,7 @@ public class ServiceDetailActivity extends Activity {
 						db.update(DbService.TABLE_NAME, 
 								values, DbService._ID +"=?",
 								new String[]{String.valueOf(mService.getServicioId())});
+						return null;
 					}
 				});
 			}
@@ -139,5 +141,5 @@ public class ServiceDetailActivity extends Activity {
 
 	public void onClick_documents(View v){
 		Toast.makeText(this, "No hay documentos para mostrar", Toast.LENGTH_SHORT).show();
-	}
+	}	
 }

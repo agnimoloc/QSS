@@ -44,12 +44,12 @@ public class GeneralReviewActivity extends Activity {
 				
 		DbTrans.read(this, new DbTrans.Db() {
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				/*c = db.query(
 						DbGeneralCheckpoint.TABLE_NAME, 
 						new String[]{DbGeneralCheckpoint._ID, DbGeneralCheckpoint.CN_NAME}, 
 						null, null, null, null, null, null);*/
-				
+				return null;
 				
 			}
 		});		
@@ -162,10 +162,10 @@ public class GeneralReviewActivity extends Activity {
 			Toast.makeText(this, getString(R.string.msg_photo_take_successfully), Toast.LENGTH_SHORT).show();	        
 	    }else if(requestCode == REQUEST_SINGLE_COMMENT && resultCode == RESULT_OK){
 	    	Bundle extras = data.getExtras();
-	    	final String comment = extras.getString(CheckpointCommentActivity.FLD_COMMENT);
+	    	String comment = extras.getString(CheckpointCommentActivity.FLD_COMMENT);
 	    	DbTrans.write(this, new DbTrans.Db() {
 				@Override
-				public void onDo(Context context, SQLiteDatabase db) {
+				public Object onDo(Context context, SQLiteDatabase db) {
 					/*ContentValues values = new ContentValues();
 					values.put(DbGeneralCheckpointResult.CN_SERVICE, serviceId);
 					values.put(DbGeneralCheckpointResult.CN_GENERAL_CHECKPOINT, checkpointId);
@@ -180,6 +180,7 @@ public class GeneralReviewActivity extends Activity {
 					if(affected == 0){
 						db.insert(DbGeneralCheckpointResult.TABLE_NAME, null, values);
 					}*/
+					return null;
 				}
 			});
 	    	Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();	 

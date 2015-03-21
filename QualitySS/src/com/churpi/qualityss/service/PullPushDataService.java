@@ -3,46 +3,24 @@ package com.churpi.qualityss.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbHelper;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.helper.GsonRequest;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
-
-import android.app.AlarmManager;
-import android.app.DownloadManager;
-import android.app.PendingIntent;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
 import android.app.IntentService;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.SystemClock;
-import android.util.JsonReader;
 import android.util.Log;
 import android.widget.Toast;
 
 public class PullPushDataService extends IntentService {
-
-	private static final String RESP_TIMESTAMP = "timestamp";
 
 	private static final String ERR_CONN = "CONNECTION";
 

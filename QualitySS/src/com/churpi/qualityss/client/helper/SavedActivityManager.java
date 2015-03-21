@@ -3,7 +3,6 @@ package com.churpi.qualityss.client.helper;
 import com.churpi.qualityss.Constants;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 
 public class SavedActivityManager {
 

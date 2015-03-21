@@ -43,19 +43,18 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 		Cursor c = getCursor();
 		c.moveToPosition(position);
 		int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
-		String status = null;
+		layout.setBackground(null);
+		
 		if(!c.isNull(c.getColumnIndex(DbService.CN_STATUS))){
-			status = c.getString(c.getColumnIndex(DbService.CN_STATUS));
+			String status = c.getString(c.getColumnIndex(DbService.CN_STATUS));
+			if(ServiceDTO.ServiceStatus.CURRENT.compareTo(status)==0){
+				layout.setBackgroundColor(mContext.getResources().getColor(R.color.started));
+			} else if(ServiceDTO.ServiceStatus.FINALIZED.compareTo(status)==0){
+				layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
+			} else if(ServiceDTO.ServiceStatus.SENT.compareTo(status)==0){
+				layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
+			}
 		}
-		
-		if(status != null && ServiceDTO.ServiceStatus.CURRENT.compareTo(status)==0){
-			layout.setBackgroundColor(mContext.getResources().getColor(R.color.started));
-		} else if(status != null && ServiceDTO.ServiceStatus.FINALIZED.compareTo(status)==0){
-			layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
-		} else if(status != null && ServiceDTO.ServiceStatus.SENT.compareTo(status)==0){
-			layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
-		}
-		
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE), 

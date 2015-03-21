@@ -79,23 +79,23 @@ public class SectorListFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 
 		
-		DbTrans.read(getActivity(), new DbTrans.Db(){
-
+		c = (Cursor)DbTrans.read(getActivity(), new DbTrans.Db(){
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
-				c = db.query(
+			public Object onDo(Context context, SQLiteDatabase db) {
+				return db.query(
 						DbSector.TABLE_NAME, 
 						new String[]{DbSector._ID, DbSector.CN_NAME}, 
-						null, null, null, null, null, null);
-				
-				String[] from = new String[]{DbSector.CN_NAME};
-				int[] to = new int[]{ android.R.id.text1};
-				setListAdapter(new SimpleCursorAdapter(
-						context, 
-						R.layout.item_sector, c, 
-						from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
+						null, null, null, null, null, null);				
 			}
 		});
+		
+		String[] from = new String[]{DbSector.CN_NAME};
+		int[] to = new int[]{ android.R.id.text1};
+		setListAdapter(new SimpleCursorAdapter(
+				getActivity(), 
+				R.layout.item_sector, c, 
+				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
+
 	}
 	
 	@Override

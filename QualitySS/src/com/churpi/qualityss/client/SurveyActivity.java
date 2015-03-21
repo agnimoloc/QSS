@@ -2,8 +2,8 @@ package com.churpi.qualityss.client;
 
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
 
 import android.app.Activity;
@@ -13,8 +13,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
@@ -54,10 +52,10 @@ public class SurveyActivity extends Activity {
 		list.setOnItemClickListener(selectItem);
 	}
 	private void createCursor(){
-		DbTrans.read(this, new DbTrans.Db() {			
+		c = (Cursor)DbTrans.read(this, new DbTrans.Db() {			
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {				
-				c = db.rawQuery(DbQuery.STAFF_SURVEY, new String[]{
+			public Object onDo(Context context, SQLiteDatabase db) {				
+				return db.rawQuery(DbQuery.STAFF_SURVEY, new String[]{
 						String.valueOf(employeeId),
 						String.valueOf(serviceId)
 				});
@@ -86,31 +84,52 @@ public class SurveyActivity extends Activity {
 		}
 	};
 	
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
 		
 		if(requestCode == 0){
 			if(resultCode == RESULT_OK){
-				final String result = data.getStringExtra(CheckpointCommentActivity.FLD_COMMENT);
 				DbTrans.write(this, new DbTrans.Db() {
-					
 					@Override
-					public void onDo(Context context, SQLiteDatabase db) {
-						ContentValues values = new ContentValues();
-						values.put(DbSurveyQuestionAnswer.CN_RESULT, result);
-						int count = db.update(DbSurveyQuestionAnswer.TABLE_NAME, values, 
-								DbSurveyQuestionAnswer.CN_SERVICE + "=? AND "
+					public Object onDo(Context context, SQLiteDatabase db) {
+						String whereClause = DbSurveyQuestionAnswer.CN_SERVICE + "=? AND "
 								+ DbSurveyQuestionAnswer.CN_EMPLOYEE + "=? AND "
-								+ DbSurveyQuestionAnswer.CN_QUESTION + "=?" , 
-								new String[]{
-									String.valueOf(serviceId), 
-									String.valueOf(employeeId), 
-									String.valueOf(questionId) });
-						if(count == 0){
-							values.put(DbSurveyQuestionAnswer.CN_SERVICE, serviceId);
-							values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE, employeeId);
-							values.put(DbSurveyQuestionAnswer.CN_QUESTION, questionId);
-							db.insert(DbSurveyQuestionAnswer.TABLE_NAME, null, values);
+								+ DbSurveyQuestionAnswer.CN_QUESTION + "=?";
+						String[] whereArgs = new String[]{
+								String.valueOf(serviceId), 
+								String.valueOf(employeeId), 
+								String.valueOf(questionId) }; 
+						
+						Cursor cur = db.query(DbSurveyQuestionAnswer.TABLE_NAME,
+								new String[]{ DbSurveyQuestionAnswer.CN_RESULT},
+								whereClause, whereArgs, null, null, null);
+						String result = data.getStringExtra(CheckpointCommentActivity.FLD_COMMENT);
+						boolean saveResult = false;
+						if(cur.moveToFirst()){		
+							String savedResult = cur.getString(
+									cur.getColumnIndex(DbSurveyQuestionAnswer.CN_RESULT));
+							if(result != null && result.compareTo(savedResult) != 0){
+								saveResult = true;
+							}							
+						}else if (result != null && result.length() > 0 ){
+							saveResult = true;
 						}
+						cur.close();
+						if(saveResult){
+							DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+							
+							ContentValues values = new ContentValues();
+							values.put(DbSurveyQuestionAnswer.CN_RESULT, result);
+							int count = db.update(DbSurveyQuestionAnswer.TABLE_NAME, values, 
+									whereClause, whereArgs);
+
+							if(count == 0){
+								values.put(DbSurveyQuestionAnswer.CN_SERVICE, serviceId);
+								values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE, employeeId);
+								values.put(DbSurveyQuestionAnswer.CN_QUESTION, questionId);
+								db.insert(DbSurveyQuestionAnswer.TABLE_NAME, null, values);
+							}
+						}
+						return null;
 					}
 				});
 				createCursor();

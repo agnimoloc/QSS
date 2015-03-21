@@ -25,11 +25,8 @@ public class DbQuery {
 				"se." + DbServiceEmployee.CN_EMPLOYEE + " = e." + DbEmployee._ID + 
 				" AND se." + DbServiceEmployee.CN_SERVICE + " = ?";
 	public static final String STAFF_INVENTORY = 
-			"SELECT e." + DbEquipment._ID + ", "
-					/*+ "CASE WHEN ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "
-					+ "THEN 0 ELSE ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
-					+ "END AS " + DbEmployeeEquipmentInventory.CN_CHECKED*/
-					+ DbEmployeeEquipmentInventory.CN_CHECKED + " "
+			"SELECT e." + DbEquipment._ID 
+					+ ", ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
 			+ "FROM " + DbEmployeeEquipment.TABLE_NAME + " ee "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
@@ -38,12 +35,14 @@ public class DbQuery {
 			+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " AND "
 			+ "ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE
 			+ " WHERE ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ?";
+	
+	public static final String STAFF_INVENTORY_NULL_RESULT = 
+			STAFF_INVENTORY 
+			+ " AND ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "; 
+	
 	public static final String SERVICE_INVENTORY = 
-			"SELECT e." + DbEquipment._ID + ", "
-					/*+ "CASE WHEN ei." + DbServiceEquipmentInventory.CN_CHECKED + " IS NULL "
-					+ "THEN 0 ELSE ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
-					+ "END AS " + DbServiceEquipmentInventory.CN_CHECKED*/
-					+ DbServiceEquipmentInventory.CN_CHECKED + " "
+			"SELECT e." + DbEquipment._ID 
+					+ ", ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
 			+ "FROM " + DbServiceEquipment.TABLE_NAME + " ee "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
@@ -56,11 +55,8 @@ public class DbQuery {
 	public static final String STAFF_REVIEW = 
 			"SELECT q." + DbQuestion._ID 
 					+ ", q." + DbQuestion.CN_DESCRIPTION +", "
-					+ "s." + DbSection.CN_DESCRIPTION + " AS " + DbReviewQuestion.CN_SECTION_NAME +", "
-					/*+ "CASE WHEN ra." + DbReviewQuestionAnswer.CN_RESULT + " IS NULL "
-					+ "THEN 'B' ELSE ra." + DbReviewQuestionAnswer.CN_RESULT + " "
-					+ "END AS " + DbReviewQuestionAnswer.CN_RESULT + " "*/
-					+ DbReviewQuestionAnswer.CN_RESULT + " "
+					+ "s." + DbSection.CN_DESCRIPTION + " AS " + DbReviewQuestion.CN_SECTION_NAME 
+					+ ", ra." + DbReviewQuestionAnswer.CN_RESULT + " "
 			+ "FROM " + DbReviewQuestion.TABLE_NAME + " rq "
 			+ "INNER JOIN " + DbQuestion.TABLE_NAME + " q ON "
 			+ "q." + DbQuestion._ID + " = rq." + DbReviewQuestion.CN_QUESTION + " "
@@ -70,7 +66,12 @@ public class DbQuery {
 			+ "q." + DbQuestion._ID + " = ra." + DbReviewQuestionAnswer.CN_QUESTION + " AND "
 			+ "rq." + DbReviewQuestion.CN_SERVICE + " = ra." + DbReviewQuestionAnswer.CN_SERVICE + " AND "
 			+ "ra." +  DbReviewQuestionAnswer.CN_EMPLOYEE + " = ? "
-			+ " WHERE rq." + DbReviewQuestion.CN_SERVICE + " = ?"; 
+			+ " WHERE rq." + DbReviewQuestion.CN_SERVICE + " = ?";
+	
+	public static final String STAFF_REVIEW_NULL_RESULT =
+			STAFF_REVIEW + 
+			" AND ra." + DbReviewQuestionAnswer.CN_RESULT + " IS NULL";
+	
 	public static final String STAFF_SURVEY = 
 			"SELECT q." + DbQuestion._ID 
 					+ ", q." + DbQuestion.CN_DESCRIPTION +", "
@@ -85,6 +86,10 @@ public class DbQuery {
 			+ "sq." + DbSurveyQuestion.CN_SERVICE + " = sa." + DbSurveyQuestionAnswer.CN_SERVICE + " AND "
 			+ "sa." +  DbSurveyQuestionAnswer.CN_EMPLOYEE + " = ? "
 			+ " WHERE sq." + DbSurveyQuestion.CN_SERVICE + " = ?"; 
+	
+	public static final String STAFF_SURVEY_NULL_RESULT =
+			STAFF_SURVEY + 
+			" AND sa." + DbSurveyQuestionAnswer.CN_RESULT + " IS NULL";
 	
 	public static final String GET_ADDRESS = 
 			"SELECT a.*, s." + DbState.CN_NAME + " AS " + DbAddress.CN_STATE_NAME + ", "

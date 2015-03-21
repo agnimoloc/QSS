@@ -5,8 +5,10 @@ import java.util.List;
 
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswer;
 import com.churpi.qualityss.client.dto.QuestionDTO;
+import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.client.helper.StaffReviewQuestionAdapter;
 
 import android.app.Activity;
@@ -16,13 +18,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 public class StaffReviewActivity extends Activity {
 
@@ -45,13 +44,12 @@ public class StaffReviewActivity extends Activity {
 		employeeId = extras.getInt(EMPLOYEE_ID);
 		employeeName = extras.getString(EMPLOYEE_NAME);
 		
-		final List<QuestionDTO> questions = new ArrayList<QuestionDTO>();
-		
-		
-		DbTrans.read(this, new DbTrans.Db() {
+		@SuppressWarnings("unchecked")
+		List<QuestionDTO> questions = (List<QuestionDTO>)DbTrans.read(this, new DbTrans.Db() {
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
 				Cursor c = db.rawQuery(DbQuery.STAFF_REVIEW, new String[]{String.valueOf(employeeId), String.valueOf(serviceId)});
+				List<QuestionDTO> questions = new ArrayList<QuestionDTO>(); 
 				if(c.moveToFirst()){
 					do{
 						QuestionDTO question = new QuestionDTO();
@@ -59,7 +57,7 @@ public class StaffReviewActivity extends Activity {
 						questions.add(question);
 					}while(c.moveToNext());
 				}
-				
+				return questions;
 			}
 		});
 		
@@ -88,7 +86,10 @@ public class StaffReviewActivity extends Activity {
 		DbTrans.write(this, new DbTrans.Db() {
 			
 			@Override
-			public void onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, SQLiteDatabase db) {
+				
+				DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+				
 				ContentValues values = new ContentValues();
 				values.put(DbReviewQuestionAnswer.CN_RESULT, value);
 				int count = db.update(DbReviewQuestionAnswer.TABLE_NAME, 
@@ -108,7 +109,7 @@ public class StaffReviewActivity extends Activity {
 					values.put(DbReviewQuestionAnswer.CN_QUESTION , currentQuestion.getPreguntaId());
 					db.insert(DbReviewQuestionAnswer.TABLE_NAME, null, values);
 				}
-				
+				return null;
 			}
 		});
 		
@@ -120,11 +121,39 @@ public class StaffReviewActivity extends Activity {
 	}
 	
 	public void onClick_finish(View v){
-		
-		Intent intent = new Intent(getApplicationContext(), StaffReviewListActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(StaffReviewListActivity.FLD_SERVICE_ID, serviceId);
-		startActivity(intent);
+		boolean finish = (Boolean)DbTrans.write(this, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, SQLiteDatabase db) {
+				String msg = null;
+				Cursor cur = db.rawQuery(DbQuery.STAFF_INVENTORY_NULL_RESULT,  
+						new String[]{String.valueOf(employeeId)});
+				if(cur.getCount() > 0){
+					msg = getString(R.string.msg_fault_staff_inventory);
+				}
+				cur.close();
+				cur = db.rawQuery(DbQuery.STAFF_REVIEW_NULL_RESULT,
+						new String[]{String.valueOf(employeeId),String.valueOf(serviceId)
+				});
+				if(cur.getCount() > 0){
+					msg += (msg != null ? "\n":"")+ getString(R.string.msg_fault_staff_review);
+				}
+				cur.close();
+				if(msg == null){
+					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.FINALIZED);
+					return true;
+				}else{					
+					Alerts.showError(context,
+							getString(R.string.msg_cannot_finish_staff_review) + "\n"+ msg);
+				}
+				return false;
+			}
+		}); 
+		if(finish){
+			Intent intent = new Intent(getApplicationContext(), StaffReviewListActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(StaffReviewListActivity.FLD_SERVICE_ID, serviceId);
+			startActivity(intent);
+		}
 	}
 
 	public void onClick_survey(View v){

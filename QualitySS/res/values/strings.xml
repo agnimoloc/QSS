@@ -84,4 +84,7 @@
     <string name="ttl_finish_service">Finalizar Servicio</string>
 	<string name="msg_finish_service">¿Esta completamente seguro de finalizar el servicio y enviar los resultados?</string>
 	<string name="btn_documents">Ver documentos</string>
+	<string name="msg_fault_staff_inventory">El inventario no está completo</string>
+	<string name="msg_fault_staff_review">El pase de revista del elemento no está completo</string>
+	<string name="msg_cannot_finish_staff_review">No se puede finalizar la revisión del elemento:</string>
 </resources>

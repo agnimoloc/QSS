@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 
 public class ElementListAdapter extends SimpleCursorAdapter{
@@ -45,6 +45,14 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 		c.moveToPosition(position);
 		EmployeeDTO employee = new EmployeeDTO();
 		employee.fillFromCursor(c);
+		
+		ViewGroup imgContainer = (ViewGroup)img.getParent();
+		imgContainer.setBackground(null);		
+		if(employee.getStatus() != null){
+			if(DbEmployee.EmployeeStatus.CURRENT.compareTo(employee.getStatus())==0){
+				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.started));
+			} 
+		}
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 

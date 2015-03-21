@@ -11,13 +11,7 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class IdentifyElementActivity extends Activity {
@@ -68,7 +62,7 @@ public class IdentifyElementActivity extends Activity {
 		if(requestCode == 0){		
 			if(resultCode == RESULT_OK){
 				String contents = data.getStringExtra("SCAN_RESULT");
-				String format = data.getStringExtra("SCAN_RESULT_FORMAT");
+				//String format = data.getStringExtra("SCAN_RESULT_FORMAT");
 
 				final ProgressDialog progressDialog = ProgressDialog.show(this, 
 						getString(R.string.msg_authenitcate), 

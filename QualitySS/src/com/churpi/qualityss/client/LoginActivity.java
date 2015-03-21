@@ -6,26 +6,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.helper.SavedActivityManager;
 import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -121,7 +111,7 @@ public class LoginActivity extends Activity {
 					}
 				});
 			request.setRetryPolicy(new DefaultRetryPolicy(
-				5000, 
+				10000, 
 				DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
 				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 			VolleySingleton.getInstance(this).addToRequestQueue(request);    

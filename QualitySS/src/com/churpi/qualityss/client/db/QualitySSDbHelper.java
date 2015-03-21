@@ -1,10 +1,5 @@
 package com.churpi.qualityss.client.db;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
@@ -35,7 +30,6 @@ import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
 import com.churpi.qualityss.client.dto.StateDTO;
 import com.churpi.qualityss.client.dto.TownDTO;
-import com.google.gson.Gson;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -316,7 +310,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		}						
 	}
 
-	public void loadDataFromJSON(){
+	/*public void loadDataFromJSON(){
 
 		StringBuffer sb = new StringBuffer();
 		try {
@@ -339,7 +333,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		Gson gson = new Gson();
 		DataDTO data = gson.fromJson(sb.toString().trim(), DataDTO.class);
 		try{
-		/*	db.beginTransaction();
+			db.beginTransaction();
 			for(UserDTO user : data.getUsers()){
 				ContentValues values = new ContentValues();
 				values.put(DbUser._ID, user.getId());
@@ -388,12 +382,12 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 				db.insert(DbGeneralCheckpoint.TABLE_NAME, null, values);
 			}
 			
-			db.setTransactionSuccessful();*/
+			db.setTransactionSuccessful();
 			sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, "", 100);
 		}finally{
 			db.endTransaction();    		
 		}
-	}
+	}*/
 
 	private void sendBroadCastResult(String statusDescription, String description, int progress){
 		Intent status = new Intent();

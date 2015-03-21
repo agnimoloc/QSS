@@ -1,19 +1,17 @@
 package com.churpi.qualityss.client.dto;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 public class EmployeeDTO {
 	int ElementoId;
 	String Code;
 	String Nombre;
 	String Matricula;
-	EquipmentDTO[] Equipo;	
+	String Status;
+	EquipmentDTO[] Equipo;
 	
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
@@ -41,6 +39,10 @@ public class EmployeeDTO {
 		index = c.getColumnIndex(DbEmployee.CN_PLATE);
 		if(index != -1){
 			Matricula = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_STATUS);
+		if(index != -1){
+			Status = c.getString(index);
 		}
 	}
 	
@@ -73,5 +75,14 @@ public class EmployeeDTO {
 	}
 	public void setEquipo(EquipmentDTO[] equipo) {
 		Equipo = equipo;
+	}
+
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
 	}		
+	
 }
