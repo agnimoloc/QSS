@@ -66,6 +66,7 @@ public class InventoryListAdapter extends SimpleCursorAdapter {
 			checked = c.getInt(1);
 		}
 		RadioGroup group = (RadioGroup)layout.findViewById(R.id.radioGroup);
+		group.clearCheck();
 		group.setTag(id);
 		for(int i = 0; i < mTo.length; i++){
 			if(mFrom.length > i){
@@ -73,13 +74,13 @@ public class InventoryListAdapter extends SimpleCursorAdapter {
 				TextView field = (TextView)layout.findViewById(mTo[i]);
 				field.setText(text);
 			}else{
-				RadioButton field = (RadioButton)layout.findViewById(mTo[i]);
-				if(checked != null){
-					field.setChecked(checked == Integer.parseInt(field.getTag().toString()));
+				RadioButton field = (RadioButton)group.findViewById(mTo[i]);
+				if(checked != null && checked == Integer.parseInt(field.getTag().toString())){
+					field.setChecked(true);
 				}
 			}
-			
 		}	
+		layout.refreshDrawableState();
 		return layout;
 	}
 }

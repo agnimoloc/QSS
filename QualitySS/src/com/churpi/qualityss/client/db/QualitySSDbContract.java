@@ -97,13 +97,15 @@ public final class QualitySSDbContract {
 		public static final String CN_NAME = "name";
 		public static final String CN_PLATE = "plate";
 		public static final String CN_STATUS = "status";
+		public static final String CN_BARCODECHECK = "checkBarcode";
 		
 		public static final String CREATE_TABLE = "CREATE TABLE " +
 				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY," +
 				CN_CODE  + " TEXT, " +
 				CN_NAME  + " TEXT, " +
 				CN_PLATE  + " TEXT, " +
-				CN_STATUS + " TEXT);";
+				CN_STATUS + " TEXT, " +
+				CN_BARCODECHECK + " INTEGER);";
 		
 		public class EmployeeStatus{
 			public final static String CURRENT = "C";
@@ -167,6 +169,12 @@ public final class QualitySSDbContract {
 				+ "REFERENCES "+ DbSector.TABLE_NAME + "(" + DbSector._ID + ")," 
 				+ "FOREIGN KEY(" + CN_EMPLOYEEREVIEW+ ") " 
 				+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "));";
+		
+		public class ServiceStatus{
+			public final static String CURRENT = "C";
+			public final static String FINALIZED = "F";
+			public final static String SENT = "S";
+		}
 	}
 	
 	

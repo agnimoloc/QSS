@@ -39,6 +39,7 @@ public final class Constants {
 	public static final String PREF_PASSHASH = "CURRENT_PASSHASH";
 	public static final String PREF_EMPLOYEE = "CURRENT_EMPLOYEE";
 	public static final String PREF_CHANGESET = "CURRENT_CHANGESET";
+	public static final String PREF_IMAGEURL = "IMAGE_URL";
 	public static final String PREF_ACTIVITY = "CURRENT_ACTIVITY";
 	public static final String PREF_SECTOR_ID = "SECTOR_ID";
 	public static final String PREF_SERVICE_ID = "SERVICE_ID";
@@ -54,6 +55,7 @@ public final class Constants {
 	
 	public static final String IMG_SERVICE = "imgServ";
 	public static final String IMG_EMPLOYEE = "imgEmp";
+	public static final String DOC_DIR = "docServ";
 
 	
 	

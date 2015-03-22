@@ -51,7 +51,11 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 		if(employee.getStatus() != null){
 			if(DbEmployee.EmployeeStatus.CURRENT.compareTo(employee.getStatus())==0){
 				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.started));
-			} 
+			} else if(DbEmployee.EmployeeStatus.FINALIZED.compareTo(employee.getStatus())==0){
+				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
+			} else if(DbEmployee.EmployeeStatus.SENT.compareTo(employee.getStatus())==0){
+				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
+			}
 		}
 
 		File dir = new File(

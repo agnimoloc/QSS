@@ -19,11 +19,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -123,7 +119,7 @@ public class ServiceDetailActivity extends Activity {
 						int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
 						values.put(DbService.CN_EMPLOYEEREVIEW, userEmployeeId);
 						values.put(DbService.CN_DATETIME, DateHelper.getCurrentTime());
-						values.put(DbService.CN_STATUS, ServiceDTO.ServiceStatus.CURRENT);
+						values.put(DbService.CN_STATUS, DbService.ServiceStatus.CURRENT);
 						db.update(DbService.TABLE_NAME, 
 								values, DbService._ID +"=?",
 								new String[]{String.valueOf(mService.getServicioId())});

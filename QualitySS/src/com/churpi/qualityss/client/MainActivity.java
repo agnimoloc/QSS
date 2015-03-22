@@ -1,20 +1,11 @@
 package com.churpi.qualityss.client;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.db.QualitySSDbHelper;
-import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.service.PullPushDataService;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,7 +13,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.TextView;

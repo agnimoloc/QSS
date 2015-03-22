@@ -8,6 +8,8 @@ import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.client.helper.ElementListAdapter;
 import com.churpi.qualityss.service.VolleySingleton;
 
@@ -15,6 +17,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -124,6 +127,17 @@ public class StaffReviewListActivity extends Activity {
 								int resultEmployeeId = Integer.parseInt(arg0);
 								progressDialog.dismiss();
 								if(resultEmployeeId == employeeId){
+									DbTrans.write(getBaseContext(), new DbTrans.Db() {
+										@Override
+										public Object onDo(Context context, SQLiteDatabase db) {
+											ContentValues values = new ContentValues();
+											values.put(DbEmployee.CN_BARCODECHECK, 1);
+											db.update(DbEmployee.TABLE_NAME, values, 
+													DbEmployee._ID + "=?", 
+													new String[]{String.valueOf(employeeId)});
+											return null;
+										}
+									});
 									openStaffInventoryActivity();
 								}else{
 									Toast.makeText(
@@ -162,28 +176,69 @@ public class StaffReviewListActivity extends Activity {
 	}
 	
 	public void onClick_finish(View v){
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-		dialogBuilder.setTitle(R.string.ttl_finish_service);
-		dialogBuilder.setMessage(R.string.msg_finish_service);
-		dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+		
+		boolean canFinish = (Boolean)DbTrans.read(this, new DbTrans.Db() {
 			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				//TODO: send data
-				Intent intent = new Intent(getApplicationContext(), SectorListActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-				dialog.dismiss();
+			public Object onDo(Context context, SQLiteDatabase db) {
+				Cursor cur = db.rawQuery(
+						DbQuery.EMPLOYEES_SERVICE_NOT_END, 
+						new String[]{String.valueOf(serviceId)});
 				
+				String msg = null;
+				if(cur.getCount() > 0){
+					msg = getString(R.string.msg_there_are_employees_not_finalized);
+				}
+				cur.close();
+				
+				cur = db.rawQuery(DbQuery.SERVICE_INVENTORY_NULL_RESULT,
+						new String[]{ String.valueOf(serviceId)});
+				
+				if(cur.getCount() > 0){
+					msg = (msg != null ? msg + "\n":"")+  getString(R.string.msg_fault_service_inventory);
+				}
+				
+				if(msg != null){
+					Alerts.showError(context, msg, R.string.msg_cannot_finish_service);
+					return false;
+				}
+				
+				return true;
 			}
 		});
-		dialogBuilder.create().show();		
+		
+		if(canFinish){
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+			dialogBuilder.setTitle(R.string.ttl_finish_service);
+			dialogBuilder.setMessage(R.string.msg_finish_service);
+			dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+			dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					DbTrans.write(getBaseContext(), new DbTrans.Db() {
+						@Override
+						public Object onDo(Context context, SQLiteDatabase db) {
+							ContentValues values = new ContentValues();
+							values.put(DbService.CN_STATUS, DbService.ServiceStatus.FINALIZED);
+							db.update(DbService.TABLE_NAME, values, DbService._ID + "=?", new String[]{String.valueOf(serviceId)});							
+							return null;
+						}
+					});
+					Intent intent = new Intent(getApplicationContext(), SectorListActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+					dialog.dismiss();
+
+				}
+			});
+			dialogBuilder.create().show();		
+		}
 	}
 }

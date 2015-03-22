@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -13,10 +14,12 @@ import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbHelper;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.helper.GsonRequest;
+
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,6 +28,11 @@ public class PullPushDataService extends IntentService {
 	private static final String ERR_CONN = "CONNECTION";
 
 	private static long enqueue;
+	
+	public interface Callback {
+		void success(Context context);
+		void error(VolleyError error, Context context);
+	}
 
 
 
@@ -37,12 +45,12 @@ public class PullPushDataService extends IntentService {
 	
 		String changeSet = getChangeset(); 
 		if(changeSet== null){
-			updateData(getBaseContext(), changeSet);
+			updateData(getBaseContext(), changeSet, null);
 		}
 	}
 		
 	
-	public static void updateData(final Context context, String changeSet){
+	public static void updateData(final Context context, String changeSet, final Callback callback){
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("content-type", "text/json");
 		GsonRequest<DataDTO> request = new GsonRequest<DataDTO>(
@@ -55,7 +63,7 @@ public class PullPushDataService extends IntentService {
 					public void onResponse(DataDTO data) {
 						if(data != null){
 							sendBroadCastResult(context, Constants.PULL_PUSH_DATA_REFRESH, context.getString(R.string.msg_update_database), 50);
-							setChangeset(context, data.getChangeset());
+							setPreferencesByData(context, data);
 							QualitySSDbHelper dbHelper = new QualitySSDbHelper(context);
 							dbHelper.updateDBfromValue(data);
 						}else{
@@ -63,7 +71,9 @@ public class PullPushDataService extends IntentService {
 							Toast.makeText(context, "no", Toast.LENGTH_LONG).show();
 							sendBroadCastResult(context, Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
 						}
-
+						if(callback != null){
+							callback.success(context);
+						}
 					}
 				}, 
 				new Response.ErrorListener() {
@@ -79,6 +89,9 @@ public class PullPushDataService extends IntentService {
 
 						Log.e(ERR_CONN, errorMsg);
 						sendBroadCastResult(context, Constants.PULL_PUSH_DATA_FAIL, errorMsg, 0);
+						if(callback != null){
+							callback.error(error, context);
+						}
 					}
 				}); 
 		request.setRetryPolicy(new DefaultRetryPolicy(
@@ -88,11 +101,11 @@ public class PullPushDataService extends IntentService {
 		VolleySingleton.getInstance(context).addToRequestQueue(request);
 	}
 	
-	private static void setChangeset(Context context, String changeset){
-		Constants.getPref(context)
-				.edit()
-				.putString(Constants.PREF_CHANGESET, changeset)
-				.commit();
+	private static void setPreferencesByData(Context context, DataDTO data){
+		Editor editor = Constants.getPref(context).edit();
+		editor.putString(Constants.PREF_CHANGESET, data.getChangeset());
+		editor.putString(Constants.PREF_IMAGEURL, data.getImageBaseUrl());
+		editor.commit();
 	}
 	private String getChangeset(){
 		SharedPreferences pref = Constants.getPref(getBaseContext());

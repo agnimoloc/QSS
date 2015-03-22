@@ -20,20 +20,21 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbTown;
 public class DbQuery {
 	
 	public static final String EMPLOYEES_BY_SERVICE = 
-			"SELECT e.* FROM " + DbEmployee.TABLE_NAME + " e " + 
-			"INNER JOIN " + DbServiceEmployee.TABLE_NAME + " se ON " + 
-				"se." + DbServiceEmployee.CN_EMPLOYEE + " = e." + DbEmployee._ID + 
-				" AND se." + DbServiceEmployee.CN_SERVICE + " = ?";
+			"SELECT e.* "
+			+ "FROM " + DbEmployee.TABLE_NAME + " e " 
+			+ "INNER JOIN " + DbServiceEmployee.TABLE_NAME + " se ON " 
+				+ "se." + DbServiceEmployee.CN_EMPLOYEE + " = e." + DbEmployee._ID 
+				+ " AND se." + DbServiceEmployee.CN_SERVICE + " = ?";
 	public static final String STAFF_INVENTORY = 
 			"SELECT e." + DbEquipment._ID 
 					+ ", ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
 			+ "FROM " + DbEmployeeEquipment.TABLE_NAME + " ee "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
-			+ "e." + DbEquipment._ID + " = ee." + DbEmployeeEquipment.CN_EQUIPMENT + " "
+				+ "e." + DbEquipment._ID + " = ee." + DbEmployeeEquipment.CN_EQUIPMENT + " "
 			+ "LEFT JOIN " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei ON "
-			+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " AND "
-			+ "ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE
+				+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " AND "
+				+ "ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE
 			+ " WHERE ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ?";
 	
 	public static final String STAFF_INVENTORY_NULL_RESULT = 
@@ -51,6 +52,9 @@ public class DbQuery {
 			+ "e." + DbEquipment._ID + " = ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " AND "
 			+ "ee." + DbServiceEquipment.CN_SERVICE + " = ei." + DbServiceEquipmentInventory.CN_SERVICE
 			+ " WHERE ee." + DbServiceEquipment.CN_SERVICE + " = ?";
+	public static final String SERVICE_INVENTORY_NULL_RESULT = 
+			SERVICE_INVENTORY 
+			+ " AND ei." + DbServiceEquipmentInventory.CN_CHECKED + " IS NULL "; 
 	
 	public static final String STAFF_REVIEW = 
 			"SELECT q." + DbQuestion._ID 
@@ -100,4 +104,12 @@ public class DbQuery {
 			+ "INNER JOIN " + DbTown.TABLE_NAME + " t ON "
 					+ "t." + DbTown._ID + " = a." + DbAddress.CN_TOWN + " "
 			+ "WHERE a." + DbAddress._ID + " = ?";
+	public static final String EMPLOYEES_SERVICE_NOT_END = 
+			"SELECT e." + DbEmployee._ID + " "
+			+ "FROM " + DbServiceEmployee.TABLE_NAME + " s "
+			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e "
+			+ "ON e." + DbEmployee._ID + " = s." + DbServiceEmployee.CN_EMPLOYEE + " "
+			+ "WHERE s." + DbServiceEmployee.CN_SERVICE + " = ? "
+			+ "AND e." + DbEmployee.CN_STATUS + " IS NOT NULL "
+			+ "AND e." + DbEmployee.CN_STATUS + " <> '" + DbEmployee.EmployeeStatus.FINALIZED + "'";
 }

@@ -41,6 +41,7 @@ public class StaffInventoryActivity extends Activity {
 	
 	
 	private Cursor c;
+	private InventoryListAdapter adapter = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,21 @@ public class StaffInventoryActivity extends Activity {
 			text.setText(String.format(getString(R.string.inst_equipment_exist_service, mName)));
 		}
 			
+		initCursor();
+		
+		String[] from = new String[]{DbEquipment.CN_DESCRIPTION};
+		int[] to = new int[]{ android.R.id.text1, R.id.checkBox1, R.id.checkBox2};
+		
+		adapter = new InventoryListAdapter(
+				this, R.layout.item_inventory, c,
+				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+		
+		ListView list = (ListView)findViewById(R.id.listView1);
+		list.setAdapter(adapter);
+		
+	}
+	
+	private void initCursor(){
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
 
 			@Override
@@ -73,14 +89,6 @@ public class StaffInventoryActivity extends Activity {
 			}
 			
 		});
-		String[] from = new String[]{DbEquipment.CN_DESCRIPTION};
-		int[] to = new int[]{ android.R.id.text1, R.id.checkBox1, R.id.checkBox2};
-		
-		ListView list = (ListView)findViewById(R.id.listView1);
-		list.setAdapter(new InventoryListAdapter(
-				this, R.layout.item_inventory, c,
-				from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
-		
 	}
 	
 	@Override
@@ -94,7 +102,7 @@ public class StaffInventoryActivity extends Activity {
 	public void onClick_radio(View v){
 		RadioButton radio = (RadioButton)v;
 		int value = Integer.parseInt(radio.getTag().toString());
-		int equipmentId = Integer.parseInt(((RadioGroup)radio.getParent()).getTag().toString());
+		int equipmentId = Integer.parseInt(((RadioGroup)radio.getParent()).getTag().toString());		
 		if(radio.isChecked()){
 			updateInventory(equipmentId, value);			
 		}else{
@@ -138,6 +146,12 @@ public class StaffInventoryActivity extends Activity {
 				return null;
 			}
 		});
+		
+		initCursor();
+		
+		Cursor oldCursor = adapter.swapCursor(c);
+		oldCursor.close();
+		
 	}
 	
 	public void onClick_next(View v){

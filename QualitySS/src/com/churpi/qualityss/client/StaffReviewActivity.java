@@ -135,15 +135,14 @@ public class StaffReviewActivity extends Activity {
 						new String[]{String.valueOf(employeeId),String.valueOf(serviceId)
 				});
 				if(cur.getCount() > 0){
-					msg += (msg != null ? "\n":"")+ getString(R.string.msg_fault_staff_review);
+					msg = (msg != null ? msg + "\n":"")+ getString(R.string.msg_fault_staff_review);
 				}
 				cur.close();
 				if(msg == null){
 					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.FINALIZED);
 					return true;
 				}else{					
-					Alerts.showError(context,
-							getString(R.string.msg_cannot_finish_staff_review) + "\n"+ msg);
+					Alerts.showError(context, msg, R.string.msg_cannot_finish_staff_review);
 				}
 				return false;
 			}

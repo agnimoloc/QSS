@@ -47,11 +47,11 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 		
 		if(!c.isNull(c.getColumnIndex(DbService.CN_STATUS))){
 			String status = c.getString(c.getColumnIndex(DbService.CN_STATUS));
-			if(ServiceDTO.ServiceStatus.CURRENT.compareTo(status)==0){
+			if(DbService.ServiceStatus.CURRENT.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.started));
-			} else if(ServiceDTO.ServiceStatus.FINALIZED.compareTo(status)==0){
+			} else if(DbService.ServiceStatus.FINALIZED.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
-			} else if(ServiceDTO.ServiceStatus.SENT.compareTo(status)==0){
+			} else if(DbService.ServiceStatus.SENT.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
 			}
 		}

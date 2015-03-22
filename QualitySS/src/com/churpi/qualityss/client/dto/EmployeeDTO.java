@@ -11,6 +11,7 @@ public class EmployeeDTO {
 	String Nombre;
 	String Matricula;
 	String Status;
+	int BarcodeChecked;
 	EquipmentDTO[] Equipo;
 	
 	public ContentValues getContentValues(){
@@ -43,6 +44,10 @@ public class EmployeeDTO {
 		index = c.getColumnIndex(DbEmployee.CN_STATUS);
 		if(index != -1){
 			Status = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_BARCODECHECK);
+		if(index != -1){
+			BarcodeChecked = c.getInt(index);
 		}
 	}
 	
@@ -83,6 +88,14 @@ public class EmployeeDTO {
 
 	public void setStatus(String status) {
 		Status = status;
+	}
+
+	public int getBarcodeChecked() {
+		return BarcodeChecked;
+	}
+
+	public void setBarcodeChecked(int barcodeChecked) {
+		BarcodeChecked = barcodeChecked;
 	}		
 	
 }

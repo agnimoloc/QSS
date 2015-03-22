@@ -7,13 +7,6 @@ import android.database.Cursor;
 
 public class ServiceDTO {
 	
-	
-	public class ServiceStatus{
-		public final static String CURRENT = "C";
-		public final static String FINALIZED = "F";
-		public final static String SENT = "S";
-	}
-	
 	int ServicioId;
 	String Code;
 	String Descripcion;

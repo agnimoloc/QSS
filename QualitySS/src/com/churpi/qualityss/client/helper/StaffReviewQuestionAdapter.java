@@ -106,16 +106,12 @@ public class StaffReviewQuestionAdapter extends BaseExpandableListAdapter {
 
 		RadioGroup group = (RadioGroup)layout.findViewById(R.id.radioGroup);
 		group.setTag(question);
-
-
-
+		group.clearCheck();
 		for(int radioId : mRadioIds){
 			RadioButton button = (RadioButton)layout.findViewById(radioId);
 			if(question.getResultado() != null){
 				if(button.getTag().toString().compareTo(question.getResultado())==0){
 					button.setChecked(true);
-				}else{
-					button.setChecked(false);
 				}
 			}
 		}			

@@ -86,5 +86,11 @@
 	<string name="btn_documents">Ver documentos</string>
 	<string name="msg_fault_staff_inventory">El inventario no está completo</string>
 	<string name="msg_fault_staff_review">El pase de revista del elemento no está completo</string>
-	<string name="msg_cannot_finish_staff_review">No se puede finalizar la revisión del elemento:</string>
+	<string name="msg_cannot_finish_staff_review">No se puede finalizar la revisión del elemento</string>
+	<string name="msg_fault_service_inventory">El inventario del servicio no esta completo</string>
+	<string name="msg_there_are_employees_not_finalized">Existen elementos iniciados no finalizados</string>
+	<string name="msg_cannot_finish_service">No se puede finalizar el servicio</string>
+	<string name="msg_error_send">Problemas al enviar los datos: </string>
+	<string name="msg_error_recieved">Problemas al recibir las actualizaciones: </string>
+	<string name="msg_error_json_to_send">Error al construir el JSON para mandar</string>
 </resources>
