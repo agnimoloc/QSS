@@ -4,9 +4,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
@@ -97,8 +99,9 @@ public class UpdateDataReciever extends BroadcastReceiver {
 			}
 		});
 
-		if(!json.isNull(JSON_LIST_SERVICES)){
-			JsonObjectRequest request = new JsonObjectRequest(
+		if(!json.isNull(JSON_LIST_SERVICES)){						
+			JsonObjectRequestResponseString request = new JsonObjectRequestResponseString(
+					Request.Method.POST,
 					Config.getUrl(Config.ServerAction.SEND_DATA), 
 					json, 
 					new Response.Listener<JSONObject>() {
@@ -201,7 +204,7 @@ public class UpdateDataReciever extends BroadcastReceiver {
 			do{
 				JSONObject json = new JSONObject();
 				json.put("EquipoId", cInvent.getInt(cInvent.getColumnIndex(DbEquipment._ID)));
-				json.put("Valido", cInvent.getInt(cInvent.getColumnIndex(DbServiceEquipmentInventory.CN_CHECKED)) == 1 );
+				json.put("Valido", cInvent.getInt(cInvent.getColumnIndex(DbServiceEquipmentInventory.CN_CHECKED)) == 1);
 				inventory.put(json);
 			}while(cInvent.moveToNext());
 		}
@@ -230,7 +233,7 @@ public class UpdateDataReciever extends BroadcastReceiver {
 		if(status == null){
 			item.put("Omitido", true);
 		}else{
-			item.put("Omitido", DbEmployee.EmployeeStatus.FINALIZED.compareTo(status) != 0);
+			item.put("Omitido", DbEmployee.EmployeeStatus.FINALIZED.compareTo(status) == 0);
 			item.put("IdentificoGafete", c.getInt(c.getColumnIndex(DbEmployee.CN_BARCODECHECK))==1);
 
 			JSONArray questions = new JSONArray();

@@ -6,10 +6,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.service.DownloadFileReciever;
 import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,6 +35,7 @@ public class LoginActivity extends Activity {
 	
 	
 	UpdateDataReciever updateRecievier;
+	DownloadFileReciever downloadRecievier;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +43,18 @@ public class LoginActivity extends Activity {
 		setContentView(R.layout.activity_login);
 		
 		updateRecievier = new UpdateDataReciever(this);
+		downloadRecievier = new DownloadFileReciever(this);
         registerReceiver(updateRecievier, new IntentFilter(Constants.UPDATE_DATA_ACTION) );
-        
+        registerReceiver(downloadRecievier, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE) );
 	}
 	
 	@Override
 	protected void onDestroy() {
-		updateRecievier.dispose();
 		unregisterReceiver(updateRecievier);
+		unregisterReceiver(downloadRecievier);
+		updateRecievier.dispose();
+		downloadRecievier.dispose();
+		
 		
 		super.onDestroy();
 	}
@@ -138,6 +145,7 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == REQUEST_MAIN_ACTION && resultCode == RESULT_OK){
+			downloadRecievier.downloadFiles();
 			Intent sectorActivity = new Intent(this, SectorListActivity.class);
 			startActivity(sectorActivity);
 			
@@ -148,6 +156,7 @@ public class LoginActivity extends Activity {
 	}
 	
 	private void startMainActivity(){
+		
 		Intent intentMain = new Intent(getBaseContext(), MainActivity.class);
 		startActivityForResult(intentMain, REQUEST_MAIN_ACTION);						
 	}

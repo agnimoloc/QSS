@@ -62,6 +62,7 @@ public class PullPushDataService extends IntentService {
 					@Override
 					public void onResponse(DataDTO data) {
 						if(data != null){
+							DownloadFileReciever.setDataDTO(data);
 							sendBroadCastResult(context, Constants.PULL_PUSH_DATA_REFRESH, context.getString(R.string.msg_update_database), 50);
 							setPreferencesByData(context, data);
 							QualitySSDbHelper dbHelper = new QualitySSDbHelper(context);

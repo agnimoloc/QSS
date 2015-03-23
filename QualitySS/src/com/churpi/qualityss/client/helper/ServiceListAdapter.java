@@ -42,7 +42,7 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 		
 		Cursor c = getCursor();
 		c.moveToPosition(position);
-		int serviceId = c.getInt(c.getColumnIndex(DbService._ID));
+		String serviceCode = c.getString(c.getColumnIndex(DbService.CN_CODE));
 		layout.setBackground(null);
 		
 		if(!c.isNull(c.getColumnIndex(DbService.CN_STATUS))){
@@ -58,7 +58,7 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE), 
-				"IMGSRV_" + String.valueOf(serviceId) + ".jpg");
+				"S" + serviceCode + ".jpg");
 		if(dir.exists()){
 			img.setImageURI(Uri.fromFile(dir));
 		}else{

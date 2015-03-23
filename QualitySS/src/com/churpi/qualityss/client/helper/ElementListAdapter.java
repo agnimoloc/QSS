@@ -60,7 +60,7 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 
-				"IMGEMP_" + String.valueOf(employee.getElementoId()) + ".jpg");
+				employee.getCode() + ".jpg");
 		if(dir.exists()){
 			img.setImageURI(Uri.fromFile(dir));
 		}else{

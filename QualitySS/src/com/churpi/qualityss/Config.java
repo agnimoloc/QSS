@@ -10,7 +10,7 @@ public class Config {
 			"http://giatest.cloudapp.net":"http://giatest.cloudapp.net";
 	private static final String SERVER_GET_DATA = "api/ServiceApi/GetServices";
 	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPassword";
-	private static final String SERVER_SEND_DATA = "api/ServiceApi/SendData";
+	private static final String SERVER_SEND_DATA = "api/EvaluacionApi/SendServices";
 	
 	public static final String SERVER_GET_FILE_FLD_TIMESTAMP = "timestamp";
 	
@@ -46,7 +46,7 @@ public class Config {
 		}else if(serverAction == ServerAction.SEND_DATA){
 			builder.appendEncodedPath(SERVER_SEND_DATA);
 		}else if(serverAction == ServerAction.DOWNLOAD_FILE ){
-			builder.appendEncodedPath(args[0]);
+			builder = Uri.parse(args[0]).buildUpon();
 			builder.appendPath(args[1]);
 		}
 		return builder.build().toString();
