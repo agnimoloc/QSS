@@ -55,8 +55,10 @@ public class StaffInventoryActivity extends Activity {
 		TextView text = (TextView)findViewById(android.R.id.text1);
 		mAction =getIntent().getAction(); 
 		if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
+			setTitle(R.string.title_activity_staff_inventory);
 			text.setText(String.format(getString(R.string.inst_equipment_exist_element, mName)));
 		}else{
+			setTitle(R.string.title_activity_service_inventory);
 			text.setText(String.format(getString(R.string.inst_equipment_exist_service, mName)));
 		}
 			

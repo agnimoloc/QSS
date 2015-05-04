@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -80,6 +81,8 @@ public class StaffReviewQuestionAdapter extends BaseExpandableListAdapter {
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
 		ViewGroup layout;
+		ExpandableListView mExpandableListView = (ExpandableListView) parent;
+		mExpandableListView.expandGroup(groupPosition);
 		if(convertView == null){
 			layout = (ViewGroup)mLInflater.inflate(R.layout.item_group_question, parent, false);
 		}else{

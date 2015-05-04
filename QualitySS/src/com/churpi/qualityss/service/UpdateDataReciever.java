@@ -116,7 +116,7 @@ public class UpdateDataReciever extends BroadcastReceiver {
 											JSONObject service = (JSONObject) services.get(i);
 											ContentValues values = new ContentValues();
 											values.put(DbService.CN_STATUS, DbService.ServiceStatus.SENT);
-											values.putNull(DbService.CN_DATETIME);
+											values.put(DbService.CN_DATETIME, DateHelper.getCurrentTime());
 											values.put(DbService.CN_LASTREVIEW, DateHelper.fromJSONDate(service.getString(JSON_SERVICE_DATE)));
 											
 											db.update(DbService.TABLE_NAME, values, 

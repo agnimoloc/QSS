@@ -23,19 +23,17 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClick_radio"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:tag="1"
             android:text="@string/yes"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <RadioButton
             android:id="@+id/checkBox2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:onClick="onClick_radio"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:tag="0"
             android:text="@string/no"
             android:textAppearance="?android:attr/textAppearanceMedium" />

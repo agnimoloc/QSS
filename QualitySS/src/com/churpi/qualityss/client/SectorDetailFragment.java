@@ -59,7 +59,7 @@ public class SectorDetailFragment extends Fragment {
 			@Override
 			public Object onDo(Context context, SQLiteDatabase db) {				
 				return db.query(DbService.TABLE_NAME, 
-						new String[]{DbService._ID, DbService.CN_STATUS, DbService.CN_CODE}, 
+						new String[]{DbService._ID, DbService.CN_STATUS, DbService.CN_CODE, DbService.CN_DATETIME }, 
 						DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
 						null, null, null);
 			}

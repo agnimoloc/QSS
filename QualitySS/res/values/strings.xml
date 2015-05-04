@@ -93,4 +93,6 @@
 	<string name="msg_error_send">Problemas al enviar los datos: </string>
 	<string name="msg_error_recieved">Problemas al recibir las actualizaciones: </string>
 	<string name="msg_error_json_to_send">Error al construir el JSON para mandar</string>
+	<string name="msg_warning_service_finalized">El servicio ha sido mandado, para empezar nuevamente tiene que esperar %1$d horas y %2$2d minutos</string>
+	<string name="msg_warning_employee_finalized">El elemento ya se encuentra finalizado</string>
 </resources>

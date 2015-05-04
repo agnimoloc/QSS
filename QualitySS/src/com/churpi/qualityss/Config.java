@@ -7,7 +7,7 @@ import com.churpi.qualityss.client.BuildConfig;
 public class Config {
 	
 	private static final String SERVER_URL = BuildConfig.DEBUG ?  
-			"http://giatest.cloudapp.net":"http://giatest.cloudapp.net";
+			"http://giatest2.cloudapp.net":"http://giatest2.cloudapp.net";
 	private static final String SERVER_GET_DATA = "api/ServiceApi/GetServices";
 	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPassword";
 	private static final String SERVER_SEND_DATA = "api/EvaluacionApi/SendServices";
@@ -16,6 +16,8 @@ public class Config {
 	
 	public static final int SERVER_GET_FILE_TIMEOUT = 1000 * 60;
 	public static final int REFRESH_TIME = 10000;
+	
+	public static final int HOURS_TO_RESET_SENT_SERVICE = 1;
 	
 	public class ServerAction{
 		public static final int GET_DATA = 0;

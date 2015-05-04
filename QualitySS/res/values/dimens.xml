@@ -7,5 +7,7 @@
     <dimen name="image_selector">100dp</dimen>
     <dimen name="staff_detail">200dp</dimen>
     <dimen name="image_border">2dp</dimen>
+    <dimen name="image_login_height">100dp</dimen>
+    <dimen name="margin_login_form">10dp</dimen>
 
 </resources>

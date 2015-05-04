@@ -8,8 +8,8 @@ import java.util.TimeZone;
 
 public class DateHelper {
 
-	private static String DATE_FORMAT = "yyyyMMddhhmmss";
-	private static String JSON_DATE_FORMAT = "yyyy-MM-dd'T'hh:mm:ss.0000000+00:00";
+	private static String DATE_FORMAT = "yyyyMMddHHmmss";
+	private static String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.0000000+00:00";
 	
 	public static String getCurrentTime(){
 		Calendar calendar = Calendar.getInstance();
@@ -17,7 +17,19 @@ public class DateHelper {
 		return format.format(calendar.getTime());
 	}
 	
+	public static Date getDateFromDb(String dbDate){
+		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+		try {
+			return format.parse(dbDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} 
+		return new Date();
+	}
+	
 	public static String getJSONDate(String date){
+		if(date == null)
+			return null;
 		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
 		try {
 			Date d = format.parse(date);

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <TextView
         android:id="@android:id/text1"
@@ -24,33 +24,31 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClick_radio"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:tag="B"
             android:text="@string/bad"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <RadioButton
             android:id="@+id/checkBox2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClick_radio"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:tag="G"
             android:text="@string/good"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" 
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
         
         <RadioButton
             android:id="@+id/checkBox3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClick_radio"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:tag="E"
             android:text="@string/excelent"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium" 
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"/>
     </RadioGroup>
 
 </LinearLayout>

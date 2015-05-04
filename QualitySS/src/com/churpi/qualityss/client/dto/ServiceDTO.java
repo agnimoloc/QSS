@@ -1,6 +1,7 @@
 package com.churpi.qualityss.client.dto;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbService.ServiceStatus;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -177,10 +178,6 @@ public class ServiceDTO {
 	}
 	public void setStatus(String status) {
 		Status = status;
-	}
-	public boolean canOpen() {
-		
-		return true;
 	}
 	public boolean canStart() {
 		if(Status == null)

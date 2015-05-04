@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -65,6 +66,13 @@ public class StaffReviewActivity extends Activity {
 		list.setAdapter(new StaffReviewQuestionAdapter(this, 
 				questions.toArray(new QuestionDTO[0]), 
 				R.id.checkBox1, R.id.checkBox2, R.id.checkBox3));
+		list.setOnGroupClickListener(new OnGroupClickListener() {
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+					int groupPosition, long id) {
+				return true;//Disabling collapse and expand
+			}
+		});
 	}
 	
 	public void onClick_radio(View v){

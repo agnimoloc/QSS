@@ -86,6 +86,13 @@ public class StaffReviewListActivity extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			c.moveToPosition(position);
+			
+			String status = c.getString(c.getColumnIndex(DbEmployee.CN_STATUS));
+			if(status != null && DbEmployee.EmployeeStatus.FINALIZED.compareTo(status)==0){
+				Toast.makeText(getApplicationContext(), getString(R.string.msg_warning_employee_finalized), Toast.LENGTH_LONG).show();
+				return;
+			}
+			
 			int tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployee._ID));;
 			
 			if(employeeId != tmpEmployeeId ){

@@ -14,6 +14,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.FixedInfo;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
@@ -68,9 +69,9 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 		}
 		
 		TextView text = (TextView)layout.findViewById(android.R.id.text1);
-		text.setText(employee.getCode());
-		text = (TextView)layout.findViewById(android.R.id.text2);
 		text.setText(employee.getNombre());
+		text = (TextView)layout.findViewById(android.R.id.text2);
+		text.setText(FixedInfo.codePrefix + employee.getCode());
 		text = (TextView)layout.findViewById(android.R.id.content);
 		text.setText(employee.getMatricula());	
 		return layout;
