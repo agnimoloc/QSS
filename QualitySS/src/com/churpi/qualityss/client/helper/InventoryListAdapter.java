@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SimpleCursorAdapter;
@@ -80,6 +81,12 @@ public class InventoryListAdapter extends SimpleCursorAdapter {
 				}
 			}
 		}	
+		
+		ImageButton btn = (ImageButton)layout.findViewById(R.id.btnPicture);
+		btn.setTag(id);
+		btn = (ImageButton)layout.findViewById(R.id.btnComment);
+		btn.setTag(id);
+		
 		layout.refreshDrawableState();
 		return layout;
 	}

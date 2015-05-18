@@ -1,8 +1,11 @@
 package com.churpi.qualityss.client;
 
+import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.helper.ServiceListAdapter;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.os.Bundle;
 import android.app.Fragment;
@@ -28,8 +31,6 @@ public class SectorDetailFragment extends Fragment {
 	 * The fragment argument representing the item ID that this fragment
 	 * represents.
 	 */
-	public static final String ARG_ITEM_ID = "sector_id";
-	
 	private final int REQUEST_SERVICEDETAIL = 0;
 
 	Cursor c = null;
@@ -47,9 +48,9 @@ public class SectorDetailFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		if (getArguments().containsKey(ARG_ITEM_ID)) {
-			sectorId = getArguments().getInt(ARG_ITEM_ID);
+		int sectorId = Ses.getInstance(getActivity()).getSectorId();
+		if (sectorId != 0) {
+			this.sectorId = sectorId;
 			c = initCursor();
 		}
 	}
@@ -57,11 +58,25 @@ public class SectorDetailFragment extends Fragment {
 	private Cursor initCursor(){
 		return (Cursor)DbTrans.read(getActivity(), new DbTrans.Db() {
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {				
-				return db.query(DbService.TABLE_NAME, 
-						new String[]{DbService._ID, DbService.CN_STATUS, DbService.CN_CODE, DbService.CN_DATETIME }, 
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				return db.rawQuery(
+						DbQuery.SERVICES_BY_SECTOR, 
+						new String[]{
+								String.valueOf(Ses.getInstance(context).getActivityType()),
+								String.valueOf(sectorId)
+						}
+				);
+				
+				/*return db.query(DbService.TABLE_NAME, 
+						new String[]{
+							DbService._ID, 
+							DbServiceInstance.CN_STATUS, 
+							DbService.CN_CODE, 
+							DbServiceInstance.CN_FINISH_DATETIME
+							}, 
 						DbService.CN_SECTOR + "=?", new String[]{String.valueOf(sectorId)},
 						null, null, null);
+						*/
 			}
 		});		
 	}
@@ -107,9 +122,12 @@ public class SectorDetailFragment extends Fragment {
 	}
 	
 	private void openServiceDetail(int serviceId){
-		Intent intent = new Intent(getActivity(), ServiceDetailActivity.class);
-		intent.putExtra(ServiceDetailActivity.SERVICE_ID, serviceId);
-		startActivityForResult(intent, REQUEST_SERVICEDETAIL);
+		
+		Ses.getInstance(getActivity()).setServiceId(serviceId);
+		
+		startActivityForResult(
+				WorkflowHelper.process(getActivity(), R.id.gridView1),
+				REQUEST_SERVICEDETAIL);
 	}
 	
 	@Override

@@ -8,9 +8,13 @@ import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.helper.Alerts;
+import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.ElementListAdapter;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
+import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
@@ -24,6 +28,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
@@ -34,28 +40,27 @@ public class StaffReviewListActivity extends Activity {
 
 	Cursor c = null;
 	ElementListAdapter adapter = null;
-	
-	int serviceId;
+
+	int serviceInstanceId;
 	int employeeId;
 	String employeeName;
-	
-	public static final String FLD_SERVICE_ID = "service_id"; 
-	
+
 	private final int REQUEST_BARCODE = 0;
 	private final int REQUEST_INVENTORY = 1;
-	
+	private final int REQUEST_COMMENTS = 2;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_staff_review_list);
-		
-		serviceId = getIntent().getIntExtra(FLD_SERVICE_ID, -1);
-		
+
+		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
+
 		initCursor();
 
 		String[] from = new String[]{DbSector.CN_NAME};
 		int[] to = new int[]{ android.R.id.text1};
-		
+
 		GridView grid = (GridView)findViewById(R.id.gridView1);
 		adapter = new ElementListAdapter(this, 
 				R.layout.item_staff_review, c, 
@@ -64,40 +69,61 @@ public class StaffReviewListActivity extends Activity {
 		grid.setAdapter(adapter);
 		grid.setOnItemClickListener(onSelected);
 	}
-	
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_comments) {
+			addComments();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	private void initCursor(){
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
-				return db.rawQuery(DbQuery.EMPLOYEES_BY_SERVICE,new String[]{String.valueOf(serviceId)});
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				return db.rawQuery(
+						DbQuery.EMPLOYEES_BY_SERVICE,
+						new String[]{String.valueOf(serviceInstanceId)});
 			}
 		});
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		if(c!= null)
 			c.close();
 		super.onDestroy();
 	}
-	
+
 	private AdapterView.OnItemClickListener onSelected = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			c.moveToPosition(position);
-			
+
 			String status = c.getString(c.getColumnIndex(DbEmployee.CN_STATUS));
 			if(status != null && DbEmployee.EmployeeStatus.FINALIZED.compareTo(status)==0){
 				Toast.makeText(getApplicationContext(), getString(R.string.msg_warning_employee_finalized), Toast.LENGTH_LONG).show();
 				return;
 			}
-			
+
 			int tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployee._ID));;
-			
+
 			if(employeeId != tmpEmployeeId ){
 				employeeId = tmpEmployeeId;
+				Ses.getInstance(getBaseContext()).setEmployeeId(tmpEmployeeId);
 				employeeName = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
+				Ses.getInstance(getParent()).setEmployeeName(employeeName);
+
 				Intent intent = new Intent("com.google.zxing.client.android.SCAN");
 				intent.setPackage("com.google.zxing.client.android");
 				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
@@ -111,109 +137,114 @@ public class StaffReviewListActivity extends Activity {
 			}
 		}
 	};
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
-		if(requestCode == REQUEST_BARCODE){
-			if(resultCode == RESULT_OK){
-				String contents = data.getStringExtra("SCAN_RESULT");
-				//String format = data.getStringExtra("SCAN_RESULT_FORMAT");
 
-				final ProgressDialog progressDialog = ProgressDialog.show(this, 
-						getString(R.string.msg_authenitcate), 
-						String.format(
-								getString(R.string.msg_verify_barcode),
-								employeeName));
+		if(requestCode == REQUEST_BARCODE && resultCode == RESULT_OK){
+			String contents = data.getStringExtra("SCAN_RESULT");
+			//String format = data.getStringExtra("SCAN_RESULT_FORMAT");
 
-				StringRequest request = new StringRequest(
-						Config.getUrl(Config.ServerAction.GET_BARCODE, contents), 
-						new Response.Listener<String>(){
-							@Override
-							public void onResponse(String arg0) {
-								int resultEmployeeId = Integer.parseInt(arg0);
-								progressDialog.dismiss();
-								if(resultEmployeeId == employeeId){
-									DbTrans.write(getBaseContext(), new DbTrans.Db() {
-										@Override
-										public Object onDo(Context context, SQLiteDatabase db) {
-											ContentValues values = new ContentValues();
-											values.put(DbEmployee.CN_BARCODECHECK, 1);
-											db.update(DbEmployee.TABLE_NAME, values, 
-													DbEmployee._ID + "=?", 
-													new String[]{String.valueOf(employeeId)});
-											return null;
-										}
-									});
-									openStaffInventoryActivity();
-								}else{
-									Toast.makeText(
-											getBaseContext(), 
-											String.format(
-													getString(R.string.msg_wrong_barcode),
-													employeeName), 
-											Toast.LENGTH_LONG).show();					
-								}
+			final ProgressDialog progressDialog = ProgressDialog.show(this, 
+					getString(R.string.msg_authenitcate), 
+					String.format(
+							getString(R.string.msg_verify_barcode),
+							employeeName));
+
+			StringRequest request = new StringRequest(
+					Config.getUrl(Config.ServerAction.GET_BARCODE, contents), 
+					new Response.Listener<String>(){
+						@Override
+						public void onResponse(String arg0) {
+							int resultEmployeeId = Integer.parseInt(arg0);
+							progressDialog.dismiss();
+							if(resultEmployeeId == employeeId){
+								DbTrans.write(getBaseContext(), new DbTrans.Db() {
+									@Override
+									public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+										ContentValues values = new ContentValues();
+										values.put(DbEmployee.CN_BARCODECHECK, 1);
+										db.update(DbEmployee.TABLE_NAME, values, 
+												DbEmployee._ID + "=?", 
+												new String[]{String.valueOf(employeeId)});
+										return null;
+									}
+								});
+								openStaffInventoryActivity();
+							}else{
+								Toast.makeText(
+										getBaseContext(), 
+										String.format(
+												getString(R.string.msg_wrong_barcode),
+												employeeName), 
+												Toast.LENGTH_LONG).show();					
 							}
-						}, 
-						new Response.ErrorListener() {
-							@Override
-							public void onErrorResponse(VolleyError arg0) {
-								progressDialog.dismiss();
-								Toast.makeText(getBaseContext(), getString(R.string.msg_error_connection), Toast.LENGTH_LONG).show();
-							}
-						});
-				VolleySingleton.getInstance(this).addToRequestQueue(request);
-			}
-		}else if (requestCode == REQUEST_INVENTORY){
+						}
+					}, 
+					new Response.ErrorListener() {
+						@Override
+						public void onErrorResponse(VolleyError arg0) {
+							progressDialog.dismiss();
+							Toast.makeText(getBaseContext(), getString(R.string.msg_error_connection), Toast.LENGTH_LONG).show();
+						}
+					});
+			VolleySingleton.getInstance(this).addToRequestQueue(request);
+		}else if (requestCode == REQUEST_BARCODE && requestCode == REQUEST_INVENTORY){
 			initCursor();
 			Cursor oldCursor = adapter.swapCursor(c);
 			oldCursor.close();
+		} else if(requestCode == REQUEST_COMMENTS && resultCode == RESULT_OK){
+			Bundle extras = data.getExtras();
+			updateEmployeeComment(extras.getString(CheckpointCommentActivity.FLD_COMMENT));
+			Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();
 		}
 
 	};
-	
+
 	private void openStaffInventoryActivity(){
-		Intent intent = new Intent(getBaseContext(), StaffInventoryActivity.class);
-		intent.putExtra(StaffInventoryActivity.SERVICE_ID, serviceId);
-		intent.putExtra(StaffInventoryActivity.ID, employeeId);			
-		intent.putExtra(StaffInventoryActivity.NAME, employeeName);
-		intent.setAction(StaffInventoryActivity.ACTION_EMPLOYEE);
-		startActivityForResult(intent, REQUEST_INVENTORY);
+		startActivityForResult(
+				WorkflowHelper.process(this, 
+						R.id.gridView1,
+						StaffInventoryActivity.ACTION_EMPLOYEE),REQUEST_INVENTORY);
 	}
-	
+
 	public void onClick_finish(View v){
-		
+
 		boolean canFinish = (Boolean)DbTrans.read(this, new DbTrans.Db() {
-			
+
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				Cursor cur = db.rawQuery(
 						DbQuery.EMPLOYEES_SERVICE_NOT_END, 
-						new String[]{String.valueOf(serviceId)});
-				
+						new String[]{String.valueOf(serviceInstanceId)});
+
 				String msg = null;
 				if(cur.getCount() > 0){
 					msg = getString(R.string.msg_there_are_employees_not_finalized);
 				}
 				cur.close();
-				
+
 				cur = db.rawQuery(DbQuery.SERVICE_INVENTORY_NULL_RESULT,
-						new String[]{ String.valueOf(serviceId)});
-				
+						new String[]{ 
+							String.valueOf(serviceInstanceId),
+							String.valueOf(Ses.getInstance(context).getServiceId()),
+							String.valueOf(Ses.getInstance(context).getActivityType()),
+						}
+				);
+
 				if(cur.getCount() > 0){
 					msg = (msg != null ? msg + "\n":"")+  getString(R.string.msg_fault_service_inventory);
 				}
-				
+
 				if(msg != null){
 					Alerts.showError(context, msg, R.string.msg_cannot_finish_service);
 					return false;
 				}
-				
+
 				return true;
 			}
 		});
-		
+
 		if(canFinish){
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 			dialogBuilder.setTitle(R.string.ttl_finish_service);
@@ -231,21 +262,70 @@ public class StaffReviewListActivity extends Activity {
 				public void onClick(DialogInterface dialog, int which) {
 					DbTrans.write(getBaseContext(), new DbTrans.Db() {
 						@Override
-						public Object onDo(Context context, SQLiteDatabase db) {
+						public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 							ContentValues values = new ContentValues();
-							values.put(DbService.CN_STATUS, DbService.ServiceStatus.FINALIZED);
-							db.update(DbService.TABLE_NAME, values, DbService._ID + "=?", new String[]{String.valueOf(serviceId)});							
+							values.put(DbServiceInstance.CN_STATUS, DbServiceInstance.ServiceStatus.FINALIZED);
+							values.put(DbServiceInstance.CN_FINISH_DATETIME, DateHelper.getCurrentTime());
+							db.update(DbServiceInstance.TABLE_NAME, values, DbServiceInstance._ID + "=?", new String[]{String.valueOf(serviceInstanceId)});							
 							return null;
 						}
 					});
-					Intent intent = new Intent(getApplicationContext(), SectorListActivity.class);
+					UpdateDataReciever.getInstance().force();
+					
+					
+					startActivity(
+							WorkflowHelper.process(
+									StaffReviewListActivity.this,
+									android.R.id.button1
+							)
+					);
+					
+					/*Intent in tent = new Intent(getApplicationContext(), SectorListActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					startActivity(intent);*/
 					dialog.dismiss();
 
 				}
 			});
 			dialogBuilder.create().show();		
 		}
+	}
+
+	private void addComments(){
+		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				Cursor cur = db.query(
+						DbServiceInstance.TABLE_NAME, 
+						new String[]{DbServiceInstance._ID ,DbServiceInstance.CN_EMPLOYEE_COMMENT}, 
+						DbServiceInstance._ID + "=?", 
+						new String[]{
+								String.valueOf(serviceInstanceId)
+						}, null, null, null);
+				if(cur.moveToFirst()){
+					return cur.getString(cur.getColumnIndex(DbServiceInstance.CN_EMPLOYEE_COMMENT));
+				}
+				cur.close();
+				return null;
+			}
+		});
+		WorkflowHelper.getComments(this, 
+				comment, getString(R.string.inst_comment_element_result), 
+				REQUEST_COMMENTS);
+	}
+	private void updateEmployeeComment(String comment){
+		DbTrans.write(this, comment, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				String comment = (String)parameter;
+				ContentValues values = new ContentValues();
+				values.put(DbServiceInstance.CN_EMPLOYEE_COMMENT, comment);
+				db.update(DbServiceInstance.TABLE_NAME, 
+						values, 
+						DbServiceInstance._ID + "=?", 
+						new String[]{String.valueOf(serviceInstanceId)});					
+				return null;
+			}
+		});
 	}
 }

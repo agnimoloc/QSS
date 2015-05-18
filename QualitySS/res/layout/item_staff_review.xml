@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:contentDescription="@string/img_content_description"
     android:orientation="horizontal" >
 
     <FrameLayout
@@ -13,7 +14,8 @@
             android:layout_width="@dimen/image_selector"
             android:layout_height="@dimen/image_selector"
             android:layout_margin="@dimen/image_border"
-            android:src="@drawable/ic_launcher" />
+            android:src="@drawable/ic_launcher"
+            android:contentDescription="@string/img_content_description" />
 
     </FrameLayout>
 
@@ -30,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:text="Large Text"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
@@ -39,7 +40,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:text="Medium Text"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
@@ -47,8 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
-            android:text="TextView" />
+            android:gravity="center_horizontal"/>
 
     </LinearLayout>
 

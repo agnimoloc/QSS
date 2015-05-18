@@ -96,6 +96,10 @@
             android:name=".SurveyActivity"
             android:label="@string/title_activity_survey" >
         </activity>
+        <activity
+            android:name=".MainMenuActivity"
+            android:label="@string/title_activity_main_menu" >
+        </activity>
     </application>
 
 </manifest>

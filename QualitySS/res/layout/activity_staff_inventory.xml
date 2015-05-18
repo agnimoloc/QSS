@@ -30,12 +30,19 @@
 
     </ListView>
 
-    <Button
-        android:id="@android:id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:onClick="onClick_next"
-        android:text="@string/next" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@android:id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:onClick="onClick_next"
+            android:text="@string/next" />
+
+    </RelativeLayout>
 
 </LinearLayout>

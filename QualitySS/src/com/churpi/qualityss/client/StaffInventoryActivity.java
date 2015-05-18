@@ -1,14 +1,18 @@
 package com.churpi.qualityss.client;
 
+import java.io.File;
+
+import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
-import com.churpi.qualityss.client.dto.EmployeeDTO;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.helper.InventoryListAdapter;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -16,7 +20,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,19 +31,20 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class StaffInventoryActivity extends Activity {
 
-	public static final String SERVICE_ID = "serviceId";
-	public static final String ID = "currentId";
-	public static final String NAME = "currentName";
 	public static final String ACTION_EMPLOYEE = "employee";
 	public static final String ACTION_SERVICE = "service";
 	
-	private int mId;
-	private int mServiceId;
-	private String mName;
 	private String mAction;
+	private int selectedId;
+	
+	private static final int REQUEST_PHOTO = 0;
+	private static final int REQUEST_IMAGE_SHOW = 1;
+	private static final int REQUEST_SINGLE_COMMENT = 2;
+	private static final int REQUEST_SINGLE_COMMENTS = 3;
 	
 	
 	private Cursor c;
@@ -48,18 +55,14 @@ public class StaffInventoryActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_staff_inventory);
 		
-		Bundle extras = getIntent().getExtras();
-		mId = extras.getInt(ID);
-		mServiceId = extras.getInt(SERVICE_ID);
-		mName = extras.getString(NAME);
 		TextView text = (TextView)findViewById(android.R.id.text1);
 		mAction =getIntent().getAction(); 
 		if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
 			setTitle(R.string.title_activity_staff_inventory);
-			text.setText(String.format(getString(R.string.inst_equipment_exist_element, mName)));
+			text.setText(String.format(getString(R.string.inst_equipment_exist_element, Ses.getInstance(this).getEmployeeName())));
 		}else{
 			setTitle(R.string.title_activity_service_inventory);
-			text.setText(String.format(getString(R.string.inst_equipment_exist_service, mName)));
+			text.setText(String.format(getString(R.string.inst_equipment_exist_service, Ses.getInstance(this).getServiceDescription())));
 		}
 			
 		initCursor();
@@ -78,19 +81,32 @@ public class StaffInventoryActivity extends Activity {
 	
 	private void initCursor(){
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
-
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
 					return db.rawQuery(DbQuery.STAFF_INVENTORY, 
-							new String[]{String.valueOf(mId)});
+							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
 				}else{
 					return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
-							new String[]{String.valueOf(mId)});
+							new String[]{
+								String.valueOf(Ses.getInstance(context).getServiceInstanceId()),
+								String.valueOf(Ses.getInstance(context).getServiceId()),
+								String.valueOf(Ses.getInstance(context).getActivityType())
+							}
+					);
 				}
 			}
-			
 		});
+		if(!c.moveToFirst()){
+			startActivity(
+					WorkflowHelper.process(
+							this,
+							android.R.id.button1, 
+							mAction
+					)
+			);	
+			finish();
+		}
 	}
 	
 	@Override
@@ -101,47 +117,254 @@ public class StaffInventoryActivity extends Activity {
 		super.onDestroy();
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_comments) {
+			addComments();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
 	public void onClick_radio(View v){
 		RadioButton radio = (RadioButton)v;
 		int value = Integer.parseInt(radio.getTag().toString());
-		int equipmentId = Integer.parseInt(((RadioGroup)radio.getParent()).getTag().toString());		
+		selectedId = Integer.parseInt(((RadioGroup)radio.getParent()).getTag().toString());
+		InventoryUpdateItem item = new InventoryUpdateItem();
 		if(radio.isChecked()){
-			updateInventory(equipmentId, value);			
+			item.setValue(value);
 		}else{
-			updateInventory(equipmentId, value==1?0:1);
+			item.setValue(value==1?0:1);
 		}
+		updateInventory(item);
+	}
+	
+	private File getDestImage(int id){
+		String fileName = null;
+		
+		if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
+			fileName = String.format(Constants.PHOTO_INVENTORY_EMPLOYEE ,
+					Ses.getInstance(this).getServiceInstanceKey(),
+					Ses.getInstance(this).getEmployeeId(),
+					id);
+		}else if(mAction.compareTo(ACTION_SERVICE)== 0){
+			fileName = String.format(Constants.PHOTO_INVENTORY_SERVICE ,
+					Ses.getInstance(this).getServiceInstanceKey(),
+					id);			
+		}
+		
+		return new File (getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+	}
+	
+	public void onClick_TakePhoto(View v){
+		int id = (Integer)v.getTag();
+		File dest = getDestImage(id);
+		if(dest.exists()){
+			WorkflowHelper.showPhoto(this, dest, REQUEST_IMAGE_SHOW);
+		}else{
+			WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);
+		}
+	}
+	
+	public void onClick_Comment(View v){
+		selectedId = (Integer)v.getTag();
+		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+					Cursor cur = db.query(
+							DbEmployeeEquipmentInventory.TABLE_NAME, 
+							new String[]{DbEmployeeEquipmentInventory.CN_COMMENT}, 
+							DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=? AND " +
+							DbEmployeeEquipmentInventory.CN_EQUIPMENT + "=?", 
+							new String[]{
+									String.valueOf(Ses.getInstance(context).getEmployeeId()), 
+									String.valueOf(selectedId)
+							}, null, null, null);
+					if(cur.moveToFirst()){
+						return cur.getString(cur.getColumnIndex(DbEmployeeEquipmentInventory.CN_COMMENT));
+					}
+					cur.close();	
+				}else{
+					Cursor cur = db.query(
+							DbServiceEquipmentInventory.TABLE_NAME, 
+							new String[]{DbServiceEquipmentInventory.CN_COMMENT}, 
+							DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + "=? AND " +
+									DbServiceEquipmentInventory.CN_EQUIPMENT + "=?", 
+							new String[]{
+									String.valueOf(Ses.getInstance(context).getServiceInstanceId()), 
+									String.valueOf(selectedId)
+							}, null, null, null);
+					if(cur.moveToFirst()){
+						return cur.getString(cur.getColumnIndex(DbEmployeeEquipmentInventory.CN_COMMENT));
+					}
+				}
+				return null;
+			}
+		});
+		WorkflowHelper.getComments(this, 
+				comment, getString(R.string.inst_comment_inventory),
+				REQUEST_SINGLE_COMMENT);
+	}
+	public void addComments(){
+		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+					Cursor cur = db.query(
+							DbEmployee.TABLE_NAME, 
+							new String[]{DbEmployee.CN_INVENTORY_COMMENT}, 
+							DbEmployee._ID + "=?", 
+							new String[]{
+									String.valueOf(Ses.getInstance(context).getEmployeeId())
+							}, null, null, null);
+					if(cur.moveToFirst()){
+						return cur.getString(cur.getColumnIndex(DbEmployee.CN_INVENTORY_COMMENT));
+					}
+					cur.close();	
+				}else{
+					Cursor cur = db.query(
+							DbServiceInstance.TABLE_NAME, 
+							new String[]{DbServiceInstance._ID ,DbServiceInstance.CN_INVENTORY_COMMENT}, 
+							DbServiceInstance._ID + "=?", 
+							new String[]{
+									String.valueOf(Ses.getInstance(context).getServiceInstanceId())
+							}, null, null, null);
+					if(cur.moveToFirst()){
+						return cur.getString(cur.getColumnIndex(DbServiceInstance.CN_INVENTORY_COMMENT));
+					}
+					cur.close();
+				}
+				return null;
+			}
+		});
+		WorkflowHelper.getComments(this, 
+				comment, getString(R.string.inst_comment_inventory_result), 
+				REQUEST_SINGLE_COMMENTS);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == REQUEST_PHOTO && resultCode == RESULT_OK){
+			Toast.makeText(this, getString(R.string.msg_photo_take_successfully), Toast.LENGTH_SHORT).show();
+		} else if(requestCode == REQUEST_IMAGE_SHOW && resultCode == RESULT_OK){
+			File dest = new File(((Uri)data.getExtras().get(ShowPhotoActivity.FILE_URI)).getPath());
+			WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);
+	    } else if(requestCode == REQUEST_SINGLE_COMMENT && resultCode == RESULT_OK){
+	    	Bundle extras = data.getExtras();
+	    	InventoryUpdateItem item = new InventoryUpdateItem();
+	    	item.setComment(extras.getString(CheckpointCommentActivity.FLD_COMMENT));
+	    	updateInventory( item);
+	    	Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();
+	    } else if(requestCode == REQUEST_SINGLE_COMMENTS && resultCode == RESULT_OK){
+	    	Bundle extras = data.getExtras();
+	    	updateInventoryComment(extras.getString(CheckpointCommentActivity.FLD_COMMENT));
+	    	Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();
+	    }		
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+	private class InventoryUpdateItem{
+		boolean iscomment = false;
+		boolean isvalue = false;
+		String comment;
+		int value;
+		public boolean isComment() {
+			return iscomment;
+		}
+		public boolean isValue() {
+			return isvalue;
+		}
+		public String getComment() {
+			return comment;
+		}
+		public void setComment(String commentText) {
+			iscomment = true;
+			this.comment = commentText;
+		}
+		public int getValue() {
+			return value;
+		}
+		public void setValue(int value) {
+			isvalue = true;
+			this.value = value;
+		}
+		
 		
 	}
 	
-	private void updateInventory(final int equipmentId, final int checked){
-		DbTrans.write(this, new DbTrans.Db() {			
+	private void updateInventoryComment(String comment){
+		DbTrans.write(this, comment, new DbTrans.Db() {
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
 				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
-					DbEmployee.setStatus(db, mId, DbEmployee.EmployeeStatus.CURRENT);
+					values.put(DbEmployee.CN_INVENTORY_COMMENT, comment);
+					db.update(DbEmployee.TABLE_NAME, 
+							values, 
+							DbEmployee._ID + "=?", 
+							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+				}else{
+					values.put(DbServiceInstance.CN_INVENTORY_COMMENT, comment);
+					db.update(DbServiceInstance.TABLE_NAME, 
+							values, 
+							DbServiceInstance._ID + "=?", 
+							new String[]{String.valueOf(Ses.getInstance(context).getServiceInstanceId())});					
+				}
+				return null;
+			}
+		});
+	}
+	
+	private void updateInventory(InventoryUpdateItem item){
+		DbTrans.write(this, item, new DbTrans.Db() {			
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				InventoryUpdateItem item = (InventoryUpdateItem)parameter;
+				
+				ContentValues values = new ContentValues();
+				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+					int employeeId = Ses.getInstance(context).getEmployeeId();
+					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+					if(item.isValue())
+						values.put(DbEmployeeEquipmentInventory.CN_CHECKED, item.getValue());
+					else if (item.isComment())
+						values.put(DbEmployeeEquipmentInventory.CN_COMMENT, item.getComment());
 					
-					values.put(DbEmployeeEquipmentInventory.CN_CHECKED, checked);
 					int count = db.update(DbEmployeeEquipmentInventory.TABLE_NAME, 
 							values, 
 							DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=? AND " +
 							DbEmployeeEquipmentInventory.CN_EQUIPMENT + "=?", 
-							new String[]{String.valueOf(mId), String.valueOf(equipmentId)});
+							new String[]{String.valueOf(employeeId), String.valueOf(selectedId)});
 					if(count == 0){
-						values.put(DbEmployeeEquipmentInventory.CN_EMPLOYEE, mId);
-						values.put(DbEmployeeEquipmentInventory.CN_EQUIPMENT, equipmentId);
+						values.put(DbEmployeeEquipmentInventory.CN_EMPLOYEE, employeeId);
+						values.put(DbEmployeeEquipmentInventory.CN_EQUIPMENT, selectedId);
 						db.insert(DbEmployeeEquipmentInventory.TABLE_NAME, null, values);
 					}
 				}else{
-					values.put(DbServiceEquipmentInventory.CN_CHECKED, checked);
+					if(item.isValue())
+						values.put(DbServiceEquipmentInventory.CN_CHECKED, item.getValue());
+					else if(item.isComment())
+						values.put(DbServiceEquipmentInventory.CN_COMMENT, item.getComment());
+					
+					int serviceInstanceId = Ses.getInstance(context).getServiceInstanceId();
 					int count = db.update(DbServiceEquipmentInventory.TABLE_NAME, 
 							values, 
-							DbServiceEquipmentInventory.CN_SERVICE + "=? AND " +
+							DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + "=? AND " +
 							DbServiceEquipmentInventory.CN_EQUIPMENT + "=?", 
-							new String[]{String.valueOf(mId), String.valueOf(equipmentId)});
+							new String[]{String.valueOf(serviceInstanceId), String.valueOf(selectedId)});
 					if(count == 0){
-						values.put(DbServiceEquipmentInventory.CN_SERVICE, mId);
-						values.put(DbServiceEquipmentInventory.CN_EQUIPMENT, equipmentId);
+						values.put(DbServiceEquipmentInventory.CN_SERVICE_INSTANCE, serviceInstanceId);
+						values.put(DbServiceEquipmentInventory.CN_EQUIPMENT, selectedId);
 						db.insert(DbServiceEquipmentInventory.TABLE_NAME, null, values);
 					}
 				}
@@ -157,16 +380,12 @@ public class StaffInventoryActivity extends Activity {
 	}
 	
 	public void onClick_next(View v){
-		if(mAction.compareTo(ACTION_EMPLOYEE)==0){
-			Intent intent = new Intent(this, StaffReviewActivity.class);
-			intent.putExtra(StaffReviewActivity.SERVICE_ID, mServiceId);
-			intent.putExtra(StaffReviewActivity.EMPLOYEE_ID, mId);
-			intent.putExtra(StaffReviewActivity.EMPLOYEE_NAME, mName);
-			startActivity(intent);		
-		}else{
-			Intent intent = new Intent(this, StaffReviewListActivity.class);
-			intent.putExtra(StaffReviewListActivity.FLD_SERVICE_ID, mId);
-			startActivity(intent);
-		}
+		startActivity(
+				WorkflowHelper.process(
+						this,
+						android.R.id.button1, 
+						mAction
+				)
+		);		
 	}
 }

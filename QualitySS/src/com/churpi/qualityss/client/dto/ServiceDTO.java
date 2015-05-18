@@ -1,7 +1,6 @@
 package com.churpi.qualityss.client.dto;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService.ServiceStatus;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -13,18 +12,12 @@ public class ServiceDTO {
 	String Descripcion;
 	AddressDTO Domicilio;
 	int ClienteId;
-	SurveyDTO Examen;
-	ReviewDTO[] PaseRevista;
 	int SectorId;
+	ServiceConfigurationDTO[] Configuraciones;
 	ServiceEmployeeDTO[] ServicioElementos;
-	int ElementoRevisionId;
-	String FechaRevision;
-	String UltimaRevision;
-	String Status;
-	EquipmentDTO[] ServicioEquipo;
 	
-	
-	
+	//SurveyDTO Examen;
+		
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();		
 		values.put(DbService.CN_CODE, Code);
@@ -62,22 +55,6 @@ public class ServiceDTO {
 		if(index != -1){
 			SectorId = c.getInt(index);
 		}		
-		index = c.getColumnIndex(DbService.CN_EMPLOYEEREVIEW);
-		if(index != -1){
-			ElementoRevisionId = c.getInt(index);
-		}
-		index = c.getColumnIndex(DbService.CN_DATETIME);
-		if(index != -1){
-			FechaRevision = c.getString(index);
-		}
-		index = c.getColumnIndex(DbService.CN_LASTREVIEW);
-		if(index != -1){
-			UltimaRevision = c.getString(index);
-		}	
-		index = c.getColumnIndex(DbService.CN_STATUS);
-		if(index != -1){
-			Status = c.getString(index);
-		}	
 	}
 	
 	public int getServicioId() {
@@ -105,12 +82,12 @@ public class ServiceDTO {
 	public void setDomicilio(AddressDTO domicilio) {
 		Domicilio = domicilio;
 	}
-	public SurveyDTO getExamen() {
+	/*public SurveyDTO getExamen() {
 		return Examen;
 	}
 	public void setExamen(SurveyDTO examen) {
 		Examen = examen;
-	}
+	}*/
 	public ServiceEmployeeDTO[] getServicioElementos() {
 		return ServicioElementos;
 	}
@@ -134,55 +111,11 @@ public class ServiceDTO {
 		SectorId = sectorId;
 	}
 	
-
-	public ReviewDTO[] getPaseRevista() {
-		return PaseRevista;
-	}
-
-	public void setPaseRevista(ReviewDTO[] paseRevista) {
-		PaseRevista = paseRevista;
-	}
-
-	public int getElementoRevisionId() {
-		return ElementoRevisionId;
-	}
-
-	public void setElementoRevisionId(int elementoRevisionId) {
-		ElementoRevisionId = elementoRevisionId;
-	}
-
-	public String getFechaRevision() {
-		return FechaRevision;
-	}
-
-	public void setFechaRevision(String fechaRevision) {
-		FechaRevision = fechaRevision;
-	}
-
-	public String getUltimaRevision() {
-		return UltimaRevision;
-	}
-
-	public void setUltimaRevision(String ultimaRevision) {
-		UltimaRevision = ultimaRevision;
+	public ServiceConfigurationDTO[] getConfiguraciones() {
+		return Configuraciones;
 	}
 	
-	public EquipmentDTO[] getServicioEquipo() {
-		return ServicioEquipo;
-	}
-	public void setServicioEquipo(EquipmentDTO[] servicioEquipo) {
-		ServicioEquipo = servicioEquipo;
-	}
-	public String getStatus() {
-		return Status;
-	}
-	public void setStatus(String status) {
-		Status = status;
-	}
-	public boolean canStart() {
-		if(Status == null)
-			return true;
-		return false;
-	}
-	
+	public void setConfiguraciones(ServiceConfigurationDTO[] configuraciones) {
+		Configuraciones = configuraciones;
+	}	
 }

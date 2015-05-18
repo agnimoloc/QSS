@@ -1,7 +1,6 @@
 package com.churpi.qualityss.client;
 
 import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.helper.SavedActivityManager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,23 +39,13 @@ public class SectorDetailActivity extends Activity {
 		if (savedInstanceState == null) {
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
-			Bundle arguments = new Bundle();
+			/*Bundle arguments = new Bundle();
 			arguments.putInt(SectorDetailFragment.ARG_ITEM_ID, getIntent()
-					.getIntExtra(SectorDetailFragment.ARG_ITEM_ID, -1));
+					.getIntExtra(SectorDetailFragment.ARG_ITEM_ID, -1));*/
 			SectorDetailFragment fragment = new SectorDetailFragment();
-			fragment.setArguments(arguments);
+			//fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
 					.add(R.id.sector_detail_container, fragment).commit();
-		}
-		
-		if(SavedActivityManager.navigate(this)){
-			SharedPreferences pref = Constants.getPref(this);
-			int sectorId = pref.getInt(Constants.PREF_SECTOR_ID, 0);
-			int serviceId = pref.getInt(Constants.PREF_SERVICE_ID, 0);
-			//openSectorDetail(sectorId);
-			Toast.makeText(this, "abrir actividad", Toast.LENGTH_LONG).show();
-		}else{
-			SavedActivityManager.saveActivity(this);
 		}
 	}
 

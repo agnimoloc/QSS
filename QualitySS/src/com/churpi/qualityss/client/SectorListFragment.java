@@ -81,7 +81,7 @@ public class SectorListFragment extends ListFragment {
 		
 		c = (Cursor)DbTrans.read(getActivity(), new DbTrans.Db(){
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				return db.query(
 						DbSector.TABLE_NAME, 
 						new String[]{DbSector._ID, DbSector.CN_NAME}, 

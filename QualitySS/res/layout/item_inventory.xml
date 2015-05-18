@@ -22,11 +22,11 @@
             android:id="@+id/checkBox1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:onClick="onClick_radio"
             android:tag="1"
             android:text="@string/yes"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginRight="@dimen/activity_horizontal_margin" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <RadioButton
             android:id="@+id/checkBox2"
@@ -37,7 +37,22 @@
             android:tag="0"
             android:text="@string/no"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
     </RadioGroup>
+
+    <ImageButton
+        android:id="@+id/btnComment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/img_content_description"
+        android:onClick="onClick_Comment"
+        android:src="@android:drawable/ic_menu_edit" />
+
+    <ImageButton
+        android:id="@+id/btnPicture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/img_content_description"
+        android:onClick="onClick_TakePhoto"
+        android:src="@android:drawable/ic_menu_camera" />
 
 </LinearLayout>

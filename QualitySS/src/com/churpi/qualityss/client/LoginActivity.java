@@ -6,6 +6,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.service.DownloadFileReciever;
 import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
@@ -34,7 +35,7 @@ public class LoginActivity extends Activity {
 	
 	
 	
-	UpdateDataReciever updateRecievier;
+	//UpdateDataReciever updateRecievier;
 	DownloadFileReciever downloadRecievier;
 	
 	@Override
@@ -42,17 +43,17 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 		
-		updateRecievier = new UpdateDataReciever(this);
+		UpdateDataReciever.createInstance(this);
 		downloadRecievier = new DownloadFileReciever(this);
-        registerReceiver(updateRecievier, new IntentFilter(Constants.UPDATE_DATA_ACTION) );
+        registerReceiver(UpdateDataReciever.getInstance(), new IntentFilter(Constants.UPDATE_DATA_ACTION) );
         registerReceiver(downloadRecievier, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE) );
 	}
 	
 	@Override
 	protected void onDestroy() {
-		unregisterReceiver(updateRecievier);
+		unregisterReceiver(UpdateDataReciever.getInstance());
 		unregisterReceiver(downloadRecievier);
-		updateRecievier.dispose();
+		UpdateDataReciever.getInstance().dispose();
 		downloadRecievier.dispose();
 		
 		
@@ -88,12 +89,19 @@ public class LoginActivity extends Activity {
 					public void onResponse(String employeeIdStr) {
 						int employeeId = Integer.parseInt(employeeIdStr);
 						if(employeeId != 0){
-							SharedPreferences pref = Constants.getPref(getBaseContext());
+							
+							Ses.getInstance(getBaseContext())
+							.edit()
+							.setAccount(account)
+							.setPassHashcode(password.hashCode())
+							.setEmployee(employeeId)
+							.commit();
+							/*SharedPreferences pref = Constants.getPref(getBaseContext());
 							Editor editor = pref.edit();
 							editor.putString(Constants.PREF_ACCOUNT, account);
 							editor.putInt(Constants.PREF_PASSHASH, password.hashCode());
 							editor.putInt(Constants.PREF_EMPLOYEE, employeeId);
-							editor.commit();							
+							editor.commit();*/							
 							startMainActivity();
 						}else{
 							Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
@@ -130,9 +138,11 @@ public class LoginActivity extends Activity {
 	}
 	
 	private int validateLocal(String account, String password){
-		SharedPreferences pref = Constants.getPref(this);
+		/*SharedPreferences pref = Constants.getPref(this);
 		String savedAccount =  pref.getString(Constants.PREF_ACCOUNT, null);
-		int savedPassHash =  pref.getInt(Constants.PREF_PASSHASH, 0);
+		int savedPassHash =  pref.getInt(Constants.PREF_PASSHASH, 0);*/
+		String savedAccount =  Ses.getInstance(this).getAccount();
+		int savedPassHash =  Ses.getInstance(this).getPassHashcode();
 		if(savedAccount != null && account.compareTo(savedAccount)==0){
 			if(password.hashCode() == savedPassHash){
 				return VALID_USER_PASSWORD;
@@ -146,10 +156,10 @@ public class LoginActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode == REQUEST_MAIN_ACTION && resultCode == RESULT_OK){
 			downloadRecievier.downloadFiles();
-			Intent sectorActivity = new Intent(this, SectorListActivity.class);
-			startActivity(sectorActivity);
+			Intent mainMenuActivity = new Intent(this, MainMenuActivity.class);
+			startActivity(mainMenuActivity);
 			
-			updateRecievier.start();
+			UpdateDataReciever.getInstance().start();
 		}
     	
 		super.onActivityResult(requestCode, resultCode, data);

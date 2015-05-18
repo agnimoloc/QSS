@@ -1,10 +1,9 @@
 package com.churpi.qualityss.client;
 
-import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.helper.SavedActivityManager;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Activity;
 
@@ -49,20 +48,9 @@ public class SectorListActivity extends Activity implements
 			((SectorListFragment) getFragmentManager().findFragmentById(
 					R.id.sector_list)).setActivateOnItemClick(true);
 			setTitle(R.string.title_activity_sector_service);
-			
-			if(SavedActivityManager.navigate(this)){
-				SharedPreferences pref = Constants.getPref(this);
-				int sectorId = pref.getInt(Constants.PREF_SECTOR_ID, 0);
-				int serviceId = pref.getInt(Constants.PREF_SERVICE_ID, 0);
-				//openSectorDetail(sectorId);
-	        }
-			
+						
 		}else{
-			if(SavedActivityManager.navigate(this)){
-				int sectorId = Constants.getPref(this)
-						.getInt(Constants.PREF_SECTOR_ID, 0);
-				openSectorDetail(sectorId);
-	        }
+			
 		}
 
 	}
@@ -73,17 +61,19 @@ public class SectorListActivity extends Activity implements
 	 */
 	@Override
 	public void onItemSelected(int id) {
-		Constants.getPref(this).edit()
+		
+		Ses.getInstance(this).setSectorId(id);
+		/*Constants.getPref(this).edit()
 			.putInt(Constants.PREF_SECTOR_ID, id)
-			.commit();
+			.commit();*/
 		if (mTwoPane) {
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
-			Bundle arguments = new Bundle();
-			arguments.putInt(SectorDetailFragment.ARG_ITEM_ID, id);
+			/*Bundle arguments = new Bundle();
+			arguments.putInt(SectorDetailFragment.ARG_ITEM_ID, id);*/
 			SectorDetailFragment fragment = new SectorDetailFragment();
-			fragment.setArguments(arguments);
+			//fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
 					.replace(R.id.sector_detail_container, fragment).commit();
 
@@ -93,9 +83,9 @@ public class SectorListActivity extends Activity implements
 	}
 	
 	private void openSectorDetail(int sectorId){
-		Intent detailIntent = new Intent(this, SectorDetailActivity.class);
-		detailIntent.putExtra(SectorDetailFragment.ARG_ITEM_ID, sectorId);
-		startActivity(detailIntent);
+		Ses.getInstance(this).setSectorId(sectorId);
+		//startActivity(WorkflowHelper.process(this, SectorListActivity.class, R.id.sector_list));
+		startActivity(WorkflowHelper.process(this, R.id.sector_list));
 	}
 	
 }

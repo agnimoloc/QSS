@@ -8,6 +8,7 @@ import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 
 import android.content.Context;
@@ -48,15 +49,16 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 		String serviceCode = c.getString(c.getColumnIndex(DbService.CN_CODE));
 		layout.setBackground(null);
 		
-		if(!c.isNull(c.getColumnIndex(DbService.CN_STATUS))){
-			String status = c.getString(c.getColumnIndex(DbService.CN_STATUS));
-			if(DbService.ServiceStatus.CURRENT.compareTo(status)==0){
+		
+		if(!c.isNull(c.getColumnIndex(DbServiceInstance.CN_STATUS))){
+			String status = c.getString(c.getColumnIndex(DbServiceInstance.CN_STATUS));
+			if(DbServiceInstance.ServiceStatus.CURRENT.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.started));
-			} else if(DbService.ServiceStatus.FINALIZED.compareTo(status)==0){
+			} else if(DbServiceInstance.ServiceStatus.FINALIZED.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
-			} else if(DbService.ServiceStatus.SENT.compareTo(status)==0){
+			} else if(DbServiceInstance.ServiceStatus.SENT.compareTo(status)==0){
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(DateHelper.getDateFromDb(c.getString(c.getColumnIndex(DbService.CN_DATETIME))));
+				cal.setTime(DateHelper.getDateFromDb(c.getString(c.getColumnIndex(DbServiceInstance.CN_FINISH_DATETIME))));
 				cal.add(Calendar.HOUR_OF_DAY, Config.HOURS_TO_RESET_SENT_SERVICE);				
 				long diff = cal.getTime().getTime() - Calendar.getInstance().getTime().getTime();
 				if(diff >0 ){

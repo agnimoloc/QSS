@@ -5,6 +5,8 @@ import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -13,51 +15,102 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.ActionMode;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 public class SurveyActivity extends Activity {
 
-	protected static final String EMPLOYEE_ID = "employeeId";
-	public static final String SERVICE_ID = "serviceId";
+	private static final int REQUEST_SURVEY_RESPONSE = 0;
+	private static final int REQUEST_SURVEY_COMMENT = 1;
+	private static final int REQUEST_SURVEY_COMMENTS = 2;
+
 
 	int employeeId;
-	int serviceId;
+	int serviceInstanceId;
 	int questionId;
-	
+	String questionComment;
+
 	Cursor c;
 	SimpleCursorAdapter adapter ;
+	ActionMode mActionMode;
 
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_survey);
-		
-		Bundle extras = getIntent().getExtras();
-		employeeId = extras.getInt(EMPLOYEE_ID);
-		serviceId = extras.getInt(SERVICE_ID);
+
+		employeeId = Ses.getInstance(this).getEmployeeId();
+		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 
 		createCursor();
 		ListView list = (ListView)findViewById(R.id.listView1);
-		
+
 		String[] from = new String[]{ DbQuestion.CN_DESCRIPTION};
 		int[] to = new int[]{ android.R.id.text1 };				
 		adapter = new SimpleCursorAdapter(this, 
 				R.layout.item_survey, c, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(selectItem);
+		registerForContextMenu(list);
 	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+
+
+		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_comments) {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+			c.moveToPosition(info.position);
+			questionId = c.getInt(c.getColumnIndex(DbQuestion._ID));
+			String comment = c.getString(c.getColumnIndex(DbSurveyQuestionAnswer.CN_COMMENT));
+
+			WorkflowHelper.getComments(SurveyActivity.this, comment, getString(R.string.inst_comment_survey), REQUEST_SURVEY_COMMENT);
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_comments) {
+			addComments();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	private void createCursor(){
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db() {			
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {				
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {				
 				return db.rawQuery(DbQuery.STAFF_SURVEY, new String[]{
 						String.valueOf(employeeId),
-						String.valueOf(serviceId)
+						String.valueOf(serviceInstanceId)
 				});
 			}
 		});
@@ -66,7 +119,7 @@ public class SurveyActivity extends Activity {
 			cur.close();
 		}
 	}
-	
+
 	AdapterView.OnItemClickListener selectItem = new AdapterView.OnItemClickListener() {
 
 		@Override
@@ -76,77 +129,104 @@ public class SurveyActivity extends Activity {
 			questionId = c.getInt(c.getColumnIndex(DbQuestion._ID));
 			String result = c.getString(c.getColumnIndex(DbSurveyQuestionAnswer.CN_RESULT));
 			String question = c.getString(c.getColumnIndex(DbQuestion.CN_DESCRIPTION));
-			Intent intent = new Intent(getBaseContext(), CheckpointCommentActivity.class);
-			intent.putExtra(CheckpointCommentActivity.FLD_COMMENT, result);
-			intent.putExtra(CheckpointCommentActivity.FLD_TEXT, question);
-			
-			startActivityForResult(intent, 0);
+
+			WorkflowHelper.getComments(SurveyActivity.this, result, question, REQUEST_SURVEY_RESPONSE);
 		}
 	};
-	
-	protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-		
-		if(requestCode == 0){
-			if(resultCode == RESULT_OK){
-				DbTrans.write(this, new DbTrans.Db() {
-					@Override
-					public Object onDo(Context context, SQLiteDatabase db) {
-						String whereClause = DbSurveyQuestionAnswer.CN_SERVICE + "=? AND "
-								+ DbSurveyQuestionAnswer.CN_EMPLOYEE + "=? AND "
-								+ DbSurveyQuestionAnswer.CN_QUESTION + "=?";
-						String[] whereArgs = new String[]{
-								String.valueOf(serviceId), 
-								String.valueOf(employeeId), 
-								String.valueOf(questionId) }; 
-						
-						Cursor cur = db.query(DbSurveyQuestionAnswer.TABLE_NAME,
-								new String[]{ DbSurveyQuestionAnswer.CN_RESULT},
-								whereClause, whereArgs, null, null, null);
-						String result = data.getStringExtra(CheckpointCommentActivity.FLD_COMMENT);
-						boolean saveResult = false;
-						if(cur.moveToFirst()){		
-							String savedResult = cur.getString(
-									cur.getColumnIndex(DbSurveyQuestionAnswer.CN_RESULT));
-							if(result != null && result.compareTo(savedResult) != 0){
-								saveResult = true;
-							}							
-						}else if (result != null && result.length() > 0 ){
-							saveResult = true;
-						}
-						cur.close();
-						if(saveResult){
-							DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
-							
-							ContentValues values = new ContentValues();
-							values.put(DbSurveyQuestionAnswer.CN_RESULT, result);
-							int count = db.update(DbSurveyQuestionAnswer.TABLE_NAME, values, 
-									whereClause, whereArgs);
 
-							if(count == 0){
-								values.put(DbSurveyQuestionAnswer.CN_SERVICE, serviceId);
-								values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE, employeeId);
-								values.put(DbSurveyQuestionAnswer.CN_QUESTION, questionId);
-								db.insert(DbSurveyQuestionAnswer.TABLE_NAME, null, values);
-							}
-						}
-						return null;
+	protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
+		if((requestCode == REQUEST_SURVEY_COMMENT || requestCode == REQUEST_SURVEY_RESPONSE) && resultCode == RESULT_OK){
+			DbTrans.write(this, data, new DbTrans.Db() {
+				@Override
+				public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+					Intent data = (Intent)parameter;
+					String whereClause = DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + "=? AND "
+							+ DbSurveyQuestionAnswer.CN_EMPLOYEE + "=? AND "
+							+ DbSurveyQuestionAnswer.CN_QUESTION + "=?";
+					String[] whereArgs = new String[]{
+							String.valueOf(serviceInstanceId), 
+							String.valueOf(employeeId), 
+							String.valueOf(questionId) }; 
+
+					String result = data.getStringExtra(CheckpointCommentActivity.FLD_COMMENT);
+
+					ContentValues values = new ContentValues();
+					if(requestCode == REQUEST_SURVEY_RESPONSE) 
+						values.put(DbSurveyQuestionAnswer.CN_RESULT, result);
+					else if (requestCode == REQUEST_SURVEY_COMMENT )
+						values.put(DbSurveyQuestionAnswer.CN_COMMENT, result);
+
+					int count = db.update(DbSurveyQuestionAnswer.TABLE_NAME, values, 
+							whereClause, whereArgs);
+
+					if(count == 0){
+						DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+
+						values.put(DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE, serviceInstanceId);
+						values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE, employeeId);
+						values.put(DbSurveyQuestionAnswer.CN_QUESTION, questionId);
+						db.insert(DbSurveyQuestionAnswer.TABLE_NAME, null, values);
 					}
-				});
-				createCursor();
-			}
-		}
+					return null;
+				}
+			});
+			createCursor();
+		} else if(requestCode == REQUEST_SURVEY_COMMENTS && resultCode == RESULT_OK){
+			Bundle extras = data.getExtras();
+			updateSurveyComment(extras.getString(CheckpointCommentActivity.FLD_COMMENT));
+			Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();
+		}	
 		super.onActivityResult(requestCode, resultCode, data);
 	};
-	
+
 	protected void onDestroy() {
 		if(c != null){
 			c.close();
 		}
 		super.onDestroy();
 	};
-	
+
 	public void onClick_previous(View v){
 		finish();
+	}
+
+	private void updateSurveyComment(String comment){
+		DbTrans.write(this, comment, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				String comment = (String)parameter;
+				ContentValues values = new ContentValues();
+				values.put(DbEmployee.CN_SURVEY_COMMENT, comment);
+				db.update(DbEmployee.TABLE_NAME, 
+						values, 
+						DbEmployee._ID + "=?", 
+						new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+				return null;
+			}
+		});
+	}
+
+	private void addComments(){
+		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				Cursor cur = db.query(
+						DbEmployee.TABLE_NAME, 
+						new String[]{DbEmployee.CN_SURVEY_COMMENT}, 
+						DbEmployee._ID + "=?", 
+						new String[]{
+								String.valueOf(Ses.getInstance(context).getEmployeeId())
+						}, null, null, null);
+				if(cur.moveToFirst()){
+					return cur.getString(cur.getColumnIndex(DbEmployee.CN_SURVEY_COMMENT));
+				}
+				cur.close();	
+				return null;
+			}
+		});
+		WorkflowHelper.getComments(this, 
+				comment, getString(R.string.inst_comment_survey_result), 
+				REQUEST_SURVEY_COMMENTS);
 	}
 
 }

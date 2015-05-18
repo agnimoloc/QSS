@@ -14,6 +14,10 @@ public class EmployeeDTO {
 	int BarcodeChecked;
 	EquipmentDTO[] Equipo;
 	
+	String ComentariosCheckList;
+	String ComentariosExamen;
+	String ComentariosInventario;
+	
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
 	
@@ -49,8 +53,45 @@ public class EmployeeDTO {
 		if(index != -1){
 			BarcodeChecked = c.getInt(index);
 		}
+		index = c.getColumnIndex(DbEmployee.CN_REVIEW_COMMENT);
+		if(index != -1){
+			ComentariosCheckList = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_SURVEY_COMMENT);
+		if(index != -1){
+			ComentariosExamen = c.getString(index);
+		}
+		index = c.getColumnIndex(DbEmployee.CN_INVENTORY_COMMENT);
+		if(index != -1){
+			ComentariosInventario = c.getString(index);
+		}
 	}
 	
+	
+	public String getComentariosCheckList() {
+		return ComentariosCheckList;
+	}
+
+	public void setComentariosCheckList(String comentariosCheckList) {
+		ComentariosCheckList = comentariosCheckList;
+	}
+
+	public String getComentariosExamen() {
+		return ComentariosExamen;
+	}
+
+	public void setComentariosExamen(String comentariosExamen) {
+		ComentariosExamen = comentariosExamen;
+	}
+
+	public String getComentariosInventario() {
+		return ComentariosInventario;
+	}
+
+	public void setComentariosInventario(String comentariosInventario) {
+		ComentariosInventario = comentariosInventario;
+	}
+
 	public int getElementoId() {
 		return ElementoId;
 	}

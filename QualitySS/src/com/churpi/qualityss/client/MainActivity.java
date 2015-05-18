@@ -2,6 +2,7 @@ package com.churpi.qualityss.client;
 
 
 import com.churpi.qualityss.Constants;
+import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.service.PullPushDataService;
 
 import android.app.Activity;
@@ -38,10 +39,12 @@ public class MainActivity extends Activity {
 				refreshUserInfo(description, progress);
 				
 				if(progress == 100){
-					SharedPreferences pref = Constants.getPref(context);
+					
+					Ses.getInstance(context).setFilledDb(true);
+					/*SharedPreferences pref = Constants.getPref(context);
 					SharedPreferences.Editor editor = pref.edit();
 					editor.putBoolean(Constants.PREF_FILLED_DB, true);
-					editor.commit();
+					editor.commit();*/
 					finishOK();
 				}
 			}else if(status.compareTo(Constants.PULL_PUSH_DATA_FAIL)==0){
@@ -123,8 +126,9 @@ public class MainActivity extends Activity {
     }
 
     private boolean isDBFilled(){    	
-    	SharedPreferences pref = Constants.getPref(getBaseContext());
-    	return pref.getBoolean(Constants.PREF_FILLED_DB, false);    	
+    	/*SharedPreferences pref = Constants.getPref(getBaseContext());
+    	return pref.getBoolean(Constants.PREF_FILLED_DB, false);*/
+    	return Ses.getInstance(getBaseContext()).isFilledDb();
     }
     
     private void refreshUserInfo(String description, int progress){

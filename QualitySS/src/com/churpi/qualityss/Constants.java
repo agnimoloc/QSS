@@ -1,8 +1,5 @@
 package com.churpi.qualityss;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 public final class Constants {
 
 	public static final String PULL_PUSH_DATA_ACTION = 
@@ -33,34 +30,29 @@ public final class Constants {
 	public static final String PULL_PUSH_DATA_DATA = 
 			"com.churpi.qualityss.service.PUSHPULLDATA";
 	
-	private static final String PREFERENCES = "QSSPREF";
-	public static final String PREF_FILLED_DB = "FILLEDDB";
-	public static final String PREF_ACCOUNT = "CURRENT_ACCOUNT";
-	public static final String PREF_PASSHASH = "CURRENT_PASSHASH";
-	public static final String PREF_EMPLOYEE = "CURRENT_EMPLOYEE";
-	public static final String PREF_CHANGESET = "CURRENT_CHANGESET";
-	public static final String PREF_IMAGEURL = "IMAGE_URL";
-	public static final String PREF_ACTIVITY = "CURRENT_ACTIVITY";
-	public static final String PREF_SECTOR_ID = "SECTOR_ID";
-	public static final String PREF_SERVICE_ID = "SERVICE_ID";
-	public static final String PREF_EMPLOYEE_ID = "EMPLOYEE_ID";
-	public static final String PREF_EMPLOYEE_NAME = "EMPLOYEE_NAME";
-	
 	
 	public static final String JSON_DIR = "DB";
 	public static final String JSON_NAME = "db.json";
 	
 	public static final String PHOTO_DIR = "picture";
-	public static final String PHOTO_GENERAL_CHECKPOINT = "GCHK_%03d_%03d.jpg";
+	public static final String PHOTO_INVENTORY_SERVICE = "%s_INVS_%d.jpg";
+	public static final String PHOTO_INVENTORY_EMPLOYEE = "%s_INVE_%d_%d.jpg";
+	public static final String PHOTO_REVIEW_SERVICE = "%s_CHKS_%d.jpg";
+	public static final String PHOTO_REVIEW_EMPLOYEE = "%s_CHKE_%d_%d.jpg";
 	
 	public static final String IMG_SERVICE = "imgServ";
 	public static final String IMG_EMPLOYEE = "imgEmp";
 	public static final String DOC_DIR = "docServ";
-
+	
+	public static final int ACTIVITY_TYPE_PATRIMONY = 1;
+	public static final int ACTIVITY_TYPE_FIRE = 2;
+	public static final int ACTIVITY_TYPE_HEALTH = 3;
+	public static final int ACTIVITY_TYPE_REQUEST = 4;
+	
+	/*public static final String EXTRA_TYPE = "extraType";
+	public static final String EXTRA_SERVICE_ID = "extraServiceId";*/
 	
 	
-	public static SharedPreferences getPref(Context context){
-		return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
-	}
+	
 	
 }

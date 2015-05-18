@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -17,6 +18,8 @@ public class ShowPhotoActivity extends Activity {
 	public static final String FILE_URI = "file_path";
 	public static final String SHOW_NEW_BUTTON = "show_new";
 	
+	private Uri uri;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -24,7 +27,7 @@ public class ShowPhotoActivity extends Activity {
 		
 		Bundle extras = getIntent().getExtras();
 		boolean showButton = extras.getBoolean(SHOW_NEW_BUTTON, false); 
-		Uri uri = (Uri)extras.get(FILE_URI);
+		uri = (Uri)extras.get(FILE_URI);
 		if(showButton){
 			Button text = (Button)findViewById(android.R.id.button2);
 			text.setVisibility(View.VISIBLE);
@@ -73,8 +76,9 @@ public class ShowPhotoActivity extends Activity {
 	}
 	
 	public void onClick_New(View v){
-		
-		setResult(RESULT_OK);
+		Intent data = new Intent();
+		data.putExtra(FILE_URI, uri);
+		setResult(RESULT_OK, data);
 		finish();
 	}
 

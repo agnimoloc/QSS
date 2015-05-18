@@ -12,6 +12,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSection;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
@@ -26,6 +27,7 @@ import com.churpi.qualityss.client.dto.QuestionDTO;
 import com.churpi.qualityss.client.dto.ReviewDTO;
 import com.churpi.qualityss.client.dto.SectionDTO;
 import com.churpi.qualityss.client.dto.SectorDTO;
+import com.churpi.qualityss.client.dto.ServiceConfigurationDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
 import com.churpi.qualityss.client.dto.StateDTO;
@@ -58,6 +60,8 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbSector.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbService.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbServiceConfiguration.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbServiceInstance.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEquipment.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceEquipment.CREATE_TABLE);
@@ -67,7 +71,8 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbSection.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbQuestion.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbReviewQuestion.CREATE_TABLE);
-		db.execSQL(QualitySSDbContract.DbReviewQuestionAnswer.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbReviewQuestionAnswerEmployee.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbReviewQuestionAnswerService.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbSurveyQuestion.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbSurveyQuestionAnswer.CREATE_TABLE);
 	}
@@ -77,7 +82,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public void updateDBfromValue(DataDTO data){
 		SQLiteDatabase db = getWritableDatabase();
 		try{
@@ -127,10 +132,10 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 						values.put(DbCustomer._ID, customer.getClienteId());
 						db.insert(DbCustomer.TABLE_NAME, null, values);
 					}
-					
+
 				}
 			}
-			
+
 			if(data.getSectores() != null){
 				for(SectorDTO sector : data.getSectores()){
 					ContentValues values = sector.getContentValues();
@@ -143,8 +148,8 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 					}
 				}
 			}
-			
-			
+
+
 			if(data.getElementos() != null){
 				for(EmployeeDTO employee : data.getElementos()){
 					ContentValues values = employee.getContentValues();
@@ -163,7 +168,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 
 					for(EquipmentDTO equipment : employee.getEquipo()){
 						addUpdateEquipment(equipment, db);
-						
+
 						ContentValues vEqui = new ContentValues();
 						vEqui.put(DbEmployeeEquipment.CN_EMPLOYEE, employee.getElementoId());
 						vEqui.put(DbEmployeeEquipment.CN_EQUIPMENT, equipment.getEquipoId());
@@ -172,7 +177,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 
 				}
 			}
-			
+
 			if(data.getSecciones() != null){
 				for(SectionDTO section : data.getSecciones()){
 					ContentValues values = new ContentValues();
@@ -187,34 +192,15 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 					}
 				}
 			}
-			
+
 			if(data.getServicios() != null){
 				for(ServiceDTO service : data.getServicios()){
-					if(service.getDomicilio() != null){
-						addUpdateAddress(service.getDomicilio(), db);
-					}
+					String[] whereServiceId = new String[]{String.valueOf(service.getServicioId())};
 					
-					ContentValues values = service.getContentValues();
-					String[] whereServiceId = new String[]{String.valueOf(service.getServicioId())}; 
-					count = db.update(DbService.TABLE_NAME, values, 
-							DbService._ID + "=?", 
-							whereServiceId);
-					if(count==0){
-						values.put(DbService._ID, service.getServicioId());
-						db.insert(DbService.TABLE_NAME, null, values);
-					}
-
 					db.delete(DbServiceEmployee.TABLE_NAME, 
 							DbServiceEmployee.CN_SERVICE +"=?", 
 							whereServiceId);
-
-					for(ServiceEmployeeDTO serviceEmp : service.getServicioElementos()){					
-						serviceEmp.setServicioId(service.getServicioId());
-						ContentValues sVals = serviceEmp.getContentValues();
-
-						db.insert(DbServiceEmployee.TABLE_NAME, null, sVals);														
-					}
-
+					
 					db.delete(DbReviewQuestion.TABLE_NAME, 
 							DbReviewQuestion.CN_SERVICE +"=?", 
 							whereServiceId);
@@ -223,46 +209,81 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 							DbSurveyQuestion.CN_SERVICE +"=?", 
 							whereServiceId);
 
-					if(service.getExamen() != null){
-						for(QuestionDTO question : service.getExamen().getPreguntas()){
-							addUpdateQuestion(question, db);
-							ContentValues qVal = new ContentValues();
-							qVal.put(DbSurveyQuestion.CN_SERVICE, service.getServicioId());
-							qVal.put(DbSurveyQuestion.CN_QUESTION, question.getPreguntaId());
-
-							db.insert(DbSurveyQuestion.TABLE_NAME, null, qVal);
-						}							
-					}
-					
-					for(ReviewDTO review : service.getPaseRevista()){
-						for(QuestionDTO question : review.getPreguntas()){
-							addUpdateQuestion(question, db);
-							ContentValues qVal = new ContentValues();
-							qVal.put(DbReviewQuestion.CN_SERVICE, service.getServicioId());
-							qVal.put(DbReviewQuestion.CN_QUESTION, question.getPreguntaId());
-							qVal.put(DbReviewQuestion.CN_SECTION, review.getPaseRevistaSeccionId());
-							db.insert(DbReviewQuestion.TABLE_NAME, null, qVal);
-						}															
-					}
-
-					
-					
 					db.delete(DbServiceEquipment.TABLE_NAME, 
 							DbServiceEquipment.CN_SERVICE +"=?", 
 							whereServiceId);
-					if(service.getServicioEquipo() != null){
-						for(EquipmentDTO equipment : service.getServicioEquipo()){
-							addUpdateEquipment(equipment, db);
+
+					db.delete(DbServiceConfiguration.TABLE_NAME, 
+							DbServiceConfiguration.CN_SERVICE +"=?", 
+							whereServiceId);
+
+
+					if(service.getDomicilio() != null){
+						addUpdateAddress(service.getDomicilio(), db);
+					}
+
+					ContentValues values = service.getContentValues();
+					 
+					count = db.update(DbService.TABLE_NAME, values, 
+							DbService._ID + "=?", 
+							whereServiceId);
+					if(count==0){
+						values.put(DbService._ID, service.getServicioId());
+						db.insert(DbService.TABLE_NAME, null, values);
+					}
+
+
+					for(ServiceEmployeeDTO serviceEmp : service.getServicioElementos()){					
+						serviceEmp.setServicioId(service.getServicioId());
+						ContentValues sVals = serviceEmp.getContentValues();
+
+						db.insert(DbServiceEmployee.TABLE_NAME, null, sVals);														
+					}
+
+					if(service.getConfiguraciones() != null){
+						for(ServiceConfigurationDTO config : service.getConfiguraciones()){
+							ContentValues scVal = new ContentValues();
+							scVal.put(DbServiceConfiguration._ID, config.getServicioConfiguracionId());
+							scVal.put(DbServiceConfiguration.CN_SERVICE, service.getServicioId());
+							scVal.put(DbServiceConfiguration.CN_TITLE, config.getTitulo());
+							scVal.put(DbServiceConfiguration.CN_ACTIVITY_TYPE, config.getTipo());
+							db.insert(DbServiceConfiguration.TABLE_NAME, null, scVal);
 							
-							ContentValues vEqui = new ContentValues();
-							vEqui.put(DbServiceEquipment.CN_SERVICE, service.getServicioId());
-							vEqui.put(DbServiceEquipment.CN_EQUIPMENT, equipment.getEquipoId());
-							db.insert(DbServiceEquipment.TABLE_NAME, null, vEqui);
+							if(config.getExamen() != null){
+								for(QuestionDTO question : config.getExamen().getPreguntas()){
+									addUpdateQuestion(question, db);
+									ContentValues qVal = new ContentValues();
+									qVal.put(DbSurveyQuestion.CN_ACTIVITY_TYPE, config.getTipo());
+									qVal.put(DbSurveyQuestion.CN_SERVICE, service.getServicioId());
+									qVal.put(DbSurveyQuestion.CN_QUESTION, question.getPreguntaId());
+									db.insert(DbSurveyQuestion.TABLE_NAME, null, qVal);
+								}							
+							}
+							if(config.getPaseRevistaElemento() != null){
+								for(ReviewDTO review : config.getPaseRevistaElemento()){
+									addUpdateReview (review, db, DbReviewQuestion.Types.EMPLOYEE, service.getServicioId(), config.getTipo());
+								}
+							}
+							if(config.getPaseRevistaServicio() != null){
+								for(ReviewDTO review : config.getPaseRevistaServicio()){
+									addUpdateReview (review, db, DbReviewQuestion.Types.SERVICE, service.getServicioId(), config.getTipo());
+								}
+							}
+							if(config.getServicioEquipo() != null){
+								for(EquipmentDTO equipment : config.getServicioEquipo()){
+									addUpdateEquipment(equipment, db);
+									ContentValues vEqui = new ContentValues();
+									vEqui.put(DbServiceEquipment.CN_ACTIVITY_TYPE, config.getTipo());
+									vEqui.put(DbServiceEquipment.CN_SERVICE, service.getServicioId());
+									vEqui.put(DbServiceEquipment.CN_EQUIPMENT, equipment.getEquipoId());
+									db.insert(DbServiceEquipment.TABLE_NAME, null, vEqui);
+								}
+							}
 						}
 					}
 				}			
 			}
-			
+
 			db.setTransactionSuccessful();
 			sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, "", 100);
 		}catch(Exception ex){
@@ -270,9 +291,22 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		}finally{
 			db.endTransaction();
 		}
-		
+
 	}
-	
+
+	private void addUpdateReview(ReviewDTO review, SQLiteDatabase db, int reviewType, int serviceId, int activityType){
+		for(QuestionDTO question : review.getPreguntas()){
+			addUpdateQuestion(question, db);
+			ContentValues qVal = new ContentValues();
+			qVal.put(DbReviewQuestion.CN_ACTIVITY_TYPE, activityType);
+			qVal.put(DbReviewQuestion.CN_SERVICE, serviceId);
+			qVal.put(DbReviewQuestion.CN_QUESTION, question.getPreguntaId());
+			qVal.put(DbReviewQuestion.CN_SECTION, review.getPaseRevistaSeccionId());
+			qVal.put(DbReviewQuestion.CN_TYPE, reviewType);
+			db.insert(DbReviewQuestion.TABLE_NAME, null, qVal);
+		}															
+	}
+
 	private void addUpdateEquipment(EquipmentDTO equipment, SQLiteDatabase db){
 		ContentValues values = equipment.getContentValues();
 		int count = db.update(DbEquipment.TABLE_NAME, values, 
@@ -283,7 +317,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 			db.insert(DbEquipment.TABLE_NAME, null, values);
 		}
 	}
-	
+
 	private void addUpdateQuestion(QuestionDTO question, SQLiteDatabase db){
 		ContentValues qVal = new ContentValues();
 		qVal.put(DbQuestion.CN_DESCRIPTION, question.getDescripcion());
@@ -297,10 +331,10 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 			db.insert(DbQuestion.TABLE_NAME, null, qVal);
 		}						
 	}
-	
+
 	private void addUpdateAddress(AddressDTO address, SQLiteDatabase db){
 		ContentValues values = address.getContentValues();		
-		
+
 		int count = db.update(DbAddress.TABLE_NAME, values , 
 				DbAddress._ID + "=?", 
 				new String[]{String.valueOf(address.getDomicilioId())});
@@ -309,85 +343,6 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 			db.insert(DbAddress.TABLE_NAME, null, values);
 		}						
 	}
-
-	/*public void loadDataFromJSON(){
-
-		StringBuffer sb = new StringBuffer();
-		try {
-			File file = new File(context.getDir(Constants.JSON_DIR, Context.MODE_PRIVATE),Constants.JSON_NAME);
-			FileReader reader = new FileReader(file);
-			BufferedReader br = new BufferedReader(reader);
-			String buf;
-			while ((buf=br.readLine()) != null) {
-				sb.append(buf);
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			sendBroadCastResult(Constants.PULL_PUSH_DATA_FAIL, "database failed", 0);
-			return;
-		}
-
-		SQLiteDatabase db = getWritableDatabase();
-
-		Gson gson = new Gson();
-		DataDTO data = gson.fromJson(sb.toString().trim(), DataDTO.class);
-		try{
-			db.beginTransaction();
-			for(UserDTO user : data.getUsers()){
-				ContentValues values = new ContentValues();
-				values.put(DbUser._ID, user.getId());
-				values.put(DbUser.CN_NAME, user.getName());
-				values.put(DbUser.CN_ACCOUNT, user.getAccount());
-				values.put(DbUser.CN_PASSWORD, user.getPassword());    	        	
-				db.insert(DbUser.TABLE_NAME, null, values);
-			}
-
-			for(ConsignaDTO consigna: data.getConsignas()){
-				ContentValues values = new ContentValues();
-				values.put(DbConsigna._ID, consigna.getId());
-				values.put(DbConsigna.CN_NAME, consigna.getName());
-				db.insert(DbConsigna.TABLE_NAME, null, values);
-				for(ConsignaDetalleDTO detalle: consigna.getDetalle()){
-					ContentValues valuesDetalle = new ContentValues();
-					valuesDetalle.put(DbConsignaDetalle._ID, detalle.getId());
-					valuesDetalle.put(DbConsignaDetalle.CN_NAME, detalle.getName());
-					valuesDetalle.put(DbConsignaDetalle.CN_CONSIGNA, consigna.getId());
-					db.insert(DbConsignaDetalle.TABLE_NAME, null, valuesDetalle);
-				}
-			}
-			
-			for(ServiceDTO service: data.getServices()){
-				ContentValues values = new ContentValues();
-				values.put(DbService._ID, service.getId());
-				values.put(DbService.CN_TYPE, service.getType());
-				values.put(DbService.CN_ADDRESS, service.getAddress());
-				values.put(DbService.CN_CONTACT, service.getContact());
-				values.put(DbService.CN_PHONE, service.getPhone());
-				values.put(DbService.CN_DESCRIPTION, service.getDescription());
-				db.insert(DbService.TABLE_NAME, null, values);
-				for(EmployeeDTO employee : service.getStaff()){
-					ContentValues valuesDetalle = new ContentValues();
-					valuesDetalle.put(DbEmployee._ID, employee.getId());
-					valuesDetalle.put(DbEmployee.CN_NAME, employee.getName());
-					valuesDetalle.put(DbEmployee.CN_SERVICE, service.getId());
-					db.insert(DbEmployee.TABLE_NAME, null, valuesDetalle);
-				}
-			}
-			
-			for(GeneralCheckpointDTO generalcheckpoint: data.getGeneralchecklist()){
-				ContentValues values = new ContentValues();
-				values.put(DbGeneralCheckpoint._ID, generalcheckpoint.getId());
-				values.put(DbGeneralCheckpoint.CN_NAME, generalcheckpoint.getName());
-				db.insert(DbGeneralCheckpoint.TABLE_NAME, null, values);
-			}
-			
-			db.setTransactionSuccessful();
-			sendBroadCastResult(Constants.PULL_PUSH_DATA_REFRESH, "", 100);
-		}finally{
-			db.endTransaction();    		
-		}
-	}*/
 
 	private void sendBroadCastResult(String statusDescription, String description, int progress){
 		Intent status = new Intent();

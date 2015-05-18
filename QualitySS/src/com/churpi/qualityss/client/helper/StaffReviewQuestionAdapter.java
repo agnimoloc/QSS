@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -103,12 +104,14 @@ public class StaffReviewQuestionAdapter extends BaseExpandableListAdapter {
 			layout = (ViewGroup)convertView;
 		}
 		QuestionDTO question = ((QuestionDTO)getChild(groupPosition, childPosition));
-
+		layout.setTag(question);;
+		
 		TextView text = (TextView)layout.findViewById(android.R.id.text1);
 		text.setText(question.getDescripcion());
 
+		
 		RadioGroup group = (RadioGroup)layout.findViewById(R.id.radioGroup);
-		group.setTag(question);
+		//group.setTag(question);
 		group.clearCheck();
 		for(int radioId : mRadioIds){
 			RadioButton button = (RadioButton)layout.findViewById(radioId);
@@ -117,7 +120,13 @@ public class StaffReviewQuestionAdapter extends BaseExpandableListAdapter {
 					button.setChecked(true);
 				}
 			}
-		}			
+		}	
+		
+		/*Button button = (Button)layout.findViewById(android.R.id.button1);
+		button.setTag(question);
+		button = (Button)layout.findViewById(android.R.id.button2);
+		button.setTag(question);*/
+		
 		return layout;
 	}
 

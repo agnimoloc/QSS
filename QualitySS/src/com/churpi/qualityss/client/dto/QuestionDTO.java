@@ -4,7 +4,8 @@ import android.database.Cursor;
 
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswer;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
 
 public class QuestionDTO {
 	int PreguntaId;
@@ -12,6 +13,10 @@ public class QuestionDTO {
 	float Valor;
 	String NombreSeccion;
 	String Resultado;
+	String Comentarios;
+	
+	boolean isResultado = false;
+	boolean isComentario = false;
 	
 	public void fillFromCursor(Cursor c) {
 		int index = c.getColumnIndex(DbQuestion._ID);
@@ -30,12 +35,37 @@ public class QuestionDTO {
 		if(index != -1){
 			NombreSeccion = c.getString(index);
 		}
-		index = c.getColumnIndex(DbReviewQuestionAnswer.CN_RESULT);
+		index = c.getColumnIndex(DbReviewQuestionAnswerEmployee.CN_RESULT);
 		if(index != -1){
 			Resultado = c.getString(index);
+		}else{
+			index = c.getColumnIndex(DbReviewQuestionAnswerService.CN_RESULT);
+			if(index != -1){
+				Resultado = c.getString(index);
+			}
+		}
+		index = c.getColumnIndex(DbReviewQuestionAnswerEmployee.CN_COMMENT);
+		if(index != -1){
+			Comentarios = c.getString(index);
+		}else{
+			index = c.getColumnIndex(DbReviewQuestionAnswerService.CN_COMMENT);
+			if(index != -1){
+				Comentarios = c.getString(index);
+			}
 		}
 	}
-	
+
+	public boolean isComentario(){
+		return isComentario;
+	}
+	public String getComentarios() {
+		return Comentarios;
+	}
+	public void setComentarios(String comentarios) {
+		isComentario = true;
+		isResultado = false;
+		Comentarios = comentarios;
+	}
 	public int getPreguntaId() {
 		return PreguntaId;
 	}
@@ -57,16 +87,18 @@ public class QuestionDTO {
 	public String getNombreSeccion() {
 		return NombreSeccion;
 	}
-
 	public void setNombreSeccion(String nombreSeccion) {
 		NombreSeccion = nombreSeccion;
 	}
-
+	public boolean isResultado(){
+		return isResultado;
+	}
 	public String getResultado() {
 		return Resultado;
 	}
-
 	public void setResultado(String resultado) {
+		isResultado = true;
+		isComentario = false;
 		Resultado = resultado;
 	}
 	

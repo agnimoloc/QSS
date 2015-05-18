@@ -18,6 +18,7 @@ import com.churpi.qualityss.client.BuildConfig;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
+import com.churpi.qualityss.client.helper.Ses;
 
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
@@ -28,12 +29,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.util.LongSparseArray;
 
 public class DownloadFileReciever extends BroadcastReceiver {
 
 	DownloadManager dm;
 	Context mContext;
-	HashMap<Long, FileRetrieve> enqueue;
+	LongSparseArray<FileRetrieve> enqueue;
 
 	private class FileRetrieve{
 		int fileType;
@@ -63,7 +65,7 @@ public class DownloadFileReciever extends BroadcastReceiver {
 	public DownloadFileReciever(Context context){		
 		dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 		mContext = context;
-		enqueue = new HashMap<Long, FileRetrieve>();
+		enqueue = new LongSparseArray<FileRetrieve>();
 	}
 
 	public void downloadFiles(){
@@ -83,11 +85,12 @@ public class DownloadFileReciever extends BroadcastReceiver {
 		String url = "";
 
 		if(fileType == Config.FileType.DOCUMENT_IMAGE){
-			url = Constants.getPref(mContext).getString(Constants.PREF_IMAGEURL, "");
+			//url = Constants.getPref(mContext).getString(Constants.PREF_IMAGEURL, "");
+			url = Ses.getInstance(mContext).getImgURL();
 		}else if(fileType == Config.FileType.EMPLOYEE_IMAGE){
-			url = Constants.getPref(mContext).getString(Constants.PREF_IMAGEURL, "");
+			url = Ses.getInstance(mContext).getImgURL();
 		}else if(fileType == Config.FileType.SERVICE_IMAGE){
-			url = Constants.getPref(mContext).getString(Constants.PREF_IMAGEURL, "");
+			url = Ses.getInstance(mContext).getImgURL();
 		}
 
 		if(BuildConfig.DEBUG){
@@ -107,7 +110,7 @@ public class DownloadFileReciever extends BroadcastReceiver {
 		String action = intent.getAction();
 		if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
 			long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-			if(enqueue.containsKey(referenceId)){
+			if(enqueue.indexOfKey(referenceId) > -1){
 				Query query = new Query();
 				query.setFilterById(referenceId);
 				Cursor c = dm.query(query);

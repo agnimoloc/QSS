@@ -4,38 +4,39 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.churpi.qualityss.Config;
-import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbActions;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbService.ServiceStatus;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.dto.AddressDTO;
 import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
+import com.churpi.qualityss.client.dto.ServiceInstanceDTO;
 import com.churpi.qualityss.client.helper.DateHelper;
+import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ServiceDetailActivity extends Activity {
-
-	public static final String SERVICE_ID = "serviceId";
-
 	int mServiceId;
 
 	ServiceDTO mService = new ServiceDTO();
+	ServiceInstanceDTO mServiceInstance = new ServiceInstanceDTO();
 	CustomerDTO mCustomer = new CustomerDTO();
 	AddressDTO mAddress = new AddressDTO();
 
@@ -44,14 +45,12 @@ public class ServiceDetailActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_service_detail);
 
-		mServiceId = getIntent().getIntExtra(SERVICE_ID, -1);
-
-
+		mServiceId = Ses.getInstance(this).getServiceId();
 
 		DbTrans.read(this, new DbTrans.Db(){
 
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				Cursor c = null;
 				try{
 					c = db.query(DbService.TABLE_NAME, null, 
@@ -115,35 +114,88 @@ public class ServiceDetailActivity extends Activity {
 	}
 
 	public void onClick_next(View v){
-		if(DbActions.checkClearService(this, mService)){
-			if(mService.canStart()){
-				DbTrans.write(this, new DbTrans.Db() {
+		ServiceInstanceDTO serviceInstance = (ServiceInstanceDTO)DbTrans.read(this, new DbTrans.Db() {
+			
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				Cursor c = null;
+				ServiceInstanceDTO si = new ServiceInstanceDTO();
+				try{
+					c = db.query(DbServiceInstance.TABLE_NAME, null, 
+							DbServiceInstance.CN_SERVICE + "=? AND " +
+							DbServiceInstance.CN_ACTIVITY_TYPE + "=?"
+							, new String[]{
+								String.valueOf(mServiceId),
+								String.valueOf(Ses.getInstance(context).getActivityType())
+							}, 
+							null, null, null);
+					if(c.moveToFirst())
+						si.fillFromCursor(c);
+					c.close();
+				}catch(Exception e){
+					Log.e("ServiceDetailActivity", e.getMessage());
+				}finally{
+				
+					if(c != null){
+						c.close();
+					}
+				}
+				return si;
+			}
+		});
+		if(DbActions.checkClearService(this, serviceInstance)){
+			if(serviceInstance.getStatus()==null){
+				DbTrans.write(this, serviceInstance, new DbTrans.Db() {
 					@Override
-					public Object onDo(Context context, SQLiteDatabase db) {
-						ContentValues values = new ContentValues();
-						SharedPreferences pref = Constants.getPref(context);
-						int userEmployeeId = pref.getInt(Constants.PREF_EMPLOYEE, -1);
+					public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+						
+						Cursor cur = db.query(DbServiceConfiguration.TABLE_NAME, 
+								new String[]{DbServiceConfiguration._ID}, 
+								DbServiceConfiguration.CN_SERVICE + "=? AND "+ 
+								DbServiceConfiguration.CN_ACTIVITY_TYPE +"=?", 
+								new String[]{
+									String.valueOf(mService.getServicioId()),
+									String.valueOf(Ses.getInstance(context).getActivityType())
+								}, 
+								null, null, null);
+						int serviceConfigurationID = 0;
+						if(cur.moveToFirst())
+							serviceConfigurationID = cur.getInt(cur.getColumnIndex(DbServiceConfiguration._ID));
+						cur.close();
+						ServiceInstanceDTO si = (ServiceInstanceDTO) parameter;
+					
+						int userEmployeeId = Ses.getInstance(context).getEmployee();
 						String currentDate = DateHelper.getCurrentTime();
-						values.put(DbService.CN_EMPLOYEEREVIEW, userEmployeeId);
-						values.put(DbService.CN_DATETIME, currentDate);
-						values.put(DbService.CN_STATUS, DbService.ServiceStatus.CURRENT);
-						db.update(DbService.TABLE_NAME, 
-								values, DbService._ID +"=?",
-								new String[]{String.valueOf(mService.getServicioId())});
-						mService.setElementoRevisionId(userEmployeeId);
-						mService.setFechaRevision(currentDate);
-						mService.setStatus(DbService.ServiceStatus.CURRENT);
+						
+						si.setServicioConfiguracionId(serviceConfigurationID);
+						si.setEmpleadoRevision(userEmployeeId);
+						si.setFechaInicio(currentDate);
+						si.setServicioId(mService.getServicioId());
+						si.setStatus(DbServiceInstance.ServiceStatus.CURRENT);
+						si.setTipo(Ses.getInstance(context).getActivityType());
+						
+						ContentValues values = si.getContentValues(); 
+ 
+						si.setServicioInstanciaId((int)
+								db.insert(DbServiceInstance.TABLE_NAME, null, values));
+						
 						return null;
 					}
 				});
 			}
-			Intent intent = new Intent(this, StaffInventoryActivity.class);
-			intent.putExtra(StaffInventoryActivity.ID, mService.getServicioId());
-			intent.putExtra(StaffInventoryActivity.NAME, mService.getDescripcion());
-			intent.setAction(StaffInventoryActivity.ACTION_SERVICE);
-			startActivity(intent);
+						
+			Ses.getInstance(this).edit()
+				.setServiceDescription(mService.getDescripcion())
+				.setServiceInstanceId(serviceInstance.getServicioInstanciaId())
+				.setServiceInstanceKey(serviceInstance.getKey())
+				.commit();
+
+			startActivity(
+					WorkflowHelper.process(this,
+							R.id.button4,
+							StaffInventoryActivity.ACTION_SERVICE));
 		}else{
-			Date sentDate =  DateHelper.getDateFromDb(mService.getFechaRevision());
+			Date sentDate =  DateHelper.getDateFromDb(serviceInstance.getFechaFin());
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(sentDate);
 			cal.add(Calendar.HOUR_OF_DAY, Config.HOURS_TO_RESET_SENT_SERVICE);

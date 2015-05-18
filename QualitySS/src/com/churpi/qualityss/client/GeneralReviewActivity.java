@@ -44,7 +44,7 @@ public class GeneralReviewActivity extends Activity {
 				
 		DbTrans.read(this, new DbTrans.Db() {
 			@Override
-			public Object onDo(Context context, SQLiteDatabase db) {
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				/*c = db.query(
 						DbGeneralCheckpoint.TABLE_NAME, 
 						new String[]{DbGeneralCheckpoint._ID, DbGeneralCheckpoint.CN_NAME}, 
@@ -87,7 +87,7 @@ public class GeneralReviewActivity extends Activity {
 	}*/
 		
 	public void onClick_TakePhoto(View v){
-		checkpointId = (Integer)v.getTag();
+		/*checkpointId = (Integer)v.getTag();
 		File dest = getDestImage();
 		if(dest.exists()){
 			Intent showPhotoIntent = new Intent(this, ShowPhotoActivity.class);
@@ -96,10 +96,10 @@ public class GeneralReviewActivity extends Activity {
 			startActivityForResult(showPhotoIntent,REQUEST_IMAGE_SHOW);
 		}else{
 			takePhoto();
-		}
+		}*/
 	}
 	
-	private File getDestImage(){
+/*	private File getDestImage(){
 		
 		File dest = new File (
 				getExternalFilesDir(Environment.DIRECTORY_PICTURES), 
@@ -114,7 +114,7 @@ public class GeneralReviewActivity extends Activity {
 	    	takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(dest));
 	        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
 	    }
-	}
+	}*/
 	public void onClick_Comment(View v){
 		checkpointId = (Integer)v.getTag();
 		Intent getComment = new Intent(this, CheckpointCommentActivity.class);
@@ -123,9 +123,9 @@ public class GeneralReviewActivity extends Activity {
 	
 	public void onClick_Next(View v){
 		//TODO: add validations to continue
-		Intent staffReview = new Intent(this, StaffReviewListActivity.class);
+		/*Intent staffReview = new Intent(this, StaffReviewListActivity.class);
 		staffReview.putExtra(StaffReviewListActivity.FLD_SERVICE_ID, serviceId);
-		startActivity(staffReview);
+		startActivity(staffReview);*/
 	}
 	
 	
@@ -165,7 +165,7 @@ public class GeneralReviewActivity extends Activity {
 	    	String comment = extras.getString(CheckpointCommentActivity.FLD_COMMENT);
 	    	DbTrans.write(this, new DbTrans.Db() {
 				@Override
-				public Object onDo(Context context, SQLiteDatabase db) {
+				public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 					/*ContentValues values = new ContentValues();
 					values.put(DbGeneralCheckpointResult.CN_SERVICE, serviceId);
 					values.put(DbGeneralCheckpointResult.CN_GENERAL_CHECKPOINT, checkpointId);
@@ -185,7 +185,7 @@ public class GeneralReviewActivity extends Activity {
 			});
 	    	Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_LONG).show();	 
 	    }else if(requestCode == REQUEST_IMAGE_SHOW && resultCode == RESULT_OK){
-	    	takePhoto();
+	    	//takePhoto();
 	    }
 		super.onActivityResult(requestCode, resultCode, data);
 	}

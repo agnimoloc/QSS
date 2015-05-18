@@ -5,6 +5,7 @@ import java.util.Map;
 
 
 
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -14,12 +15,11 @@ import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbHelper;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.helper.GsonRequest;
+import com.churpi.qualityss.client.helper.Ses;
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -103,17 +103,13 @@ public class PullPushDataService extends IntentService {
 	}
 	
 	private static void setPreferencesByData(Context context, DataDTO data){
-		Editor editor = Constants.getPref(context).edit();
-		editor.putString(Constants.PREF_CHANGESET, data.getChangeset());
-		editor.putString(Constants.PREF_IMAGEURL, data.getImageBaseUrl());
-		editor.commit();
+		Ses.getInstance(context).edit()
+		.setChangeset(data.getChangeset())
+		.setImgURL(data.getImageBaseUrl())
+		.commit();
 	}
 	private String getChangeset(){
-		SharedPreferences pref = Constants.getPref(getBaseContext());
-		if(pref.contains(Constants.PREF_CHANGESET)){
-			return pref.getString(Constants.PREF_CHANGESET, null);
-		}
-		return null;
+		return Ses.getInstance(getBaseContext()).getChangeset();
 	}
 
 	private static void sendBroadCastResult(Context context, String statusDescription, String description, int progress){
