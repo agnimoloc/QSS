@@ -126,7 +126,7 @@ public class LoginActivity extends Activity {
 					}
 				});
 			request.setRetryPolicy(new DefaultRetryPolicy(
-				10000, 
+				Config.SERVER_GET_DATA_TIMEOUT, 
 				DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
 				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 			VolleySingleton.getInstance(this).addToRequestQueue(request);    

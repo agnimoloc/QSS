@@ -143,6 +143,16 @@ public final class QualitySSDbContract {
 		}
 	}
 		
+	public static abstract class DbServiceType implements BaseColumns {
+		public static final String TABLE_NAME = "service_type";
+		public static final String CN_TITLE = "description";
+		
+		public static final String CREATE_TABLE = "CREATE TABLE " +
+				TABLE_NAME + "("
+				+ _ID + " INTEGER PRIMARY KEY," 
+				+ CN_TITLE + " TEXT);";
+	}
+
 	public static abstract class DbService implements BaseColumns {
 		public static final String TABLE_NAME = "service";
 		public static final String CN_CODE = "code";
@@ -180,6 +190,8 @@ public final class QualitySSDbContract {
 				+ CN_SERVICE + " INTEGER, " 
 				+ CN_TITLE + " TEXT, "
 				+ CN_ACTIVITY_TYPE + " INTEGER,"
+				+ "FOREIGN KEY(" + CN_ACTIVITY_TYPE + ") " 
+				+ "REFERENCES "+ DbServiceType.TABLE_NAME + "(" + DbServiceType._ID + "),"
 				+ "FOREIGN KEY(" + CN_SERVICE + ") " 
 				+ "REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + "));";
 		
@@ -213,6 +225,8 @@ public final class QualitySSDbContract {
 				+ CN_REVIEW_COMMENT + " TEXT," 
 				+ CN_EMPLOYEE_COMMENT + " TEXT," 
 				+ CN_SERVICE_CONFIGURATION + " INTEGER,"
+				+ "FOREIGN KEY(" + CN_ACTIVITY_TYPE + ") " 
+				+ "REFERENCES "+ DbServiceType.TABLE_NAME + "(" + DbServiceType._ID + "),"
 				+ "FOREIGN KEY(" + CN_SERVICE + ") " 
 				+ "REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + ")," 
 				+ "FOREIGN KEY(" + CN_SERVICE_CONFIGURATION + ") " 
@@ -260,6 +274,8 @@ public final class QualitySSDbContract {
 				CN_EQUIPMENT + " INTEGER, " +
 				"FOREIGN KEY(" + CN_EQUIPMENT + ") " + 
 				"REFERENCES "+ DbEquipment.TABLE_NAME + "(" + DbEquipment._ID + ")," +
+				"FOREIGN KEY(" + CN_ACTIVITY_TYPE + ") " +
+				"REFERENCES "+ DbServiceType.TABLE_NAME + "(" + DbServiceType._ID + ")," +
 				"FOREIGN KEY(" + CN_SERVICE + ") " + 
 				"REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + "), "+ 
 				"PRIMARY KEY (" + CN_EQUIPMENT + "," + CN_SERVICE + "," + CN_ACTIVITY_TYPE + "));";
@@ -404,6 +420,8 @@ public final class QualitySSDbContract {
 				CN_QUESTION + " INTEGER, " +
 				CN_SECTION + " INTEGER, " +
 				CN_TYPE + " INTEGER, " +
+				"FOREIGN KEY(" + CN_ACTIVITY_TYPE + ") " + 
+				"REFERENCES "+ DbServiceType.TABLE_NAME + "(" + DbServiceType._ID + ")," +
 				"FOREIGN KEY(" + CN_SERVICE + ") " + 
 				"REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + ")," +
 				"FOREIGN KEY(" + CN_QUESTION + ") " + 
@@ -472,6 +490,8 @@ public final class QualitySSDbContract {
 				CN_ACTIVITY_TYPE + " INTEGER, " +
 				CN_SERVICE + " INTEGER, " +
 				CN_QUESTION + " INTEGER, " +
+				"FOREIGN KEY(" + CN_ACTIVITY_TYPE + ") " + 
+				"REFERENCES "+ DbServiceType.TABLE_NAME + "(" + DbServiceType._ID + ")," +
 				"FOREIGN KEY(" + CN_SERVICE + ") " + 
 				"REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + ")," +
 				"FOREIGN KEY(" + CN_QUESTION + ") " + 

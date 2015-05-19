@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -240,6 +241,10 @@ public class UpdateDataReciever extends BroadcastReceiver {
 							start();
 						}
 					});
+			request.setRetryPolicy(new DefaultRetryPolicy(
+					Config.SERVER_GET_DATA_TIMEOUT, 
+					DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
+					DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 			VolleySingleton.getInstance(context).addToRequestQueue(request);
 		}else{
 			PullPushDataService.updateData(context, 

@@ -15,6 +15,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceType;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbTown;
@@ -30,6 +31,7 @@ import com.churpi.qualityss.client.dto.SectorDTO;
 import com.churpi.qualityss.client.dto.ServiceConfigurationDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
+import com.churpi.qualityss.client.dto.ServiceTypeDTO;
 import com.churpi.qualityss.client.dto.StateDTO;
 import com.churpi.qualityss.client.dto.TownDTO;
 
@@ -59,6 +61,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbCustomer.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbSector.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEmployee.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbServiceType.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbService.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceConfiguration.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceInstance.CREATE_TABLE);
@@ -189,6 +192,21 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 					if(count==0){
 						values.put(DbSection._ID, section.getPaseRevistaSeccionId());
 						db.insert(DbSection.TABLE_NAME, null, values);
+					}
+				}
+			}
+			
+			if(data.getTiposServicio() != null){
+				for(ServiceTypeDTO serviceType : data.getTiposServicio()){
+					ContentValues values = new ContentValues();
+					values.put(DbServiceType.CN_TITLE, serviceType.getNombre());
+
+					count = db.update(DbServiceType.TABLE_NAME, values, 
+							DbServiceType._ID + "=?", 
+							new String[]{String.valueOf(serviceType.getTipoServicioId())});
+					if(count==0){
+						values.put(DbServiceType._ID, serviceType.getTipoServicioId());
+						db.insert(DbServiceType.TABLE_NAME, null, values);
 					}
 				}
 			}

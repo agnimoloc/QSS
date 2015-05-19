@@ -10,6 +10,16 @@ public class DataDTO {
 	EmployeeDTO[] Elementos;
 	ServiceDTO[] Servicios;
 	SectionDTO[] Secciones;
+	ServiceTypeDTO[] TiposServicio;
+
+	
+	public ServiceTypeDTO[] getTiposServicio() {
+		return TiposServicio;
+	}
+
+	public void setTiposServicio(ServiceTypeDTO[] tiposServicio) {
+		TiposServicio = tiposServicio;
+	}
 
 	public ServiceDTO[] getServicios() {
 		return Servicios;

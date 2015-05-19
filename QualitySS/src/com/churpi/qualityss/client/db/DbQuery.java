@@ -11,6 +11,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswer
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSection;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
@@ -24,15 +25,18 @@ public class DbQuery {
 	
 	public static final String SERVICES_BY_SECTOR = 
 			"SELECT "
-					+ "s." + DbService._ID + ", "
-					+ "i." + DbServiceInstance.CN_STATUS + ", "
-					+ "s." + DbService.CN_CODE + ", "
-					+ "i." + DbServiceInstance.CN_FINISH_DATETIME + " "
+				+ "s." + DbService._ID + ", "
+				+ "i." + DbServiceInstance.CN_STATUS + ", "
+				+ "s." + DbService.CN_CODE + ", "
+				+ "i." + DbServiceInstance.CN_FINISH_DATETIME + " "
 			+ "FROM " + DbService.TABLE_NAME + " s "
+			+ "INNER JOIN " + DbServiceConfiguration.TABLE_NAME + " sc ON "
+				+ "sc." + DbServiceConfiguration.CN_SERVICE + " = s." + DbService._ID + " AND "
+				+ "sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE +" = ? "
 			+ "LEFT JOIN " + DbServiceInstance.TABLE_NAME + " i ON "
-				+ "i." + DbServiceInstance.CN_SERVICE + " = s." + DbService._ID + " AND "
-				+ "i." + DbServiceInstance.CN_ACTIVITY_TYPE + " = ? and "
-				+ "s." + DbService.CN_SECTOR + " = ?";
+				+ "i." + DbServiceInstance.CN_SERVICE + " = sc." + DbServiceConfiguration.CN_SERVICE + " AND "
+				+ "i." + DbServiceInstance.CN_ACTIVITY_TYPE + " = sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE + " "
+			+ "WHERE s." + DbService.CN_SECTOR + " = ?";
 	
 	public static final String EMPLOYEES_BY_SERVICE = 
 			"SELECT e.* "
@@ -142,7 +146,7 @@ public class DbQuery {
 				+ "END AS " + DbSurveyQuestionAnswer.CN_COMMENT + " "
 			+ "FROM " + DbServiceInstance.TABLE_NAME + " si "
 			+ "INNER JOIN " + DbSurveyQuestion.TABLE_NAME + " sq ON "			
-				+ "sq." + DbSurveyQuestion.CN_SERVICE + " = si." + DbServiceInstance.CN_SERVICE + " "
+				+ "sq." + DbSurveyQuestion.CN_SERVICE + " = si." + DbServiceInstance.CN_SERVICE + " AND "
 				+ "sq." + DbSurveyQuestion.CN_ACTIVITY_TYPE + " = si." + DbServiceInstance.CN_ACTIVITY_TYPE + " "
 			+ "INNER JOIN " + DbQuestion.TABLE_NAME + " q ON "
 				+ "q." + DbQuestion._ID + " = sq." + DbSurveyQuestion.CN_QUESTION + " "
@@ -165,5 +169,11 @@ public class DbQuery {
 			+ "INNER JOIN " + DbTown.TABLE_NAME + " t ON "
 					+ "t." + DbTown._ID + " = a." + DbAddress.CN_TOWN + " "
 			+ "WHERE a." + DbAddress._ID + " = ?";
-	
+
+	/*public static final String GET_ACTIVITIES = 
+			"SELECT DISTINCT "
+					+ DbServiceConfiguration.CN_ACTIVITY_TYPE +", "
+					+ DbServiceConfiguration.CN_TITLE +
+			" FROM "+ DbServiceConfiguration.TABLE_NAME;*/
+
 }
