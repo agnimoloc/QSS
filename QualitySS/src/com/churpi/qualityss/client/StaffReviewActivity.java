@@ -38,8 +38,7 @@ import android.widget.Toast;
 
 public class StaffReviewActivity extends Activity {
 
-	public static final String ACTION_EMPLOYEE = "employee";
-	public static final String ACTION_SERVICE = "service";
+
 
 	int employeeId;
 	int serviceInstanceId;
@@ -58,7 +57,7 @@ public class StaffReviewActivity extends Activity {
 
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 		Button button = (Button)findViewById(R.id.button4);
-		if(getIntent().getAction().compareTo(ACTION_EMPLOYEE)==0){
+		if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 			employeeId = Ses.getInstance(this).getEmployeeId();
 			employeeName = Ses.getInstance(this).getEmployeeName();
 			button.setVisibility(View.GONE);			
@@ -75,14 +74,14 @@ public class StaffReviewActivity extends Activity {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				Cursor c = null;
-				if(getIntent().getAction().compareTo(ACTION_EMPLOYEE)==0){
+				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					c = db.rawQuery(DbQuery.STAFF_REVIEW, 
 							new String[]{
 							String.valueOf(employeeId), 
 							String.valueOf(serviceInstanceId)
 					}
 							);
-				}else if(getIntent().getAction().compareTo(ACTION_SERVICE)==0){
+				}else if(getIntent().getAction().compareTo(Constants.ACTION_SERVICE)==0){
 					c = db.rawQuery(DbQuery.SERVICE_REVIEW, 
 							new String[]{
 							String.valueOf(serviceInstanceId)
@@ -157,35 +156,7 @@ public class StaffReviewActivity extends Activity {
 	}
 
 	public void onClick_finish(View v){
-		boolean finish = (Boolean)DbTrans.write(this, new DbTrans.Db() {
-			@Override
-			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				String msg = null;
-				Cursor cur = db.rawQuery(DbQuery.STAFF_INVENTORY_NULL_RESULT,  
-						new String[]{String.valueOf(employeeId)});
-				if(cur.getCount() > 0){
-					msg = getString(R.string.msg_fault_staff_inventory);
-				}
-				cur.close();
-				cur = db.rawQuery(DbQuery.STAFF_REVIEW_NULL_RESULT,
-						new String[]{String.valueOf(employeeId),String.valueOf(serviceInstanceId)
-				});
-				if(cur.getCount() > 0){
-					msg = (msg != null ? msg + "\n":"")+ getString(R.string.msg_fault_staff_review);
-				}
-				cur.close();
-				if(msg == null){
-					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.FINALIZED);
-					return true;
-				}else{					
-					Alerts.showError(context, msg, R.string.msg_cannot_finish_staff_review);
-				}
-				return false;
-			}
-		}); 
-		if(finish){
-			moveNext();
-		}
+		moveNext();
 	}
 
 	public void onClick_survey(View v){				
@@ -223,9 +194,15 @@ public class StaffReviewActivity extends Activity {
 	}
 	
 	private void moveNext(){
-		startActivity(
-				WorkflowHelper.process(this, android.R.id.button3)
+		if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+			startActivity(
+				WorkflowHelper.process(this, android.R.id.button3, getIntent().getAction())
 				);
+		}else{
+			startActivity(
+					WorkflowHelper.process(this, android.R.id.button2, getIntent().getAction())
+					);
+		}
 	}
 
 	public void updateItem(QuestionDTO currentQuestion){
@@ -235,7 +212,7 @@ public class StaffReviewActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				QuestionDTO currentQuestion = (QuestionDTO)parameter;
 
-				if(getIntent().getAction().compareTo(ACTION_EMPLOYEE)==0){
+				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
 
 					ContentValues values = new ContentValues();
@@ -296,7 +273,7 @@ public class StaffReviewActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
-				if(getIntent().getAction().compareTo(ACTION_EMPLOYEE)==0){
+				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					values.put(DbEmployee.CN_REVIEW_COMMENT, comment);
 					db.update(DbEmployee.TABLE_NAME, 
 							values, 
@@ -337,12 +314,12 @@ public class StaffReviewActivity extends Activity {
 	private File getDestImage(int id){
 		String fileName = null;
 		String action = getIntent().getAction();
-		if(action.compareTo(ACTION_EMPLOYEE)== 0){
+		if(action.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 			fileName = String.format(Constants.PHOTO_REVIEW_EMPLOYEE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					Ses.getInstance(this).getEmployeeId(),
 					id);
-		}else if(action.compareTo(ACTION_SERVICE)== 0){
+		}else if(action.compareTo(Constants.ACTION_SERVICE)== 0){
 			fileName = String.format(Constants.PHOTO_REVIEW_SERVICE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					id);			
@@ -355,7 +332,7 @@ public class StaffReviewActivity extends Activity {
 		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				if(getIntent().getAction().compareTo(ACTION_EMPLOYEE)==0){
+				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
 							DbEmployee.TABLE_NAME, 
 							new String[]{DbEmployee.CN_REVIEW_COMMENT}, 

@@ -4,6 +4,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
+import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
@@ -205,90 +206,18 @@ public class StaffReviewListActivity extends Activity {
 		startActivityForResult(
 				WorkflowHelper.process(this, 
 						R.id.gridView1,
-						StaffInventoryActivity.ACTION_EMPLOYEE),REQUEST_INVENTORY);
+						Constants.ACTION_EMPLOYEE),REQUEST_INVENTORY);
 	}
 
 	public void onClick_finish(View v){
 
-		boolean canFinish = (Boolean)DbTrans.read(this, new DbTrans.Db() {
-
-			@Override
-			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				Cursor cur = db.rawQuery(
-						DbQuery.EMPLOYEES_SERVICE_NOT_END, 
-						new String[]{String.valueOf(serviceInstanceId)});
-
-				String msg = null;
-				if(cur.getCount() > 0){
-					msg = getString(R.string.msg_there_are_employees_not_finalized);
-				}
-				cur.close();
-
-				cur = db.rawQuery(DbQuery.SERVICE_INVENTORY_NULL_RESULT,
-						new String[]{ 
-							String.valueOf(serviceInstanceId),
-							String.valueOf(Ses.getInstance(context).getServiceId()),
-							String.valueOf(Ses.getInstance(context).getActivityType()),
-						}
-				);
-
-				if(cur.getCount() > 0){
-					msg = (msg != null ? msg + "\n":"")+  getString(R.string.msg_fault_service_inventory);
-				}
-
-				if(msg != null){
-					Alerts.showError(context, msg, R.string.msg_cannot_finish_service);
-					return false;
-				}
-
-				return true;
-			}
-		});
-
-		if(canFinish){
-			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-			dialogBuilder.setTitle(R.string.ttl_finish_service);
-			dialogBuilder.setMessage(R.string.msg_finish_service);
-			dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
-			dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					DbTrans.write(getBaseContext(), new DbTrans.Db() {
-						@Override
-						public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-							ContentValues values = new ContentValues();
-							values.put(DbServiceInstance.CN_STATUS, DbServiceInstance.ServiceStatus.FINALIZED);
-							values.put(DbServiceInstance.CN_FINISH_DATETIME, DateHelper.getCurrentTime());
-							db.update(DbServiceInstance.TABLE_NAME, values, DbServiceInstance._ID + "=?", new String[]{String.valueOf(serviceInstanceId)});							
-							return null;
-						}
-					});
-					UpdateDataReciever.getInstance().force();
-					
-					
-					startActivity(
-							WorkflowHelper.process(
-									StaffReviewListActivity.this,
-									android.R.id.button1
-							)
-					);
-					
-					/*Intent in tent = new Intent(getApplicationContext(), SectorListActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);*/
-					dialog.dismiss();
-
-				}
-			});
-			dialogBuilder.create().show();		
-		}
+		startActivity(
+				WorkflowHelper.process(
+						StaffReviewListActivity.this,
+						android.R.id.button1,
+						Constants.ACTION_SERVICE
+				)
+		);
 	}
 
 	private void addComments(){

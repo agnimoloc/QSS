@@ -141,6 +141,22 @@ public final class QualitySSDbContract {
 				cur.close();
 			}
 		}
+		
+		public static void clean(SQLiteDatabase db, int employeeId){
+			String[] whereArgs = new String[]{String.valueOf(employeeId)}; 
+			
+			db.delete(DbEmployeeEquipmentInventory.TABLE_NAME, DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=?", whereArgs);
+			
+			ContentValues values = new ContentValues();
+			values.putNull(DbEmployee.CN_STATUS);
+			values.putNull(DbEmployee.CN_BARCODECHECK);
+			values.putNull(DbEmployee.CN_INVENTORY_COMMENT);
+			values.putNull(DbEmployee.CN_REVIEW_COMMENT);
+			values.putNull(DbEmployee.CN_SURVEY_COMMENT);
+			
+			db.update(DbEmployee.TABLE_NAME, values, DbEmployee._ID + "=?", whereArgs);			
+			
+		}
 	}
 		
 	public static abstract class DbServiceType implements BaseColumns {
@@ -521,6 +537,15 @@ public final class QualitySSDbContract {
 				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
 				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + ")," +
 				"PRIMARY KEY (" + CN_SERVICE_INSTANCE + "," + CN_QUESTION + "," + CN_EMPLOYEE + "));";
+	}	
+	public static abstract class DbImageToSend implements BaseColumns {
+		public static final String TABLE_NAME = "image_to_send";
+		public static final String CN_URL = "url";
+		
+		public static final String CREATE_TABLE = 
+				"CREATE TABLE " + TABLE_NAME + "("+ 
+				CN_URL + " TEXT," +
+				"PRIMARY KEY (" + CN_URL + "));";
 	}	
 
 }

@@ -170,6 +170,14 @@ public class DbQuery {
 					+ "t." + DbTown._ID + " = a." + DbAddress.CN_TOWN + " "
 			+ "WHERE a." + DbAddress._ID + " = ?";
 
+	public static final String EMPLOYEE_INVENTORY_FAULT =
+			"SELECT e." + DbEquipment.CN_DESCRIPTION + " "
+			+ "FROM " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei "
+			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
+				+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " "
+			+ "WHERE ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE + " = ? AND "
+					+ "ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " = '0' ";
+			
 	/*public static final String GET_ACTIVITIES = 
 			"SELECT DISTINCT "
 					+ DbServiceConfiguration.CN_ACTIVITY_TYPE +", "

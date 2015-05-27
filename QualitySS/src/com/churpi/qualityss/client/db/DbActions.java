@@ -11,6 +11,7 @@ import android.os.Environment;
 
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbImageToSend;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
@@ -41,11 +42,33 @@ public class DbActions {
 				@Override
 				public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 					ServiceInstanceDTO si = (ServiceInstanceDTO)parameter;
-					String serviceEmployees = 
+					/*String serviceEmployees = 
 							"SELECT " + DbServiceEmployee.CN_EMPLOYEE + 
 							" FROM " + DbServiceEmployee.TABLE_NAME + 
-							" WHERE " + DbServiceEmployee.CN_SERVICE + " = ?";
-					db.execSQL(
+							" WHERE " + DbServiceEmployee.CN_SERVICE + " = ?";*/
+					
+					String[] whereArgs = new String[]{ String.valueOf(si.getServicioInstanciaId())};
+					
+					db.delete(DbServiceEquipmentInventory.TABLE_NAME, 
+							DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?", 
+							whereArgs);
+
+					db.delete(DbReviewQuestionAnswerEmployee.TABLE_NAME, 
+							DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE + " = ?", 
+							whereArgs);
+
+					db.delete(DbReviewQuestionAnswerService.TABLE_NAME, 
+							DbReviewQuestionAnswerService.CN_SERVICE_INSTANCE + " = ?", 
+							whereArgs);
+
+					db.delete(DbSurveyQuestionAnswer.TABLE_NAME, 
+							DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + " = ?", 
+							whereArgs);
+
+					db.delete(DbServiceInstance.TABLE_NAME, 
+							DbServiceInstance._ID + " = ? ",
+							whereArgs);
+					/*db.execSQL(
 							"DELETE FROM " + DbServiceEquipmentInventory.TABLE_NAME +
 							" WHERE " + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?", new Object[]{ si.getServicioInstanciaId() });
 					db.execSQL(
@@ -70,12 +93,7 @@ public class DbActions {
 					db.update(DbEmployee.TABLE_NAME, eVal, 
 							DbEmployee._ID + " in ("+ serviceEmployees +")", 
 							new String[]{ String.valueOf(si.getServicioId())});
-					
-					/*db.execSQL(
-							"UPDATE " + DbEmployee.TABLE_NAME + 
-							" SET " + DbEmployee.CN_STATUS + " = NULL " +
-							" WHERE " + DbEmployee._ID + " in ("+ serviceEmployees +")", new Object[]{ si.getServicioId() });*/
-					
+										
 					db.execSQL(
 							"DELETE FROM " + DbServiceInstance.TABLE_NAME + 
 							" WHERE " + DbServiceInstance._ID + " = ? ", new Object[]{ si.getServicioInstanciaId() });
@@ -86,7 +104,7 @@ public class DbActions {
 						if(parts[0]== si.getKey()){
 							file.delete();
 						}
-					}
+					}*/
 					
 					return true;
 				}
@@ -94,5 +112,20 @@ public class DbActions {
 		}
 		return false;
 		
+	}
+	public static void deleteImageAndFromQueue(Context context, File file){
+		DbTrans.write(context, file, new DbTrans.Db() {
+			
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				File file = (File)parameter;
+				db.delete(DbImageToSend.TABLE_NAME, DbImageToSend.CN_URL + " = ?",
+						new String[]{ file.getAbsolutePath() });
+				if(file.exists()){
+					file.delete();
+				}
+				return null;
+			}
+		});
 	}
 }

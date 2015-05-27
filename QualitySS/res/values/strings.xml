@@ -101,11 +101,17 @@
     <string name="cnd_comment_button">Boton de comentario</string>
     <string name="cnd_btn_take_photo">Tomar una foto</string>
     <string name="mnu_comments">Comentarios</string>
-	<string name="inst_comment_inventory">Ingresa los comentarios para el item del inventario seleccionado</string>
-	<string name="inst_comment_inventory_result">Ingresa los comentarios para el resultado del inventario</string>
-	<string name="inst_comment_review">Ingresa los comentarios para el elemento del pase de revista seleccionado</string>
-	<string name="inst_comment_review_result">Ingresa los comentarios el pase de revista</string>
-	<string name="inst_comment_element_result">Ingresa los comentarios sobre los elementos</string>
-	<string name="inst_comment_survey">Ingresa los comentarios sobre la pregunta seleccionada</string>
-	<string name="inst_comment_survey_result">Ingresa los comentarios sobre el examen</string>
+    <string name="inst_comment_inventory">Ingresa los comentarios para el item del inventario seleccionado</string>
+    <string name="inst_comment_inventory_result">Ingresa los comentarios para el resultado del inventario</string>
+    <string name="inst_comment_review">Ingresa los comentarios para el elemento del pase de revista seleccionado</string>
+    <string name="inst_comment_review_result">Ingresa los comentarios el pase de revista</string>
+    <string name="inst_comment_element_result">Ingresa los comentarios sobre los elementos</string>
+    <string name="inst_comment_survey">Ingresa los comentarios sobre la pregunta seleccionada</string>
+    <string name="inst_comment_survey_result">Ingresa los comentarios sobre el examen</string>
+    <string name="msg_send_imgs">Envio de imagen de soporte</string>
+    <string name="msg_send_imgs_start">Iniciando envío&#8230;</string>
+    <string name="msg_send_imgs_sending">Enviando imagen&#8230;</string>
+    <string name="msg_send_imgs_error_response">Problemas en la respuesta del servidor</string>
+    <string name="title_activity_summary">Resumen para %s</string>
+	<string name="sum_inventory_fault">Inventario faltante:</string>
 </resources>

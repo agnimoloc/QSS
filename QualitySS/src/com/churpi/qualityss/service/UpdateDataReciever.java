@@ -1,6 +1,7 @@
 package com.churpi.qualityss.service;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbImageToSend;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
@@ -27,9 +29,11 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInve
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
+import com.churpi.qualityss.client.dto.ImageSendDTO;
 import com.churpi.qualityss.client.dto.ServiceInstanceDTO;
 import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -39,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.widget.Toast;
 
@@ -70,6 +75,7 @@ public class UpdateDataReciever extends BroadcastReceiver {
 		alarmManager = (AlarmManager)(context.getSystemService( Context.ALARM_SERVICE ));
 		pi = PendingIntent.getBroadcast( context, 
 				0,new Intent(Constants.UPDATE_DATA_ACTION),0 );
+		mContext = context;
 	}
 
 	public void start(){
@@ -89,11 +95,11 @@ public class UpdateDataReciever extends BroadcastReceiver {
 
 	public void onReceive(final Context context, Intent intent) {		 
 
-		/*List<String> keys = new ArrayList<String>();
-		DbTrans.read(context, keys, new DbTrans.Db() {
+		
+		/*DbTrans.write(context, dir, new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				List<String> keys = (List<String>)parameter;
+				File dir = (File)parameter;
 				
 					Cursor sCursor = db.query(
 							DbServiceInstance.TABLE_NAME, 
@@ -103,29 +109,32 @@ public class UpdateDataReciever extends BroadcastReceiver {
 							null, null, null);
 					if(sCursor.moveToFirst()){						
 						do{
-							keys.add(sCursor.getString(sCursor.getColumnIndex(DbServiceInstance.CN_KEY)));
+							
 							
 						}while(sCursor.moveToNext());
 					}
 					sCursor.close();
+					
+					
 				return null;
 			}
-		});
+		});*/
 
-		File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-		for(File file :dir.listFiles()){
+		
+		/*for(File file :dir.listFiles()){
 			String[] parts = file.getName().split("_");
 			if(keys.contains(parts[0])){
 				
-				MultipartRequest<ServiceInstanceDTO> fileRequest = new MultipartRequest<ServiceInstanceDTO>(
+				 file.getAbsolutePath()				
+				MultipartRequest<ImageSendDTO> fileRequest = new MultipartRequest<ImageSendDTO>(
 						Config.getUrl(Config.ServerAction.SEND_FILE), 
 						file, 
-						ServiceInstanceDTO.class, 
+						ImageSendDTO.class, 
 						null, //headers 
-						new Response.Listener<ServiceInstanceDTO>() {
+						new Response.Listener<ImageSendDTO>() {
 							@Override
-							public void onResponse(ServiceInstanceDTO arg0) {
-								
+							public void onResponse(ImageSendDTO arg0) {
+								arg0.getFile().delete();
 							}
 						}, 
 						new Response.ErrorListener() {
@@ -138,15 +147,16 @@ public class UpdateDataReciever extends BroadcastReceiver {
 									errorMsg = com.android.volley.TimeoutError.class.getName();
 								if(errorMsg == null)
 									errorMsg = context.getString(R.string.ttl_error);
-
+								
 								Toast.makeText(context, context.getString(R.string.msg_error_send) + errorMsg, Toast.LENGTH_SHORT).show();
-								start();
 							}
 						});
-				
+				fileRequest.setRetryPolicy(new DefaultRetryPolicy(
+						Config.SERVER_GET_DATA_TIMEOUT, 
+						DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 
+						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				VolleySingleton.getInstance(context).addToRequestQueue(fileRequest);
 				
-				file.delete();
 			}
 		}*/
 		
@@ -196,22 +206,28 @@ public class UpdateDataReciever extends BroadcastReceiver {
 								@Override
 								public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 									try {
-										JSONArray services = json.getJSONArray(JSON_LIST_SERVICES);								
+										JSONArray services = json.getJSONArray(JSON_LIST_SERVICES);
+										File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
 										for(int i = 0; i < services.length(); i++){
 											JSONObject service = (JSONObject) services.get(i);
 											ContentValues values = new ContentValues();
 											values.put(DbServiceInstance.CN_STATUS, DbServiceInstance.ServiceStatus.SENT);
-											
+											String key = service.getString(JSON_SERVICE_INSTANCE_KEY); 
 											db.update(DbServiceInstance.TABLE_NAME, values, 
 													DbServiceInstance.CN_KEY + "=?", 
-													new String[]{ service.getString(JSON_SERVICE_INSTANCE_KEY)});
+													new String[]{ key });
+											
+											sendImages(key, db, dir);
 											
 											JSONArray employees = service.getJSONArray(JSON_LIST_EMPLOYEES);
 											for(int j = 0; j < employees.length(); j++){
 												JSONObject employee = (JSONObject) employees.get(j);
-												DbEmployee.setStatus(db, 
+												/*DbEmployee.setStatus(db, 
 														employee.getInt(JSON_EMPLOYEE_ID), 
-														DbEmployee.EmployeeStatus.SENT);
+														DbEmployee.EmployeeStatus.SENT);*/
+												DbEmployee.clean(db, 
+														employee.getInt(JSON_EMPLOYEE_ID));
 											}
 										}
 									} catch (JSONException e) {
@@ -275,6 +291,29 @@ public class UpdateDataReciever extends BroadcastReceiver {
 		}
 	}; 
 	
+	private void sendImages(final String serviceKey, SQLiteDatabase db, File dir){
+		FileFilter filter = new FileFilter() {
+			
+			@Override
+			public boolean accept(File pathname) {
+				if(pathname.isFile()){
+					String[] parts = pathname.getName().split("_");
+					if(parts[0].compareTo(serviceKey)==0){
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+		for(File file :dir.listFiles(filter)){
+			ContentValues values = new ContentValues();
+			values.put(DbImageToSend.CN_URL, file.getAbsolutePath());
+			db.insert(DbImageToSend.TABLE_NAME, null, values);
+		}
+		//UploadImageBroadcast.getInstance().start();
+		WorkflowHelper.uploadImages(mContext);
+	}
+	
 	private JSONObject createJSONService(Cursor c, SQLiteDatabase db) throws JSONException{
 		JSONObject item = new JSONObject();
 		ServiceInstanceDTO si = new ServiceInstanceDTO();
@@ -333,6 +372,7 @@ public class UpdateDataReciever extends BroadcastReceiver {
 		employee.fillFromCursor(c);
 		
 		item.put(JSON_EMPLOYEE_ID, employee.getElementoId());
+				
 		if(employee.getStatus() == null){
 			item.put("Omitido", true);
 		}else{

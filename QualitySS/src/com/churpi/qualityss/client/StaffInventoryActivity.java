@@ -34,9 +34,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class StaffInventoryActivity extends Activity {
-
-	public static final String ACTION_EMPLOYEE = "employee";
-	public static final String ACTION_SERVICE = "service";
 	
 	private String mAction;
 	private int selectedId;
@@ -57,7 +54,7 @@ public class StaffInventoryActivity extends Activity {
 		
 		TextView text = (TextView)findViewById(android.R.id.text1);
 		mAction =getIntent().getAction(); 
-		if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
+		if(mAction.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 			setTitle(R.string.title_activity_staff_inventory);
 			text.setText(String.format(getString(R.string.inst_equipment_exist_element, Ses.getInstance(this).getEmployeeName())));
 		}else{
@@ -83,7 +80,7 @@ public class StaffInventoryActivity extends Activity {
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 					return db.rawQuery(DbQuery.STAFF_INVENTORY, 
 							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
 				}else{
@@ -150,12 +147,12 @@ public class StaffInventoryActivity extends Activity {
 	private File getDestImage(int id){
 		String fileName = null;
 		
-		if(mAction.compareTo(ACTION_EMPLOYEE)== 0){
+		if(mAction.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 			fileName = String.format(Constants.PHOTO_INVENTORY_EMPLOYEE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					Ses.getInstance(this).getEmployeeId(),
 					id);
-		}else if(mAction.compareTo(ACTION_SERVICE)== 0){
+		}else if(mAction.compareTo(Constants.ACTION_SERVICE)== 0){
 			fileName = String.format(Constants.PHOTO_INVENTORY_SERVICE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					id);			
@@ -179,7 +176,7 @@ public class StaffInventoryActivity extends Activity {
 		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
 							DbEmployeeEquipmentInventory.TABLE_NAME, 
 							new String[]{DbEmployeeEquipmentInventory.CN_COMMENT}, 
@@ -218,7 +215,7 @@ public class StaffInventoryActivity extends Activity {
 		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
 							DbEmployee.TABLE_NAME, 
 							new String[]{DbEmployee.CN_INVENTORY_COMMENT}, 
@@ -307,7 +304,7 @@ public class StaffInventoryActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
-				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					values.put(DbEmployee.CN_INVENTORY_COMMENT, comment);
 					db.update(DbEmployee.TABLE_NAME, 
 							values, 
@@ -332,7 +329,7 @@ public class StaffInventoryActivity extends Activity {
 				InventoryUpdateItem item = (InventoryUpdateItem)parameter;
 				
 				ContentValues values = new ContentValues();
-				if(mAction.compareTo(ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					int employeeId = Ses.getInstance(context).getEmployeeId();
 					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
 					if(item.isValue())

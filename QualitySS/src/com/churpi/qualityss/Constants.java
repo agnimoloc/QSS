@@ -8,6 +8,10 @@ public final class Constants {
 	public static final String UPDATE_DATA_ACTION = 
 			"com.churpi.qualityss.service.UPDATEDATA";
 
+	public static final String UPLOAD_IMAGE_ACTION = 
+			"com.churpi.qualityss.service.UPLOADIMAGE";
+
+	
 	public static final String PULL_PUSH_DATA_REFRESH = 
 			"com.churpi.qualityss.service.PUSHPULLDATA_FINISH";
 
@@ -48,6 +52,9 @@ public final class Constants {
 	public static final int ACTIVITY_TYPE_FIRE = 2;
 	public static final int ACTIVITY_TYPE_HEALTH = 3;
 	public static final int ACTIVITY_TYPE_REQUEST = 4;
+	
+	public static final String ACTION_EMPLOYEE = "employee";
+	public static final String ACTION_SERVICE = "service";
 	
 	/*public static final String EXTRA_TYPE = "extraType";
 	public static final String EXTRA_SERVICE_ID = "extraServiceId";*/

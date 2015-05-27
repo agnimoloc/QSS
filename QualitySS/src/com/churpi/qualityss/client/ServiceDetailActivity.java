@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.churpi.qualityss.Config;
+import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbActions;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
@@ -193,7 +194,7 @@ public class ServiceDetailActivity extends Activity {
 			startActivity(
 					WorkflowHelper.process(this,
 							R.id.button4,
-							StaffInventoryActivity.ACTION_SERVICE));
+							Constants.ACTION_SERVICE));
 		}else{
 			Date sentDate =  DateHelper.getDateFromDb(serviceInstance.getFechaFin());
 			Calendar cal = Calendar.getInstance();

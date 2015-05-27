@@ -11,14 +11,14 @@ public class Config {
 	private static final String SERVER_GET_DATA = "api/ServiceApi/GetServices";
 	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPassword";
 	private static final String SERVER_SEND_DATA = "api/EvaluacionApi/SendServices";
-	private static final String SERVER_SEND_FILE = "api/EvaluacionApi/FileUpload";
+	private static final String SERVER_SEND_FILE = "api/FileUpload";
 	
 	public static final String SERVER_GET_FILE_FLD_TIMESTAMP = "timestamp";
 	
 	public static final int SERVER_GET_FILE_TIMEOUT = 1000 * 60;
 	public static final int SERVER_GET_DATA_TIMEOUT = 10000;
 	
-	public static final int REFRESH_TIME = 600000;
+	public static final int REFRESH_TIME = 6000;
 	
 	public static final int HOURS_TO_RESET_SENT_SERVICE = 1;
 	

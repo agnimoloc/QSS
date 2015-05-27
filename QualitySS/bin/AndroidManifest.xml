@@ -33,6 +33,11 @@
             android:name="com.churpi.qualityss.service.PullPushDataService"
             android:exported="false" >
         </service>
+        
+        <service
+            android:name="com.churpi.qualityss.service.UploadImageService"
+            android:exported="false" >
+        </service>
 
         <activity
             android:name=".LoginActivity"
@@ -99,6 +104,10 @@
         <activity
             android:name=".MainMenuActivity"
             android:label="@string/title_activity_main_menu" >
+        </activity>
+        <activity
+            android:name=".SummaryActivity"
+            android:label="@string/title_activity_summary" >
         </activity>
     </application>
 

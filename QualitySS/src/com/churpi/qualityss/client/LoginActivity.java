@@ -7,8 +7,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.helper.WorkflowHelper;
 import com.churpi.qualityss.service.DownloadFileReciever;
+import com.churpi.qualityss.service.PullPushDataService;
 import com.churpi.qualityss.service.UpdateDataReciever;
+import com.churpi.qualityss.service.UploadImageService;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
@@ -45,6 +48,7 @@ public class LoginActivity extends Activity {
 		
 		UpdateDataReciever.createInstance(this);
 		downloadRecievier = new DownloadFileReciever(this);
+		
         registerReceiver(UpdateDataReciever.getInstance(), new IntentFilter(Constants.UPDATE_DATA_ACTION) );
         registerReceiver(downloadRecievier, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE) );
 	}
@@ -54,6 +58,7 @@ public class LoginActivity extends Activity {
 		unregisterReceiver(UpdateDataReciever.getInstance());
 		unregisterReceiver(downloadRecievier);
 		UpdateDataReciever.getInstance().dispose();
+		
 		downloadRecievier.dispose();
 		
 		
@@ -96,12 +101,7 @@ public class LoginActivity extends Activity {
 							.setPassHashcode(password.hashCode())
 							.setEmployee(employeeId)
 							.commit();
-							/*SharedPreferences pref = Constants.getPref(getBaseContext());
-							Editor editor = pref.edit();
-							editor.putString(Constants.PREF_ACCOUNT, account);
-							editor.putInt(Constants.PREF_PASSHASH, password.hashCode());
-							editor.putInt(Constants.PREF_EMPLOYEE, employeeId);
-							editor.commit();*/							
+					
 							startMainActivity();
 						}else{
 							Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
@@ -132,7 +132,7 @@ public class LoginActivity extends Activity {
 			VolleySingleton.getInstance(this).addToRequestQueue(request);    
 		} else if(valid == VALID_USER ){
 			Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
-		} else if(valid == VALID_USER_PASSWORD){
+		} else if(valid == VALID_USER_PASSWORD){			
 			startMainActivity();
 		}
 	}
@@ -160,6 +160,9 @@ public class LoginActivity extends Activity {
 			startActivity(mainMenuActivity);
 			
 			UpdateDataReciever.getInstance().start();
+			//UploadImageBroadcast.getInstance().start();
+
+			WorkflowHelper.uploadImages(this);
 		}
     	
 		super.onActivityResult(requestCode, resultCode, data);
