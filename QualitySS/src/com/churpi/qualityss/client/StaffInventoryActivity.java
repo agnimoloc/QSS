@@ -84,11 +84,16 @@ public class StaffInventoryActivity extends Activity {
 					return db.rawQuery(DbQuery.STAFF_INVENTORY, 
 							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
 				}else{
-					return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
+					/*return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
 							new String[]{
 								String.valueOf(Ses.getInstance(context).getServiceInstanceId()),
 								String.valueOf(Ses.getInstance(context).getServiceId()),
 								String.valueOf(Ses.getInstance(context).getActivityType())
+							}
+					);*/
+					return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
+							new String[]{
+								String.valueOf(Ses.getInstance(context).getServiceInstanceId())
 							}
 					);
 				}

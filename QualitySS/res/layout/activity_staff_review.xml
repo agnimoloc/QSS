@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:onClick="onClick_finish"
-            android:text="@string/finish" />
+            android:text="@string/btn_next" />
 
     </FrameLayout>
 </LinearLayout>

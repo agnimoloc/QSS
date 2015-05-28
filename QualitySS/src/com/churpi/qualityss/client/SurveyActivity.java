@@ -56,8 +56,8 @@ public class SurveyActivity extends Activity {
 		createCursor();
 		ListView list = (ListView)findViewById(R.id.listView1);
 
-		String[] from = new String[]{ DbQuestion.CN_DESCRIPTION};
-		int[] to = new int[]{ android.R.id.text1 };				
+		String[] from = new String[]{ DbQuestion.CN_DESCRIPTION, DbSurveyQuestionAnswer.CN_RESULT };
+		int[] to = new int[]{ android.R.id.text1, android.R.id.text2 };				
 		adapter = new SimpleCursorAdapter(this, 
 				R.layout.item_survey, c, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		list.setAdapter(adapter);

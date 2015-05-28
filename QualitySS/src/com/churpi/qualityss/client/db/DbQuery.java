@@ -69,7 +69,7 @@ public class DbQuery {
 			STAFF_INVENTORY 
 			+ " AND ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "; 
 	
-	public static final String SERVICE_INVENTORY =
+	/*public static final String SERVICE_INVENTORY =
 			"SELECT e." + DbEquipment._ID 
 					+ ", ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
@@ -80,7 +80,24 @@ public class DbQuery {
 			+ "LEFT JOIN " + DbServiceEquipmentInventory.TABLE_NAME + " ei ON "
 				+ "e." + DbEquipment._ID + " = ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " AND "
 				+ "ei." + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ? " 
-			+ "WHERE ee." + DbServiceEquipment.CN_SERVICE + " = ? AND ee." + DbServiceEquipment.CN_ACTIVITY_TYPE + " = ?";
+			+ "WHERE ee." + DbServiceEquipment.CN_SERVICE + " = ? AND ee." + DbServiceEquipment.CN_ACTIVITY_TYPE + " = ?";*/
+	
+	public static final String SERVICE_INVENTORY =
+			"SELECT e." + DbEquipment._ID 
+					+ ", ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
+					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
+					+ ", ei." + DbServiceEquipmentInventory.CN_COMMENT + " "
+			+ "FROM " + DbServiceInstance.TABLE_NAME + " si "
+			+ "INNER JOIN " + DbServiceEquipment.TABLE_NAME + " ee ON "
+					+ "ee." + DbServiceEquipment.CN_SERVICE + " = si." + DbServiceInstance.CN_SERVICE + " AND "
+					+ "ee." + DbServiceEquipment.CN_ACTIVITY_TYPE + " = si." + DbServiceInstance.CN_ACTIVITY_TYPE + " "
+			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
+				+ "e." + DbEquipment._ID + " = ee." + DbServiceEquipment.CN_EQUIPMENT + " "
+			+ "LEFT JOIN " + DbServiceEquipmentInventory.TABLE_NAME + " ei ON "
+				+ "e." + DbEquipment._ID + " = ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " "
+			+ "WHERE ei." + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?";
+	
+	
 	
 	public static final String SERVICE_INVENTORY_NULL_RESULT = 
 			SERVICE_INVENTORY 
@@ -171,13 +188,42 @@ public class DbQuery {
 			+ "WHERE a." + DbAddress._ID + " = ?";
 
 	public static final String EMPLOYEE_INVENTORY_FAULT =
-			"SELECT e." + DbEquipment.CN_DESCRIPTION + " "
-			+ "FROM " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei "
+			"SELECT e." + DbEquipment.CN_DESCRIPTION + ", "
+				+ " ei."+ DbEmployeeEquipmentInventory.CN_COMMENT + ", "
+				+ " ei."+ DbEmployeeEquipmentInventory.CN_CHECKED
+			+ " FROM " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
 				+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " "
 			+ "WHERE ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE + " = ? AND "
-					+ "ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " = '0' ";
-			
+					+ "(ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " = '0' OR "
+							+ "ei." + DbEmployeeEquipmentInventory.CN_COMMENT + " IS NOT NULL) ";
+
+	public static final String EMPLOYEE_REVIEW_SUMMARY =
+			STAFF_REVIEW 
+			+ " AND (ra." + DbReviewQuestionAnswerEmployee.CN_RESULT + " = 'B'"
+			+ " OR ra." + DbReviewQuestionAnswerEmployee.CN_COMMENT + " IS NOT NULL)"
+			+ " ORDER BY s." + DbSection.CN_DESCRIPTION ;
+
+	public static final String EMPLOYEE_SURVEY_SUMMARY =
+			STAFF_SURVEY
+			+ " AND (sa." + DbSurveyQuestionAnswer.CN_RESULT + " IS NOT NULL"
+			+ " OR sa." + DbSurveyQuestionAnswer.CN_COMMENT + " IS NOT NULL)";
+	
+	public static final String SERVICE_INVENTORY_FAULT = 
+			SERVICE_INVENTORY 
+			+ " AND (ei." + DbServiceEquipmentInventory.CN_CHECKED + " = '0' OR "
+			+ "ei." + DbServiceEquipmentInventory.CN_COMMENT + " IS NOT NULL) ";
+	
+	public static final String SERVICE_REVIEW_SUMMARY = 
+			SERVICE_REVIEW
+			+ " AND (ra." + DbReviewQuestionAnswerService.CN_RESULT + " = 'B'"
+			+ " OR ra." + DbReviewQuestionAnswerService.CN_COMMENT + " IS NOT NULL)"
+			+ " ORDER BY s." + DbSection.CN_DESCRIPTION ;
+	
+	public static final String EMPLOYEES_SERVICE_FINISHED = 
+			EMPLOYEES_BY_SERVICE
+			+ " AND e." + DbEmployee.CN_STATUS + " = '" + DbEmployee.EmployeeStatus.FINALIZED + "'";
+
 	/*public static final String GET_ACTIVITIES = 
 			"SELECT DISTINCT "
 					+ DbServiceConfiguration.CN_ACTIVITY_TYPE +", "

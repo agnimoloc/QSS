@@ -330,12 +330,17 @@ public class UpdateDataReciever extends BroadcastReceiver {
 		if(si.getComentariosElementos()!= null)
 			item.put("ComentariosElementos", si.getComentariosElementos());
 		
-		Cursor cInvent = db.rawQuery(DbQuery.SERVICE_INVENTORY, 
+		/*Cursor cInvent = db.rawQuery(DbQuery.SERVICE_INVENTORY, 
 				new String[]{ 
 					String.valueOf(si.getServicioInstanciaId()),
 					String.valueOf(si.getServicioId()),
 					String.valueOf(si.getTipo())
 				}
+		);*/
+		Cursor cInvent = db.rawQuery(DbQuery.SERVICE_INVENTORY, 
+			new String[]{ 
+				String.valueOf(si.getServicioInstanciaId())
+			}
 		);
 		JSONArray inventory = new JSONArray();
 		item.put("Inventario", inventory);
