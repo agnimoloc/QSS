@@ -94,8 +94,9 @@ public class DbQuery {
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
 				+ "e." + DbEquipment._ID + " = ee." + DbServiceEquipment.CN_EQUIPMENT + " "
 			+ "LEFT JOIN " + DbServiceEquipmentInventory.TABLE_NAME + " ei ON "
-				+ "e." + DbEquipment._ID + " = ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " "
-			+ "WHERE ei." + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?";
+				+ "ei." + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = si." + DbServiceInstance._ID + " AND "
+				+ "ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " = e." + DbEquipment._ID + " "
+			+ "WHERE si." + DbServiceInstance._ID + " = ?";
 	
 	
 	

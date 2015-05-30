@@ -11,8 +11,16 @@ public class DataDTO {
 	ServiceDTO[] Servicios;
 	SectionDTO[] Secciones;
 	ServiceTypeDTO[] TiposServicio;
+	NotificationDTO[] Notificaciones;
+			
+	public NotificationDTO[] getNotificaciones() {
+		return Notificaciones;
+	}
 
-	
+	public void setNotificaciones(NotificationDTO[] notificaciones) {
+		Notificaciones = notificaciones;
+	}
+
 	public ServiceTypeDTO[] getTiposServicio() {
 		return TiposServicio;
 	}

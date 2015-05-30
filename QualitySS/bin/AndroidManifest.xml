@@ -33,7 +33,6 @@
             android:name="com.churpi.qualityss.service.PullPushDataService"
             android:exported="false" >
         </service>
-        
         <service
             android:name="com.churpi.qualityss.service.UploadImageService"
             android:exported="false" >
@@ -108,6 +107,10 @@
         <activity
             android:name=".SummaryActivity"
             android:label="@string/title_activity_summary" >
+        </activity>
+        <activity
+            android:name=".NotificationsActivity"
+            android:label="@string/title_activity_notifications" >
         </activity>
     </application>
 

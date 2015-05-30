@@ -113,16 +113,20 @@
     <string name="msg_send_imgs_sending">Enviando imagen&#8230;</string>
     <string name="msg_send_imgs_error_response">Problemas en la respuesta del servidor</string>
     <string name="title_activity_summary">Resumen para %s</string>
-	<string name="sum_inventory_fault">Inventario faltante:</string>
-	<string name="sum_review_summary">Pase de revista para revisar:</string>
-	<string name="sum_survey_summary">Examen:</string>
-	<string name="sum_comment">Comentarios:</string>
-	<string name="sum_result">Resultado:</string>
-	<string name="sum_no_response">[SIN RESPUESTA]</string>
-	<string name="sum_inventory_comment">Comentario sobre el inventario:</string>
-	<string name="sum_review_comment">Comentario sobre el pase de revista:</string>
-	<string name="sum_survey_comment">Comentario sobre el examen:</string>
-	<string name="sum_employee_comment">Comentario sobre los empleados:</string>
-	<string name="sum_no_important_data">Nada relevante para mostrar</string>
-	<string name="btn_close">Cerrar</string>
+    <string name="sum_inventory_fault">Inventario faltante:</string>
+    <string name="sum_review_summary">Pase de revista para revisar:</string>
+    <string name="sum_survey_summary">Examen:</string>
+    <string name="sum_comment">Comentarios:</string>
+    <string name="sum_result">Resultado:</string>
+    <string name="sum_no_response">SIN RESPUESTA</string>
+    <string name="sum_inventory_comment">Comentario sobre el inventario:</string>
+    <string name="sum_review_comment">Comentario sobre el pase de revista:</string>
+    <string name="sum_survey_comment">Comentario sobre el examen:</string>
+    <string name="sum_employee_comment">Comentario sobre los empleados:</string>
+    <string name="sum_no_important_data">Nada relevante para mostrar</string>
+    <string name="btn_close">Cerrar</string>
+    <string name="title_activity_notifications">Notificaciones</string>
+    <string name="img_info">Imagen de información</string>
+    <string name="btn_back">Atras</string>
+
 </resources>

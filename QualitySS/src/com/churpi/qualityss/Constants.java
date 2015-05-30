@@ -52,6 +52,7 @@ public final class Constants {
 	public static final int ACTIVITY_TYPE_FIRE = 2;
 	public static final int ACTIVITY_TYPE_HEALTH = 3;
 	public static final int ACTIVITY_TYPE_REQUEST = 4;
+	public static final int ACTIVITY_TYPE_WARNING = 5;
 	
 	public static final String ACTION_EMPLOYEE = "employee";
 	public static final String ACTION_SERVICE = "service";

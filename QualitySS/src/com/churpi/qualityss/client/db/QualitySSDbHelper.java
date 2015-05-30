@@ -7,6 +7,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbNotification;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSection;
@@ -24,6 +25,7 @@ import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.dto.EquipmentDTO;
+import com.churpi.qualityss.client.dto.NotificationDTO;
 import com.churpi.qualityss.client.dto.QuestionDTO;
 import com.churpi.qualityss.client.dto.ReviewDTO;
 import com.churpi.qualityss.client.dto.SectionDTO;
@@ -79,6 +81,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbSurveyQuestion.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbSurveyQuestionAnswer.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbImageToSend.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbNotification.CREATE_TABLE);
 	}
 
 	@Override
@@ -301,6 +304,25 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 						}
 					}
 				}			
+			}
+			
+			if(data.getNotificaciones() != null){
+				for(NotificationDTO notification : data.getNotificaciones()){
+					ContentValues values = notification.getContentValues();
+					String where = DbNotification._ID + "=?"; 
+					String[] args = new String[]{String.valueOf(notification.getNotificacionId())};
+					if(notification.getEstatus() != 3){
+						count = db.update(DbNotification.TABLE_NAME, values, 
+								where, 
+								args);
+						if(count == 0){
+							values.put(DbNotification._ID, notification.getNotificacionId());
+							db.insert(DbNotification.TABLE_NAME, null, values);
+						}
+					}else{
+						db.delete(DbNotification.TABLE_NAME, where, args);
+					}
+				}
 			}
 
 			db.setTransactionSuccessful();

@@ -547,5 +547,29 @@ public final class QualitySSDbContract {
 				CN_URL + " TEXT," +
 				"PRIMARY KEY (" + CN_URL + "));";
 	}	
-
+	public static abstract class DbNotification implements BaseColumns {
+		public static final String TABLE_NAME = "notifications";
+		public static final String CN_TITLE = "title";
+		public static final String CN_SERVICE = "serviceId";
+		public static final String CN_EMPLOYEE = "employee";
+		public static final String CN_MESSAGE = "message";
+		public static final String CN_STATUS = "status";
+		public static final String CN_PRIORITY = "priority";
+		public static final String CN_TYPE = "type";
+		
+		public static final String CREATE_TABLE = 
+				"CREATE TABLE " + TABLE_NAME + "("
+						+ _ID + " INTEGER PRIMARY KEY," 
+						+ CN_TITLE  + " TEXT,"
+						+ CN_SERVICE + " INTEGER,"
+						+ CN_EMPLOYEE  + " INTEGER,"
+						+ CN_MESSAGE  + " TEXT,"
+						+ CN_STATUS  + " INTEGER,"
+						+ CN_PRIORITY  + " INTEGER,"
+						+ CN_TYPE  + " INTEGER,"
+						+ "FOREIGN KEY(" + CN_SERVICE + ") "  
+						+ "REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + ")," 
+						+ "FOREIGN KEY(" + CN_EMPLOYEE + ") "  
+						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "));";
+	}	
 }
