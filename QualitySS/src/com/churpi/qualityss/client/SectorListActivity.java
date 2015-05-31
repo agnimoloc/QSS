@@ -3,7 +3,6 @@ package com.churpi.qualityss.client;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 

@@ -1,16 +1,11 @@
 package com.churpi.qualityss.service;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
@@ -28,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.util.LongSparseArray;
 
 public class DownloadFileReciever extends BroadcastReceiver {

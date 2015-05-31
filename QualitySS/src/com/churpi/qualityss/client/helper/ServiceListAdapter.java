@@ -2,14 +2,12 @@ package com.churpi.qualityss.client.helper;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Date;
 
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
-import com.churpi.qualityss.client.dto.ServiceDTO;
 
 import android.content.Context;
 import android.database.Cursor;

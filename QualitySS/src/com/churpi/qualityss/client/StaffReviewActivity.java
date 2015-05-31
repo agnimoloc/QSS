@@ -7,12 +7,11 @@ import java.util.List;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.dto.QuestionDTO;
-import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.StaffReviewQuestionAdapter;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
@@ -40,7 +39,7 @@ public class StaffReviewActivity extends Activity {
 
 
 
-	int employeeId;
+	int employeeInstanceId;
 	int serviceInstanceId;
 	String employeeName;
 	QuestionDTO currentQuestion;
@@ -58,7 +57,7 @@ public class StaffReviewActivity extends Activity {
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 		Button button = (Button)findViewById(R.id.button4);
 		if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
-			employeeId = Ses.getInstance(this).getEmployeeId();
+			employeeInstanceId = Ses.getInstance(this).getEmployeeInstanceId();
 			employeeName = Ses.getInstance(this).getEmployeeName();
 			button.setVisibility(View.GONE);			
 		}else{
@@ -76,17 +75,10 @@ public class StaffReviewActivity extends Activity {
 				Cursor c = null;
 				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					c = db.rawQuery(DbQuery.STAFF_REVIEW, 
-							new String[]{
-							String.valueOf(employeeId), 
-							String.valueOf(serviceInstanceId)
-					}
-							);
+							new String[]{String.valueOf(employeeInstanceId)});
 				}else if(getIntent().getAction().compareTo(Constants.ACTION_SERVICE)==0){
 					c = db.rawQuery(DbQuery.SERVICE_REVIEW, 
-							new String[]{
-							String.valueOf(serviceInstanceId)
-					}
-							);
+							new String[]{String.valueOf(serviceInstanceId)});
 
 				}
 				List<QuestionDTO> questions = new ArrayList<QuestionDTO>(); 
@@ -213,7 +205,7 @@ public class StaffReviewActivity extends Activity {
 				QuestionDTO currentQuestion = (QuestionDTO)parameter;
 
 				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
-					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+					DbEmployeeInstance.setStatus(db, employeeInstanceId, DbEmployeeInstance.EmployeeStatus.CURRENT);
 
 					ContentValues values = new ContentValues();
 					if(currentQuestion.isResultado())
@@ -223,18 +215,15 @@ public class StaffReviewActivity extends Activity {
 
 					int count = db.update(DbReviewQuestionAnswerEmployee.TABLE_NAME, 
 							values, 
-							DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE + " =? AND "+ 
-									DbReviewQuestionAnswerEmployee.CN_EMPLOYEE + " =? AND "+
-									DbReviewQuestionAnswerEmployee.CN_QUESTION + " =?"
-									, new String[]{
-							String.valueOf(serviceInstanceId),
-							String.valueOf(employeeId),
-							String.valueOf(currentQuestion.getPreguntaId()),
+								DbReviewQuestionAnswerEmployee.CN_EMPLOYEE_INSTANCE + " =? AND "+ 
+								DbReviewQuestionAnswerEmployee.CN_QUESTION + " =?"
+							, new String[]{
+								String.valueOf(employeeInstanceId),
+								String.valueOf(currentQuestion.getPreguntaId()),
 					}
 							);
 					if(count == 0){
-						values.put(DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE , serviceInstanceId);
-						values.put(DbReviewQuestionAnswerEmployee.CN_EMPLOYEE , employeeId);
+						values.put(DbReviewQuestionAnswerEmployee.CN_EMPLOYEE_INSTANCE , employeeInstanceId);
 						values.put(DbReviewQuestionAnswerEmployee.CN_QUESTION , currentQuestion.getPreguntaId());
 						db.insert(DbReviewQuestionAnswerEmployee.TABLE_NAME, null, values);
 					}
@@ -274,17 +263,17 @@ public class StaffReviewActivity extends Activity {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
 				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
-					values.put(DbEmployee.CN_REVIEW_COMMENT, comment);
-					db.update(DbEmployee.TABLE_NAME, 
+					values.put(DbEmployeeInstance.CN_REVIEW_COMMENT, comment);
+					db.update(DbEmployeeInstance.TABLE_NAME, 
 							values, 
-							DbEmployee._ID + "=?", 
-							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+							DbEmployeeInstance._ID + "=?", 
+							new String[]{String.valueOf(employeeInstanceId)});
 				}else{
 					values.put(DbServiceInstance.CN_REVIEW_COMMENT, comment);
 					db.update(DbServiceInstance.TABLE_NAME, 
 							values, 
 							DbServiceInstance._ID + "=?", 
-							new String[]{String.valueOf(Ses.getInstance(context).getServiceInstanceId())});					
+							new String[]{String.valueOf(serviceInstanceId)});					
 				}
 				return null;
 			}
@@ -334,14 +323,13 @@ public class StaffReviewActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
-							DbEmployee.TABLE_NAME, 
-							new String[]{DbEmployee.CN_REVIEW_COMMENT}, 
-							DbEmployee._ID + "=?", 
-							new String[]{
-									String.valueOf(Ses.getInstance(context).getEmployeeId())
-							}, null, null, null);
+							DbEmployeeInstance.TABLE_NAME, 
+							new String[]{DbEmployeeInstance.CN_REVIEW_COMMENT}, 
+							DbEmployeeInstance._ID + "=?", 
+							new String[]{String.valueOf(employeeInstanceId)}, 
+							null, null, null);
 					if(cur.moveToFirst()){
-						return cur.getString(cur.getColumnIndex(DbEmployee.CN_REVIEW_COMMENT));
+						return cur.getString(cur.getColumnIndex(DbEmployeeInstance.CN_REVIEW_COMMENT));
 					}
 					cur.close();	
 				}else{
@@ -349,9 +337,7 @@ public class StaffReviewActivity extends Activity {
 							DbServiceInstance.TABLE_NAME, 
 							new String[]{DbServiceInstance._ID ,DbServiceInstance.CN_REVIEW_COMMENT}, 
 							DbServiceInstance._ID + "=?", 
-							new String[]{
-									String.valueOf(Ses.getInstance(context).getServiceInstanceId())
-							}, null, null, null);
+							new String[]{String.valueOf(serviceInstanceId)}, null, null, null);
 					if(cur.moveToFirst()){
 						return cur.getString(cur.getColumnIndex(DbServiceInstance.CN_REVIEW_COMMENT));
 					}

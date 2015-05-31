@@ -5,8 +5,8 @@ import java.io.File;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
@@ -82,15 +82,8 @@ public class StaffInventoryActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 					return db.rawQuery(DbQuery.STAFF_INVENTORY, 
-							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeInstanceId())});
 				}else{
-					/*return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
-							new String[]{
-								String.valueOf(Ses.getInstance(context).getServiceInstanceId()),
-								String.valueOf(Ses.getInstance(context).getServiceId()),
-								String.valueOf(Ses.getInstance(context).getActivityType())
-							}
-					);*/
 					return db.rawQuery(DbQuery.SERVICE_INVENTORY, 
 							new String[]{
 								String.valueOf(Ses.getInstance(context).getServiceInstanceId())
@@ -185,10 +178,10 @@ public class StaffInventoryActivity extends Activity {
 					Cursor cur = db.query(
 							DbEmployeeEquipmentInventory.TABLE_NAME, 
 							new String[]{DbEmployeeEquipmentInventory.CN_COMMENT}, 
-							DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=? AND " +
+							DbEmployeeEquipmentInventory.CN_EMPLOYEE_INSTANCE + "=? AND " +
 							DbEmployeeEquipmentInventory.CN_EQUIPMENT + "=?", 
 							new String[]{
-									String.valueOf(Ses.getInstance(context).getEmployeeId()), 
+									String.valueOf(Ses.getInstance(context).getEmployeeInstanceId()), 
 									String.valueOf(selectedId)
 							}, null, null, null);
 					if(cur.moveToFirst()){
@@ -222,14 +215,14 @@ public class StaffInventoryActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
-							DbEmployee.TABLE_NAME, 
-							new String[]{DbEmployee.CN_INVENTORY_COMMENT}, 
-							DbEmployee._ID + "=?", 
+							DbEmployeeInstance.TABLE_NAME, 
+							new String[]{DbEmployeeInstance.CN_INVENTORY_COMMENT}, 
+							DbEmployeeInstance._ID + "=?", 
 							new String[]{
-									String.valueOf(Ses.getInstance(context).getEmployeeId())
+									String.valueOf(Ses.getInstance(context).getEmployeeInstanceId())
 							}, null, null, null);
 					if(cur.moveToFirst()){
-						return cur.getString(cur.getColumnIndex(DbEmployee.CN_INVENTORY_COMMENT));
+						return cur.getString(cur.getColumnIndex(DbEmployeeInstance.CN_INVENTORY_COMMENT));
 					}
 					cur.close();	
 				}else{
@@ -310,11 +303,11 @@ public class StaffInventoryActivity extends Activity {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
 				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
-					values.put(DbEmployee.CN_INVENTORY_COMMENT, comment);
-					db.update(DbEmployee.TABLE_NAME, 
+					values.put(DbEmployeeInstance.CN_INVENTORY_COMMENT, comment);
+					db.update(DbEmployeeInstance.TABLE_NAME, 
 							values, 
-							DbEmployee._ID + "=?", 
-							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+							DbEmployeeInstance._ID + "=?", 
+							new String[]{String.valueOf(Ses.getInstance(context).getEmployeeInstanceId())});
 				}else{
 					values.put(DbServiceInstance.CN_INVENTORY_COMMENT, comment);
 					db.update(DbServiceInstance.TABLE_NAME, 
@@ -335,8 +328,8 @@ public class StaffInventoryActivity extends Activity {
 				
 				ContentValues values = new ContentValues();
 				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
-					int employeeId = Ses.getInstance(context).getEmployeeId();
-					DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+					int employeeInstanceId = Ses.getInstance(context).getEmployeeInstanceId();
+					DbEmployeeInstance.setStatus(db, employeeInstanceId, DbEmployeeInstance.EmployeeStatus.CURRENT);
 					if(item.isValue())
 						values.put(DbEmployeeEquipmentInventory.CN_CHECKED, item.getValue());
 					else if (item.isComment())
@@ -344,11 +337,11 @@ public class StaffInventoryActivity extends Activity {
 					
 					int count = db.update(DbEmployeeEquipmentInventory.TABLE_NAME, 
 							values, 
-							DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=? AND " +
+							DbEmployeeEquipmentInventory.CN_EMPLOYEE_INSTANCE + "=? AND " +
 							DbEmployeeEquipmentInventory.CN_EQUIPMENT + "=?", 
-							new String[]{String.valueOf(employeeId), String.valueOf(selectedId)});
+							new String[]{String.valueOf(employeeInstanceId), String.valueOf(selectedId)});
 					if(count == 0){
-						values.put(DbEmployeeEquipmentInventory.CN_EMPLOYEE, employeeId);
+						values.put(DbEmployeeEquipmentInventory.CN_EMPLOYEE_INSTANCE, employeeInstanceId);
 						values.put(DbEmployeeEquipmentInventory.CN_EQUIPMENT, selectedId);
 						db.insert(DbEmployeeEquipmentInventory.TABLE_NAME, null, values);
 					}

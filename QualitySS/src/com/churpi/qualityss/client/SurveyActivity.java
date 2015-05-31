@@ -2,7 +2,7 @@ package com.churpi.qualityss.client;
 
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
 import com.churpi.qualityss.client.helper.Ses;
@@ -35,7 +35,7 @@ public class SurveyActivity extends Activity {
 	private static final int REQUEST_SURVEY_COMMENTS = 2;
 
 
-	int employeeId;
+	int employeeInstanceId;
 	int serviceInstanceId;
 	int questionId;
 	String questionComment;
@@ -50,7 +50,7 @@ public class SurveyActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_survey);
 
-		employeeId = Ses.getInstance(this).getEmployeeId();
+		employeeInstanceId = Ses.getInstance(this).getEmployeeInstanceId();
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 
 		createCursor();
@@ -109,8 +109,7 @@ public class SurveyActivity extends Activity {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {				
 				return db.rawQuery(DbQuery.STAFF_SURVEY, new String[]{
-						String.valueOf(employeeId),
-						String.valueOf(serviceInstanceId)
+						String.valueOf(employeeInstanceId)
 				});
 			}
 		});
@@ -140,12 +139,10 @@ public class SurveyActivity extends Activity {
 				@Override
 				public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 					Intent data = (Intent)parameter;
-					String whereClause = DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + "=? AND "
-							+ DbSurveyQuestionAnswer.CN_EMPLOYEE + "=? AND "
+					String whereClause = DbSurveyQuestionAnswer.CN_EMPLOYEE_INSTANCE + "=? AND "
 							+ DbSurveyQuestionAnswer.CN_QUESTION + "=?";
 					String[] whereArgs = new String[]{
-							String.valueOf(serviceInstanceId), 
-							String.valueOf(employeeId), 
+							String.valueOf(employeeInstanceId), 
 							String.valueOf(questionId) }; 
 
 					String result = data.getStringExtra(CheckpointCommentActivity.FLD_COMMENT);
@@ -160,10 +157,9 @@ public class SurveyActivity extends Activity {
 							whereClause, whereArgs);
 
 					if(count == 0){
-						DbEmployee.setStatus(db, employeeId, DbEmployee.EmployeeStatus.CURRENT);
+						DbEmployeeInstance.setStatus(db, employeeInstanceId, DbEmployeeInstance.EmployeeStatus.CURRENT);
 
-						values.put(DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE, serviceInstanceId);
-						values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE, employeeId);
+						values.put(DbSurveyQuestionAnswer.CN_EMPLOYEE_INSTANCE, employeeInstanceId);
 						values.put(DbSurveyQuestionAnswer.CN_QUESTION, questionId);
 						db.insert(DbSurveyQuestionAnswer.TABLE_NAME, null, values);
 					}
@@ -196,11 +192,11 @@ public class SurveyActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
-				values.put(DbEmployee.CN_SURVEY_COMMENT, comment);
-				db.update(DbEmployee.TABLE_NAME, 
+				values.put(DbEmployeeInstance.CN_SURVEY_COMMENT, comment);
+				db.update(DbEmployeeInstance.TABLE_NAME, 
 						values, 
-						DbEmployee._ID + "=?", 
-						new String[]{String.valueOf(Ses.getInstance(context).getEmployeeId())});
+						DbEmployeeInstance._ID + "=?", 
+						new String[]{String.valueOf(employeeInstanceId)});
 				return null;
 			}
 		});
@@ -211,14 +207,14 @@ public class SurveyActivity extends Activity {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				Cursor cur = db.query(
-						DbEmployee.TABLE_NAME, 
-						new String[]{DbEmployee.CN_SURVEY_COMMENT}, 
-						DbEmployee._ID + "=?", 
+						DbEmployeeInstance.TABLE_NAME, 
+						new String[]{DbEmployeeInstance.CN_SURVEY_COMMENT}, 
+						DbEmployeeInstance._ID + "=?", 
 						new String[]{
-								String.valueOf(Ses.getInstance(context).getEmployeeId())
+								String.valueOf(employeeInstanceId)
 						}, null, null, null);
 				if(cur.moveToFirst()){
-					return cur.getString(cur.getColumnIndex(DbEmployee.CN_SURVEY_COMMENT));
+					return cur.getString(cur.getColumnIndex(DbEmployeeInstance.CN_SURVEY_COMMENT));
 				}
 				cur.close();	
 				return null;

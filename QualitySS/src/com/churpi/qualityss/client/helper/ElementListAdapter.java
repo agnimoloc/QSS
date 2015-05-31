@@ -17,7 +17,7 @@ import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.FixedInfo;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
-import com.churpi.qualityss.client.dto.EmployeeDTO;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 
 public class ElementListAdapter extends SimpleCursorAdapter{
 	LayoutInflater mLayoutInflater;
@@ -44,24 +44,27 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 		
 		Cursor c = getCursor();
 		c.moveToPosition(position);
-		EmployeeDTO employee = new EmployeeDTO();
-		employee.fillFromCursor(c);
+		
+		String status = c.getString(c.getColumnIndex(DbEmployeeInstance.CN_STATUS));
+		String code = c.getString(c.getColumnIndex(DbEmployee.CN_CODE));
+		String plate = c.getString(c.getColumnIndex(DbEmployee.CN_PLATE));
+		String name = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
 		
 		ViewGroup imgContainer = (ViewGroup)img.getParent();
 		imgContainer.setBackground(null);		
-		if(employee.getStatus() != null){
-			if(DbEmployee.EmployeeStatus.CURRENT.compareTo(employee.getStatus())==0){
+		if(status != null){
+			if(DbEmployeeInstance.EmployeeStatus.CURRENT.compareTo(status)==0){
 				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.started));
-			} else if(DbEmployee.EmployeeStatus.FINALIZED.compareTo(employee.getStatus())==0){
+			} else if(DbEmployeeInstance.EmployeeStatus.FINALIZED.compareTo(status)==0){
 				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
-			} else if(DbEmployee.EmployeeStatus.SENT.compareTo(employee.getStatus())==0){
+			} else if(DbEmployeeInstance.EmployeeStatus.SENT.compareTo(status)==0){
 				imgContainer.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
 			}
 		}
 
 		File dir = new File(
 				mContext.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 
-				employee.getCode() + ".jpg");
+				code + ".jpg");
 		if(dir.exists()){
 			img.setImageURI(Uri.fromFile(dir));
 		}else{
@@ -69,11 +72,11 @@ public class ElementListAdapter extends SimpleCursorAdapter{
 		}
 		
 		TextView text = (TextView)layout.findViewById(android.R.id.text1);
-		text.setText(employee.getNombre());
+		text.setText(name);
 		text = (TextView)layout.findViewById(android.R.id.text2);
-		text.setText(FixedInfo.codePrefix + employee.getCode());
+		text.setText(FixedInfo.codePrefix + code);
 		text = (TextView)layout.findViewById(android.R.id.content);
-		text.setText(employee.getMatricula());	
+		text.setText(plate);	
 		return layout;
 	}
 }

@@ -8,23 +8,19 @@ import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
-import com.churpi.qualityss.client.helper.Alerts;
-import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.ElementListAdapter;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
-import com.churpi.qualityss.service.UpdateDataReciever;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -111,13 +107,13 @@ public class StaffReviewListActivity extends Activity {
 				long id) {
 			c.moveToPosition(position);
 
-			String status = c.getString(c.getColumnIndex(DbEmployee.CN_STATUS));
-			if(status != null && DbEmployee.EmployeeStatus.FINALIZED.compareTo(status)==0){
+			String status = c.getString(c.getColumnIndex(DbEmployeeInstance.CN_STATUS));
+			if(status != null && DbEmployeeInstance.EmployeeStatus.FINALIZED.compareTo(status)==0){
 				Toast.makeText(getApplicationContext(), getString(R.string.msg_warning_employee_finalized), Toast.LENGTH_LONG).show();
 				return;
 			}
 
-			int tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployee._ID));;
+			int tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployeeInstance.CN_EMPLOYEE));;
 
 			if(employeeId != tmpEmployeeId ){
 				employeeId = tmpEmployeeId;
@@ -131,10 +127,10 @@ public class StaffReviewListActivity extends Activity {
 				try{
 					startActivityForResult(intent, REQUEST_BARCODE);	
 				}catch (ActivityNotFoundException e){
-					openStaffInventoryActivity();
+					openStaffInventoryActivity(false);
 				}
 			}else{
-				openStaffInventoryActivity();
+				openStaffInventoryActivity(false);
 			}
 		}
 	};
@@ -160,18 +156,7 @@ public class StaffReviewListActivity extends Activity {
 							int resultEmployeeId = Integer.parseInt(arg0);
 							progressDialog.dismiss();
 							if(resultEmployeeId == employeeId){
-								DbTrans.write(getBaseContext(), new DbTrans.Db() {
-									@Override
-									public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-										ContentValues values = new ContentValues();
-										values.put(DbEmployee.CN_BARCODECHECK, 1);
-										db.update(DbEmployee.TABLE_NAME, values, 
-												DbEmployee._ID + "=?", 
-												new String[]{String.valueOf(employeeId)});
-										return null;
-									}
-								});
-								openStaffInventoryActivity();
+								openStaffInventoryActivity(true);
 							}else{
 								Toast.makeText(
 										getBaseContext(), 
@@ -201,8 +186,36 @@ public class StaffReviewListActivity extends Activity {
 		}
 
 	};
+	
+	private void startEmployee(boolean barcodeChequed){
+		int employeeInstanceId = (Integer)DbTrans.write(getBaseContext(), barcodeChequed,  new DbTrans.Db() {
+			@Override
+			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {				
+				boolean barcodeChecked = (Boolean)parameter;
+				Cursor c = db.query(DbEmployeeInstance.TABLE_NAME, 
+						new String[]{ DbEmployeeInstance._ID}, 
+						DbEmployeeInstance.CN_EMPLOYEE + "=? AND " + 
+						DbEmployeeInstance.CN_SERVICE_INSTANCE + "=?", 
+						new String[]{
+							String.valueOf(employeeId),
+							String.valueOf(serviceInstanceId)
+						}, null, null, null);
+				if(c.moveToFirst()){
+					return c.getInt(c.getColumnIndex(DbEmployeeInstance._ID));
+				}else{
+					ContentValues values = new ContentValues();
+					values.put(DbEmployeeInstance.CN_BARCODECHECK, barcodeChecked?1:0);
+					values.put(DbEmployeeInstance.CN_SERVICE_INSTANCE, serviceInstanceId);
+					values.put(DbEmployeeInstance.CN_EMPLOYEE, employeeId);
+					return (int)db.insert(DbEmployeeInstance.TABLE_NAME, null, values);
+				}
+			}
+		});
+		Ses.getInstance(this).setEmployeeInstanceId(employeeInstanceId);
+	}
 
-	private void openStaffInventoryActivity(){
+	private void openStaffInventoryActivity(boolean barcodeChequed){
+		startEmployee(barcodeChequed);
 		startActivityForResult(
 				WorkflowHelper.process(this, 
 						R.id.gridView1,

@@ -4,18 +4,16 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
-import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 
 import com.churpi.qualityss.Config;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbImageToSend;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
-import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance.ServiceStatus;
@@ -37,85 +35,63 @@ public class DbActions {
 				- Calendar.getInstance().getTime().getTime();
 		if (diff <= 0) {
 			serviceInstance.setStatus(null);
-			
+
 			return (Boolean)DbTrans.write(context, serviceInstance, new DbTrans.Db() {
 				@Override
 				public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 					ServiceInstanceDTO si = (ServiceInstanceDTO)parameter;
-					/*String serviceEmployees = 
-							"SELECT " + DbServiceEmployee.CN_EMPLOYEE + 
-							" FROM " + DbServiceEmployee.TABLE_NAME + 
-							" WHERE " + DbServiceEmployee.CN_SERVICE + " = ?";*/
-					
+
 					String[] whereArgs = new String[]{ String.valueOf(si.getServicioInstanciaId())};
-					
+
 					db.delete(DbServiceEquipmentInventory.TABLE_NAME, 
 							DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?", 
-							whereArgs);
-
-					db.delete(DbReviewQuestionAnswerEmployee.TABLE_NAME, 
-							DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE + " = ?", 
 							whereArgs);
 
 					db.delete(DbReviewQuestionAnswerService.TABLE_NAME, 
 							DbReviewQuestionAnswerService.CN_SERVICE_INSTANCE + " = ?", 
 							whereArgs);
 
-					db.delete(DbSurveyQuestionAnswer.TABLE_NAME, 
-							DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + " = ?", 
-							whereArgs);
+					Cursor cEmployees = db.query(DbEmployeeInstance.TABLE_NAME, 
+							new String[]{ DbEmployeeInstance._ID }, 
+							DbEmployeeInstance.CN_SERVICE_INSTANCE + " = ? ", 
+							whereArgs, null, null, null); 
 
+					if(cEmployees.moveToFirst()){
+						do{
+							String[] whereArgsEmp = new String[]{ 
+									String.valueOf(cEmployees.getInt(cEmployees.getColumnIndex(DbEmployeeInstance._ID)))};
+							db.delete(DbReviewQuestionAnswerEmployee.TABLE_NAME, 
+									DbReviewQuestionAnswerEmployee.CN_EMPLOYEE_INSTANCE + " = ?", 
+									whereArgsEmp);
+
+							db.delete(DbEmployeeEquipmentInventory.TABLE_NAME, 
+									DbEmployeeEquipmentInventory.CN_EMPLOYEE_INSTANCE + "=?",
+									whereArgsEmp);
+
+							db.delete(DbSurveyQuestionAnswer.TABLE_NAME, 
+									DbSurveyQuestionAnswer.CN_EMPLOYEE_INSTANCE + " = ?", 
+									whereArgsEmp);
+						}while(cEmployees.moveToNext());
+					}
+
+					db.delete(DbEmployeeInstance.TABLE_NAME, 
+							DbEmployeeInstance.CN_SERVICE_INSTANCE + " = ? ",
+							whereArgs);
+					
 					db.delete(DbServiceInstance.TABLE_NAME, 
 							DbServiceInstance._ID + " = ? ",
 							whereArgs);
-					/*db.execSQL(
-							"DELETE FROM " + DbServiceEquipmentInventory.TABLE_NAME +
-							" WHERE " + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ?", new Object[]{ si.getServicioInstanciaId() });
-					db.execSQL(
-							"DELETE FROM " + DbReviewQuestionAnswerEmployee.TABLE_NAME + 
-							" WHERE " + DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE + " = ?", new Object[]{ si.getServicioInstanciaId() });
-					db.execSQL(
-							"DELETE FROM " + DbReviewQuestionAnswerService.TABLE_NAME + 
-							" WHERE " + DbReviewQuestionAnswerService.CN_SERVICE_INSTANCE + " = ?", new Object[]{ si.getServicioInstanciaId() });
-					db.execSQL(
-							"DELETE FROM " + DbSurveyQuestionAnswer.TABLE_NAME + 
-							" WHERE " + DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + "= ?", new Object[]{ si.getServicioInstanciaId() });
-					db.execSQL(
-							"DELETE FROM " + DbEmployeeEquipmentInventory.TABLE_NAME + 
-							" WHERE " + DbEmployeeEquipmentInventory.CN_EMPLOYEE + " in ("+ serviceEmployees +")", new Object[]{ si.getServicioId() });
-					
-					ContentValues eVal = new ContentValues();
-					eVal.putNull(DbEmployee.CN_STATUS);
-					eVal.putNull(DbEmployee.CN_BARCODECHECK);
-					eVal.putNull(DbEmployee.CN_INVENTORY_COMMENT);
-					eVal.putNull(DbEmployee.CN_REVIEW_COMMENT);
-					eVal.putNull(DbEmployee.CN_SURVEY_COMMENT);
-					db.update(DbEmployee.TABLE_NAME, eVal, 
-							DbEmployee._ID + " in ("+ serviceEmployees +")", 
-							new String[]{ String.valueOf(si.getServicioId())});
-										
-					db.execSQL(
-							"DELETE FROM " + DbServiceInstance.TABLE_NAME + 
-							" WHERE " + DbServiceInstance._ID + " = ? ", new Object[]{ si.getServicioInstanciaId() });
-					
-					File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-					for(File file :dir.listFiles()){
-						String[] parts = file.getName().split("_");
-						if(parts[0]== si.getKey()){
-							file.delete();
-						}
-					}*/
-					
+
 					return true;
 				}
 			});
 		}
 		return false;
-		
+
 	}
 	public static void deleteImageAndFromQueue(Context context, File file){
 		DbTrans.write(context, file, new DbTrans.Db() {
-			
+
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				File file = (File)parameter;

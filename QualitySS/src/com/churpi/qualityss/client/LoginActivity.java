@@ -9,9 +9,7 @@ import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
 import com.churpi.qualityss.service.DownloadFileReciever;
-import com.churpi.qualityss.service.PullPushDataService;
 import com.churpi.qualityss.service.UpdateDataReciever;
-import com.churpi.qualityss.service.UploadImageService;
 import com.churpi.qualityss.service.VolleySingleton;
 
 import android.app.Activity;
@@ -19,8 +17,6 @@ import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -138,9 +134,6 @@ public class LoginActivity extends Activity {
 	}
 	
 	private int validateLocal(String account, String password){
-		/*SharedPreferences pref = Constants.getPref(this);
-		String savedAccount =  pref.getString(Constants.PREF_ACCOUNT, null);
-		int savedPassHash =  pref.getInt(Constants.PREF_PASSHASH, 0);*/
 		String savedAccount =  Ses.getInstance(this).getAccount();
 		int savedPassHash =  Ses.getInstance(this).getPassHashcode();
 		if(savedAccount != null && account.compareTo(savedAccount)==0){
@@ -160,7 +153,6 @@ public class LoginActivity extends Activity {
 			startActivity(mainMenuActivity);
 			
 			UpdateDataReciever.getInstance().start();
-			//UploadImageBroadcast.getInstance().start();
 
 			WorkflowHelper.uploadImages(this);
 		}

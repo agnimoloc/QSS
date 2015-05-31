@@ -67,6 +67,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbService.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceConfiguration.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceInstance.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbEmployeeInstance.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceEmployee.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbEquipment.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbServiceEquipment.CREATE_TABLE);
@@ -391,7 +392,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		status.putExtra(Constants.PULL_PUSH_DATA_STATUS, statusDescription);
 		status.putExtra(Constants.PULL_PUSH_DATA_DESCRIPTION, description);
 		status.putExtra(Constants.PULL_PUSH_DATA_PROGRESS, progress);
-		status.putExtra(Constants.PULL_PUSH_DATA_DATA, 0);
+		//status.putExtra(Constants.PULL_PUSH_DATA_DATA, 0);
 		context.sendBroadcast(status);
 
 	}

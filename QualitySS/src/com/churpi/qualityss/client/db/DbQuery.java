@@ -4,6 +4,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbAddress;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
@@ -39,35 +40,51 @@ public class DbQuery {
 			+ "WHERE s." + DbService.CN_SECTOR + " = ?";
 	
 	public static final String EMPLOYEES_BY_SERVICE = 
-			"SELECT e.* "
+			"SELECT "
+				+ "ei." + DbEmployeeInstance._ID + ", "
+				+ "ei." + DbEmployeeInstance.CN_BARCODECHECK + ", "
+				+ "e." + DbEmployee._ID + " AS " + DbEmployeeInstance.CN_EMPLOYEE +", "
+				+ "ei." + DbEmployeeInstance.CN_INVENTORY_COMMENT + ", "
+				+ "ei." + DbEmployeeInstance.CN_REVIEW_COMMENT + ", "
+				+ "si." + DbServiceInstance._ID + " AS " + DbEmployeeInstance.CN_SERVICE_INSTANCE + ", "
+				+ "ei." + DbEmployeeInstance.CN_STATUS + ", "
+				+ "ei." + DbEmployeeInstance.CN_SURVEY_COMMENT + ", "
+				+ "e." + DbEmployee.CN_CODE + ", "
+				+ "e." + DbEmployee.CN_NAME + ", "
+				+ "e." + DbEmployee.CN_PLATE + " "
 			+ "FROM " + DbServiceInstance.TABLE_NAME + " si " 
 			+ "INNER JOIN " + DbServiceEmployee.TABLE_NAME + " se ON " 
 				+ "se." + DbServiceEmployee.CN_SERVICE + " = si." + DbServiceInstance.CN_SERVICE + " "
 			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON "
 				+ "e." + DbEmployee._ID + " = se." + DbServiceEmployee.CN_EMPLOYEE + " "
+			+ "LEFT JOIN " + DbEmployeeInstance.TABLE_NAME + " ei ON "
+				+ "ei." + DbEmployeeInstance.CN_SERVICE_INSTANCE + " = si." + DbServiceInstance._ID + " AND "
+				+ "ei." + DbEmployeeInstance.CN_EMPLOYEE + " = e." + DbEmployee._ID + " "
 			+ "WHERE si." + DbServiceInstance._ID + " = ? ";
 	
 	public static final String EMPLOYEES_SERVICE_NOT_END = 
 			EMPLOYEES_BY_SERVICE
-			+ "AND e." + DbEmployee.CN_STATUS + " IS NOT NULL "
-			+ "AND e." + DbEmployee.CN_STATUS + " <> '" + DbEmployee.EmployeeStatus.FINALIZED + "'";
+			+ "AND ei." + DbEmployeeInstance.CN_STATUS + " IS NOT NULL "
+			+ "AND ei." + DbEmployeeInstance.CN_STATUS + " <> '" + DbEmployeeInstance.EmployeeStatus.FINALIZED + "'";
 	
 	public static final String STAFF_INVENTORY = 
 			"SELECT e." + DbEquipment._ID 
-					+ ", ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
+					+ ", eii." + DbEmployeeEquipmentInventory.CN_CHECKED + " "
 					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
-					+ ", ei." + DbEmployeeEquipmentInventory.CN_COMMENT + " "
-			+ "FROM " + DbEmployeeEquipment.TABLE_NAME + " ee "
+					+ ", eii." + DbEmployeeEquipmentInventory.CN_COMMENT + " "
+			+ "FROM " + DbEmployeeInstance.TABLE_NAME + " ei "
+			+ "INNER JOIN " + DbEmployeeEquipment.TABLE_NAME + " ee ON "
+				+ "ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ei." + DbEmployeeInstance.CN_EMPLOYEE + " "
 			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
 				+ "e." + DbEquipment._ID + " = ee." + DbEmployeeEquipment.CN_EQUIPMENT + " "
-			+ "LEFT JOIN " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei ON "
-				+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " AND "
-				+ "ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE
-			+ " WHERE ee." + DbEmployeeEquipment.CN_EMPLOYEE + " = ?";
+			+ "LEFT JOIN " + DbEmployeeEquipmentInventory.TABLE_NAME + " eii ON "
+				+ "e." + DbEquipment._ID + " = eii." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " AND "
+				+ "eii." + DbEmployeeEquipmentInventory.CN_EMPLOYEE_INSTANCE + " = ei." + DbEmployeeInstance._ID
+			+ " WHERE ei." + DbEmployeeInstance._ID + " = ?";
 	
 	public static final String STAFF_INVENTORY_NULL_RESULT = 
 			STAFF_INVENTORY 
-			+ " AND ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "; 
+			+ " AND eii." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "; 
 	
 	/*public static final String SERVICE_INVENTORY =
 			"SELECT e." + DbEquipment._ID 
@@ -110,7 +127,9 @@ public class DbQuery {
 					+ "s." + DbSection.CN_DESCRIPTION + " AS " + DbReviewQuestion.CN_SECTION_NAME 
 					+ ", ra." + DbReviewQuestionAnswerEmployee.CN_RESULT + " " 
 					+ ", ra." + DbReviewQuestionAnswerEmployee.CN_COMMENT + " "
-			+ "FROM " + DbServiceInstance.TABLE_NAME + " si "
+			+ "FROM " + DbEmployeeInstance.TABLE_NAME + " ei " 
+			+ "INNER JOIN " + DbServiceInstance.TABLE_NAME + " si ON "
+				+ "si." + DbServiceInstance._ID + " = ei." + DbEmployeeInstance.CN_SERVICE_INSTANCE + " "
 			+ "INNER JOIN " + DbReviewQuestion.TABLE_NAME + " rq ON "
 				+ "si." + DbServiceInstance.CN_SERVICE + " = rq." + DbReviewQuestion.CN_SERVICE + " AND "
 				+ "si." + DbServiceInstance.CN_ACTIVITY_TYPE + " = rq." + DbReviewQuestion.CN_ACTIVITY_TYPE + " AND "
@@ -120,10 +139,9 @@ public class DbQuery {
 			+ "INNER JOIN " + DbSection.TABLE_NAME + " s ON "
 				+ "s." + DbSection._ID + " = rq." + DbReviewQuestion.CN_SECTION + " "
 			+ "LEFT JOIN " + DbReviewQuestionAnswerEmployee.TABLE_NAME + " ra ON "
-				+ "ra." + DbReviewQuestionAnswerEmployee.CN_SERVICE_INSTANCE + " = si." + DbServiceInstance._ID + " AND "
-				+ "q." + DbQuestion._ID + " = ra." + DbReviewQuestionAnswerEmployee.CN_QUESTION + " AND "
-				+ "ra." +  DbReviewQuestionAnswerEmployee.CN_EMPLOYEE + " = ? "
-			+ " WHERE si." + DbServiceInstance._ID + " = ? ";
+				+ "ra." + DbReviewQuestionAnswerEmployee.CN_EMPLOYEE_INSTANCE + " = ei." + DbEmployeeInstance._ID + " AND "
+				+ "q." + DbQuestion._ID + " = ra." + DbReviewQuestionAnswerEmployee.CN_QUESTION + " "
+			+ " WHERE si." + DbEmployeeInstance._ID + " = ? ";
 	
 	public static final String STAFF_REVIEW_NULL_RESULT =
 			STAFF_REVIEW + 
@@ -162,7 +180,9 @@ public class DbQuery {
 				+ "CASE WHEN sa." + DbSurveyQuestionAnswer.CN_COMMENT + " IS NULL "
 				+ "THEN '' ELSE sa." + DbSurveyQuestionAnswer.CN_COMMENT + " "
 				+ "END AS " + DbSurveyQuestionAnswer.CN_COMMENT + " "
-			+ "FROM " + DbServiceInstance.TABLE_NAME + " si "
+			+ "FROM " + DbEmployeeInstance.TABLE_NAME + " ei "
+			+ "INNER JOIN " + DbServiceInstance.TABLE_NAME + " si ON "
+				+ "si." + DbServiceInstance._ID + " = ei." + DbEmployeeInstance.CN_SERVICE_INSTANCE + " "
 			+ "INNER JOIN " + DbSurveyQuestion.TABLE_NAME + " sq ON "			
 				+ "sq." + DbSurveyQuestion.CN_SERVICE + " = si." + DbServiceInstance.CN_SERVICE + " AND "
 				+ "sq." + DbSurveyQuestion.CN_ACTIVITY_TYPE + " = si." + DbServiceInstance.CN_ACTIVITY_TYPE + " "
@@ -170,9 +190,8 @@ public class DbQuery {
 				+ "q." + DbQuestion._ID + " = sq." + DbSurveyQuestion.CN_QUESTION + " "
 			+ "LEFT JOIN " + DbSurveyQuestionAnswer.TABLE_NAME + " sa ON "
 				+ "q." + DbQuestion._ID + " = sa." + DbSurveyQuestionAnswer.CN_QUESTION + " AND "
-				+ "si." + DbServiceInstance._ID + " = sa." + DbSurveyQuestionAnswer.CN_SERVICE_INSTANCE + " AND "
-				+ "sa." +  DbSurveyQuestionAnswer.CN_EMPLOYEE + " = ? "
-			+ " WHERE si." + DbServiceInstance._ID + " = ?";
+				+ "ei." + DbEmployeeInstance._ID + " = sa." + DbSurveyQuestionAnswer.CN_EMPLOYEE_INSTANCE + " "
+			+ " WHERE ei." + DbEmployeeInstance._ID + " = ?";
 	
 	public static final String STAFF_SURVEY_NULL_RESULT =
 			STAFF_SURVEY + 
@@ -189,19 +208,26 @@ public class DbQuery {
 			+ "WHERE a." + DbAddress._ID + " = ?";
 
 	public static final String EMPLOYEE_INVENTORY_FAULT =
-			"SELECT e." + DbEquipment.CN_DESCRIPTION + ", "
-				+ " ei."+ DbEmployeeEquipmentInventory.CN_COMMENT + ", "
-				+ " ei."+ DbEmployeeEquipmentInventory.CN_CHECKED
-			+ " FROM " + DbEmployeeEquipmentInventory.TABLE_NAME + " ei "
-			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
-				+ "e." + DbEquipment._ID + " = ei." + DbEmployeeEquipmentInventory.CN_EQUIPMENT + " "
-			+ "WHERE ei." + DbEmployeeEquipmentInventory.CN_EMPLOYEE + " = ? AND "
-					+ "(ei." + DbEmployeeEquipmentInventory.CN_CHECKED + " = '0' OR "
-							+ "ei." + DbEmployeeEquipmentInventory.CN_COMMENT + " IS NOT NULL) ";
+			STAFF_INVENTORY
+					+ " AND (eii." + DbEmployeeEquipmentInventory.CN_CHECKED + " = '0' OR "
+						+ "eii." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL OR "
+						+ "eii." + DbEmployeeEquipmentInventory.CN_COMMENT + " IS NOT NULL) ";
 
+	public static final String GET_EMPLOYEE_DATA = 
+			"SELECT ei.*, "
+			+ "e." + DbEmployee.CN_CODE + ", "
+			+ "e." + DbEmployee.CN_NAME + ", "
+			+ "e." + DbEmployee.CN_PLATE + " "
+			+ "FROM " + DbEmployeeInstance.TABLE_NAME + " ei "
+			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON "
+				+ "e." + DbEmployee._ID + " = ei." + DbEmployeeInstance.CN_EMPLOYEE + " "
+			+ "WHERE ei." + DbEmployeeInstance._ID + " = ?";
+
+	
 	public static final String EMPLOYEE_REVIEW_SUMMARY =
 			STAFF_REVIEW 
 			+ " AND (ra." + DbReviewQuestionAnswerEmployee.CN_RESULT + " = 'B'"
+			+ " OR ra." + DbReviewQuestionAnswerEmployee.CN_RESULT + " IS NULL "
 			+ " OR ra." + DbReviewQuestionAnswerEmployee.CN_COMMENT + " IS NOT NULL)"
 			+ " ORDER BY s." + DbSection.CN_DESCRIPTION ;
 
@@ -223,7 +249,7 @@ public class DbQuery {
 	
 	public static final String EMPLOYEES_SERVICE_FINISHED = 
 			EMPLOYEES_BY_SERVICE
-			+ " AND e." + DbEmployee.CN_STATUS + " = '" + DbEmployee.EmployeeStatus.FINALIZED + "'";
+			+ " AND ei." + DbEmployeeInstance.CN_STATUS + " = '" + DbEmployeeInstance.EmployeeStatus.FINALIZED + "'";
 
 	/*public static final String GET_ACTIVITIES = 
 			"SELECT DISTINCT "

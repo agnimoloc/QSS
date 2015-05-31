@@ -1,7 +1,6 @@
 package com.churpi.qualityss.client.db;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
@@ -96,6 +95,18 @@ public final class QualitySSDbContract {
 		public static final String CN_CODE = "code";
 		public static final String CN_NAME = "name";
 		public static final String CN_PLATE = "plate";
+		
+		public static final String CREATE_TABLE = "CREATE TABLE " +
+				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY," +
+				CN_CODE  + " TEXT, " +
+				CN_NAME  + " TEXT, " +
+				CN_PLATE  + " TEXT);";		
+	}
+	
+	public static abstract class DbEmployeeInstance implements BaseColumns {
+		public static final String TABLE_NAME = "employee_instance";
+		public static final String CN_SERVICE_INSTANCE = "serviceInstanceId";
+		public static final String CN_EMPLOYEE = "employeeId";
 		public static final String CN_STATUS = "status";
 		public static final String CN_INVENTORY_COMMENT = "inventory_comment";
 		public static final String CN_REVIEW_COMMENT = "review_comment";
@@ -103,15 +114,18 @@ public final class QualitySSDbContract {
 		public static final String CN_BARCODECHECK = "checkBarcode";
 		
 		public static final String CREATE_TABLE = "CREATE TABLE " +
-				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY," +
-				CN_CODE  + " TEXT, " +
-				CN_NAME  + " TEXT, " +
-				CN_PLATE  + " TEXT, " +
+				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+				CN_SERVICE_INSTANCE + " INTEGER, " +
+				CN_EMPLOYEE + " INTEGER, " +
 				CN_STATUS + " TEXT, " +
 				CN_INVENTORY_COMMENT + " TEXT, " +
 				CN_REVIEW_COMMENT + " TEXT, " +
 				CN_SURVEY_COMMENT + " TEXT, " +
-				CN_BARCODECHECK + " INTEGER);";
+				CN_BARCODECHECK + " INTEGER,"+
+				"FOREIGN KEY(" + CN_SERVICE_INSTANCE + ") " + 
+				"REFERENCES "+ DbServiceInstance.TABLE_NAME + "(" + DbServiceInstance._ID + ")," +
+				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
+				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "));";
 		
 		public class EmployeeStatus{
 			public final static String CURRENT = "C";
@@ -119,44 +133,15 @@ public final class QualitySSDbContract {
 			public final static String SENT = "S";
 		}
 		
-		public static void setStatus(SQLiteDatabase db, int employeeId, String status){
-			String whereClause = DbEmployee._ID + "=?";
-			String[] whereArgs = new String[]{String.valueOf(employeeId)}; 
-			Cursor cur = db.query(DbEmployee.TABLE_NAME, 
-					new String[]{DbEmployee.CN_STATUS},
-					whereClause, whereArgs,
-					null,null,null);
-			try{
-				if(cur.moveToFirst() ){
-					int columnIndex = cur.getColumnIndex(DbEmployee.CN_STATUS);
-					String currentStatus = cur.getString(columnIndex);
-					ContentValues values = new ContentValues();
-					values.put(DbEmployee.CN_STATUS, status);
-
-					if(cur.isNull(columnIndex) || currentStatus.compareTo(status) != 0){
-						db.update(DbEmployee.TABLE_NAME, values, whereClause, whereArgs);
-					}
-				}
-			}finally{
-				cur.close();
-			}
+		public static void setStatus(SQLiteDatabase db, int employeeInstanceId, String status){
+			String whereClause = DbEmployeeInstance._ID + "=?";
+			String[] whereArgs = new String[]{String.valueOf(employeeInstanceId)}; 
+			ContentValues values = new ContentValues();
+			values.put(DbEmployeeInstance.CN_STATUS, status);
+			
+			db.update(DbEmployeeInstance.TABLE_NAME, values , whereClause, whereArgs);
 		}
 		
-		public static void clean(SQLiteDatabase db, int employeeId){
-			String[] whereArgs = new String[]{String.valueOf(employeeId)}; 
-			
-			db.delete(DbEmployeeEquipmentInventory.TABLE_NAME, DbEmployeeEquipmentInventory.CN_EMPLOYEE + "=?", whereArgs);
-			
-			ContentValues values = new ContentValues();
-			values.putNull(DbEmployee.CN_STATUS);
-			values.putNull(DbEmployee.CN_BARCODECHECK);
-			values.putNull(DbEmployee.CN_INVENTORY_COMMENT);
-			values.putNull(DbEmployee.CN_REVIEW_COMMENT);
-			values.putNull(DbEmployee.CN_SURVEY_COMMENT);
-			
-			db.update(DbEmployee.TABLE_NAME, values, DbEmployee._ID + "=?", whereArgs);			
-			
-		}
 	}
 		
 	public static abstract class DbServiceType implements BaseColumns {
@@ -343,54 +328,25 @@ public final class QualitySSDbContract {
 				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "), "+ 
 				"PRIMARY KEY (" + CN_EQUIPMENT + "," + CN_EMPLOYEE + "));";
 	}	
-	/*public static abstract class DbGeneralCheckpoint implements BaseColumns {
-		public static final String TABLE_NAME = "general_checkpoint";
-		public static final String CN_NAME = "name";
-		
-		public static final String CREATE_TABLE = "CREATE TABLE " +
-				TABLE_NAME + "("+ _ID + " INTEGER PRIMARY KEY," +
-				CN_NAME + " TEXT);";
-	}
-	
-	public static abstract class DbGeneralCheckpointResult implements BaseColumns {
-		public static final String TABLE_NAME = "general_checkpoint_result";
-		public static final String CN_SERVICE = "serviceID";
-		public static final String CN_GENERAL_CHECKPOINT = "general_checkpointID";
-		public static final String CN_COMMENT = "comment";
-
-		
-		public static final String CREATE_TABLE = 
-				"CREATE TABLE " + TABLE_NAME + "(" + 
-				//_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-				CN_SERVICE + " INTEGER," +
-				CN_GENERAL_CHECKPOINT +" INTEGER," +
-				CN_COMMENT + " TEXT," +
-				"FOREIGN KEY(" + CN_SERVICE + ") " + 
-				"REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + ")," +
-				"FOREIGN KEY(" + CN_GENERAL_CHECKPOINT + ") " + 
-				"REFERENCES "+ DbGeneralCheckpoint.TABLE_NAME + "(" + DbGeneralCheckpoint._ID + "), "+ 
-				"PRIMARY KEY (" + CN_SERVICE + "," + CN_GENERAL_CHECKPOINT + "));";
-	}*/
-	
 	
 	public static abstract class DbEmployeeEquipmentInventory implements BaseColumns {
 		public static final String TABLE_NAME = "employee_equipment_inventory";
-		public static final String CN_EMPLOYEE = "employeeId";
+		public static final String CN_EMPLOYEE_INSTANCE = "employeeInstanceId";
 		public static final String CN_EQUIPMENT = "equipmentId";
 		public static final String CN_CHECKED = "checked";
 		public static final String CN_COMMENT = "comment";
 		
 		public static final String CREATE_TABLE = 
 				"CREATE TABLE " + TABLE_NAME + "("+ 
-				CN_EMPLOYEE + " INTEGER, " +
+				CN_EMPLOYEE_INSTANCE + " INTEGER, " +
 				CN_EQUIPMENT + " INTEGER, " +
 				CN_CHECKED + " INTEGER, " +
 				CN_COMMENT + " TEXT, " +
 				"FOREIGN KEY(" + CN_EQUIPMENT + ") " + 
 				"REFERENCES "+ DbEquipment.TABLE_NAME + "(" + DbEquipment._ID + ")," +
-				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
-				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "), "+ 
-				"PRIMARY KEY (" + CN_EQUIPMENT + "," + CN_EMPLOYEE + "));";
+				"FOREIGN KEY(" + CN_EMPLOYEE_INSTANCE + ") " + 
+				"REFERENCES "+ DbEmployeeInstance.TABLE_NAME + "(" + DbEmployeeInstance._ID + "), "+ 
+				"PRIMARY KEY (" + CN_EQUIPMENT + "," + CN_EMPLOYEE_INSTANCE + "));";
 	}	
 	
 	public static abstract class DbSection implements BaseColumns{
@@ -453,26 +409,22 @@ public final class QualitySSDbContract {
 	}	
 	public static abstract class DbReviewQuestionAnswerEmployee implements BaseColumns {
 		public static final String TABLE_NAME = "review_question_answer_employee";
-		public static final String CN_SERVICE_INSTANCE = "serviceInstanceId";
+		public static final String CN_EMPLOYEE_INSTANCE = "employeeInstanceId";
 		public static final String CN_QUESTION = "questionId";
-		public static final String CN_EMPLOYEE = "employeeId";
 		public static final String CN_RESULT = "result";
 		public static final String CN_COMMENT = "comment";
 		
 		public static final String CREATE_TABLE = 
 				"CREATE TABLE " + TABLE_NAME + "("+ 
-				CN_SERVICE_INSTANCE + " INTEGER, " +
+				CN_EMPLOYEE_INSTANCE + " INTEGER, " +
 				CN_QUESTION + " INTEGER, " +
-				CN_EMPLOYEE + " INTEGER, " +
 				CN_RESULT + " TEXT, " +
 				CN_COMMENT + " TEXT, " +
-				"FOREIGN KEY(" + CN_SERVICE_INSTANCE + ") " + 
-				"REFERENCES "+ DbServiceInstance.TABLE_NAME + "(" + DbServiceInstance._ID + ")," +
+				"FOREIGN KEY(" + CN_EMPLOYEE_INSTANCE + ") " + 
+				"REFERENCES "+ DbEmployeeInstance.TABLE_NAME + "(" + DbEmployeeInstance._ID + ")," +
 				"FOREIGN KEY(" + CN_QUESTION + ") " +
 				"REFERENCES "+ DbQuestion.TABLE_NAME + "(" + DbQuestion._ID + "), "+
-				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
-				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + ")," +
-				"PRIMARY KEY (" + CN_SERVICE_INSTANCE + "," + CN_QUESTION + "," + CN_EMPLOYEE + "));";
+				"PRIMARY KEY (" + CN_EMPLOYEE_INSTANCE + "," + CN_QUESTION + "));";
 	}	
 	
 	public static abstract class DbReviewQuestionAnswerService implements BaseColumns {
@@ -517,26 +469,22 @@ public final class QualitySSDbContract {
 	
 	public static abstract class DbSurveyQuestionAnswer implements BaseColumns {
 		public static final String TABLE_NAME = "survey_question_answer";
-		public static final String CN_SERVICE_INSTANCE = "serviceInstanceId";
+		public static final String CN_EMPLOYEE_INSTANCE = "employeeInstanceId";
 		public static final String CN_QUESTION = "questionId";
-		public static final String CN_EMPLOYEE = "employeeId";
 		public static final String CN_RESULT = "result";
 		public static final String CN_COMMENT = "comment";
 		
 		public static final String CREATE_TABLE = 
 				"CREATE TABLE " + TABLE_NAME + "("+ 
-				CN_SERVICE_INSTANCE + " INTEGER, " +
+				CN_EMPLOYEE_INSTANCE + " INTEGER, " +
 				CN_QUESTION + " INTEGER, " +
-				CN_EMPLOYEE + " INTEGER, " +
 				CN_RESULT + " TEXT, " +
 				CN_COMMENT + " TEXT, " +
-				"FOREIGN KEY(" + CN_SERVICE_INSTANCE + ") " + 
-				"REFERENCES "+ DbServiceInstance.TABLE_NAME + "(" + DbServiceInstance._ID + ")," +
+				"FOREIGN KEY(" + CN_EMPLOYEE_INSTANCE + ") " + 
+				"REFERENCES "+ DbEmployeeInstance.TABLE_NAME + "(" + DbEmployeeInstance._ID + ")," +
 				"FOREIGN KEY(" + CN_QUESTION + ") " + 
 				"REFERENCES "+ DbQuestion.TABLE_NAME + "(" + DbQuestion._ID + "), "+ 
-				"FOREIGN KEY(" + CN_EMPLOYEE + ") " + 
-				"REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + ")," +
-				"PRIMARY KEY (" + CN_SERVICE_INSTANCE + "," + CN_QUESTION + "," + CN_EMPLOYEE + "));";
+				"PRIMARY KEY (" + CN_EMPLOYEE_INSTANCE + "," + CN_QUESTION + "));";
 	}	
 	public static abstract class DbImageToSend implements BaseColumns {
 		public static final String TABLE_NAME = "image_to_send";

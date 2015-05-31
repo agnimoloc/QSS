@@ -31,8 +31,8 @@ public final class Constants {
 	public static final String PULL_PUSH_DATA_DESCRIPTION = 
 			"com.churpi.qualityss.service.PUSHPULLDESCRIPTION";
 	
-	public static final String PULL_PUSH_DATA_DATA = 
-			"com.churpi.qualityss.service.PUSHPULLDATA";
+	/*public static final String PULL_PUSH_DATA_DATA = 
+			"com.churpi.qualityss.service.PUSHPULLDATA";*/
 	
 	
 	public static final String JSON_DIR = "DB";

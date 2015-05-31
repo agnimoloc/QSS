@@ -1,13 +1,9 @@
 package com.churpi.qualityss.client;
 
-import com.churpi.qualityss.Constants;
-
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 /**
  * An activity representing a single Sector detail screen. This activity is only
