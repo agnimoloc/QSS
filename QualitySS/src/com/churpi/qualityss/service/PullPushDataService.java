@@ -15,6 +15,8 @@ import java.util.Map;
 
 
 
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +31,7 @@ import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbRequisition;
 import com.churpi.qualityss.client.db.QualitySSDbHelper;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
@@ -40,6 +43,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInve
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
 import com.churpi.qualityss.client.dto.DataDTO;
+import com.churpi.qualityss.client.dto.RequisitionDTO;
 import com.churpi.qualityss.client.dto.ServiceInstanceDTO;
 import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.GsonRequest;
@@ -59,6 +63,8 @@ import android.widget.Toast;
 public class PullPushDataService extends IntentService {
 
 	private final String JSON_LIST_SERVICES = "Servicios";
+	private final String JSON_LIST_REQUISITIONS = "Requisiciones";
+	private final String JSON_REQUISITION_ID = "RequisicionId";
 	private final String JSON_LIST_EMPLOYEES = "EvaluacionElemento";
 	private final String JSON_EMPLOYEE_ID = "ElementoId";
 	private final String JSON_SERVICE_INSTANCE_KEY = "Key";
@@ -113,6 +119,33 @@ public class PullPushDataService extends IntentService {
 						}while(sCursor.moveToNext());
 					}
 					sCursor.close();
+					sCursor = db.rawQuery(DbQuery.GET_REQUISITION_TO_SEND, null);
+					if(sCursor.moveToFirst()){
+						JSONArray jRequisitions = new JSONArray();
+						json.put(JSON_LIST_REQUISITIONS, jRequisitions);
+						do{
+							RequisitionDTO requisition = new RequisitionDTO();
+							requisition.fillFromCursor(sCursor);
+							JSONObject jRequisition = new JSONObject();
+							jRequisition.put(JSON_REQUISITION_ID, requisition.getId());
+							jRequisition.put("ResponsableId", requisition.getResponsableId());
+							jRequisition.put("Acuerdo_Compromiso", requisition.getAcuerdo_Compromiso());
+							/*if(requisition.getLugar() != null)
+								jRequisition.put("Lugar", requisition.getLugar());*/
+							if(requisition.getAvance() != null)
+								jRequisition.put("Avance", requisition.getAvance());							
+							jRequisition.put("Status", requisition.getStatus());
+							jRequisition.put("FechaInicio", DateHelper.getJSONDate(requisition.getFechaInicio()));
+							if(requisition.getFechaTerminacion() != null)
+								jRequisition.put("FechaTerminacion", DateHelper.getJSONDate(requisition.getFechaTerminacion()));
+							if(requisition.getServicioId() != null && requisition.getServicioId() >0)
+								jRequisition.put("ServicioId", requisition.getServicioId());							
+							jRequisition.put("UniqueKey", requisition.getUniqueKey());
+							
+							jRequisitions.put(jRequisition);							
+						}while(sCursor.moveToNext());
+					}
+					sCursor.close();
 				} catch (JSONException e) {
 					Toast.makeText(context, context.getString(R.string.msg_error_json_to_send), Toast.LENGTH_SHORT).show();
 					e.printStackTrace();
@@ -121,7 +154,7 @@ public class PullPushDataService extends IntentService {
 			}
 		});
 
-		if(!json.isNull(JSON_LIST_SERVICES)){	
+		if(!json.isNull(JSON_LIST_SERVICES) || !json.isNull(JSON_LIST_REQUISITIONS)){	
 			
 			
 			
@@ -136,19 +169,33 @@ public class PullPushDataService extends IntentService {
 								@Override
 								public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 									try {
-										JSONArray services = json.getJSONArray(JSON_LIST_SERVICES);
-										File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+										if(!json.isNull(JSON_LIST_SERVICES)){
+											JSONArray services = json.getJSONArray(JSON_LIST_SERVICES);
+											File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-										for(int i = 0; i < services.length(); i++){
-											JSONObject service = (JSONObject) services.get(i);
-											ContentValues values = new ContentValues();
-											values.put(DbServiceInstance.CN_STATUS, DbServiceInstance.ServiceStatus.SENT);
-											String key = service.getString(JSON_SERVICE_INSTANCE_KEY); 
-											db.update(DbServiceInstance.TABLE_NAME, values, 
-													DbServiceInstance.CN_KEY + "=?", 
-													new String[]{ key });
-											
-											sendImages(key, db, dir);											
+											for(int i = 0; i < services.length(); i++){
+												JSONObject service = (JSONObject) services.get(i);
+												ContentValues values = new ContentValues();
+												values.put(DbServiceInstance.CN_STATUS, DbServiceInstance.ServiceStatus.SENT);
+												String key = service.getString(JSON_SERVICE_INSTANCE_KEY); 
+												db.update(DbServiceInstance.TABLE_NAME, values, 
+														DbServiceInstance.CN_KEY + "=?", 
+														new String[]{ key });
+
+												sendImages(key, db, dir);											
+											}
+										}
+										if(!json.isNull(JSON_LIST_REQUISITIONS)){
+											JSONArray requisitions = json.getJSONArray(JSON_LIST_REQUISITIONS);
+											for(int i = 0; i < requisitions.length(); i++){
+												JSONObject requisition = (JSONObject) requisitions.get(i);
+												ContentValues values = new ContentValues();
+												values.put(DbRequisition.CN_SENT, 1);
+												int requisitionId = requisition.getInt(JSON_REQUISITION_ID); 
+												db.update(DbRequisition.TABLE_NAME, values, 
+														DbRequisition._ID + "=?", 
+														new String[]{ String.valueOf(requisitionId) });											
+											}
 										}
 									} catch (JSONException e) {
 										e.printStackTrace();

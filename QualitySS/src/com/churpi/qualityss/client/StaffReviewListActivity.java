@@ -80,6 +80,11 @@ public class StaffReviewListActivity extends Activity {
 			addComments();
 			return true;
 		}
+		if (id == R.id.requisition_detail) {
+			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
+			return true;
+		}
+
 		return super.onOptionsItemSelected(item);
 	}
 

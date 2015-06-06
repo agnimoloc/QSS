@@ -112,6 +112,24 @@
             android:name=".NotificationsActivity"
             android:label="@string/title_activity_notifications" >
         </activity>
+        <activity
+            android:name=".RequirementActivity"
+            android:label="@string/title_activity_requirement" >
+        </activity>
+        <activity
+            android:name=".RequisitionListActivity"
+            android:label="@string/title_requisition_list"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".RequisitionDetailActivity"
+            android:label="@string/title_requisition_detail"
+            android:parentActivityName=".RequisitionListActivity" 
+            android:windowSoftInputMode="stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.churpi.qualityss.client.RequisitionListActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -6,7 +6,9 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbHREmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbRequisition;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
@@ -251,10 +253,30 @@ public class DbQuery {
 			EMPLOYEES_BY_SERVICE
 			+ " AND ei." + DbEmployeeInstance.CN_STATUS + " = '" + DbEmployeeInstance.EmployeeStatus.FINALIZED + "'";
 
-	/*public static final String GET_ACTIVITIES = 
-			"SELECT DISTINCT "
-					+ DbServiceConfiguration.CN_ACTIVITY_TYPE +", "
-					+ DbServiceConfiguration.CN_TITLE +
-			" FROM "+ DbServiceConfiguration.TABLE_NAME;*/
+	public static final String GET_HR_EMPLOYEES = 
+			"SELECT e.* "
+			+ "FROM " + DbHREmployee.TABLE_NAME + " h "
+			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON e." + DbEmployee._ID + " = h." + DbHREmployee._ID;
 
+	public static final String GET_REQUISITION_LIST = 
+			"SELECT "
+				+ "r." + DbRequisition._ID + ","
+				+ "substr(r." + DbRequisition.CN_START_DATE + ",7,2)||'/'||"
+					+ "substr(r." + DbRequisition.CN_START_DATE + ",5,2)||'/'||"
+					+ "substr(r." + DbRequisition.CN_START_DATE + ",1,4) "
+				+ "AS " + DbRequisition.CN_START_DATE + ","
+				+ "CASE r." + DbRequisition.CN_STATUS + " "
+					+ "WHEN 0 THEN 'Abierto' "
+					+ "WHEN 1 THEN 'En proceso' "
+					+ "WHEN 2 THEN 'Cerrado' "
+				+ "END AS " + DbRequisition.CN_STATUS + ","
+				+ "r." + DbRequisition.CN_AGREEMENT + ","
+				+ "e." + DbEmployee.CN_NAME + " "
+			+ "FROM " + DbRequisition.TABLE_NAME + " r "
+			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON e." + DbEmployee._ID + " = r." + DbRequisition.CN_ASSIGN_EMPLOYEE;
+	public static final String GET_REQUISITION_TO_SEND = 
+			"SELECT "
+				+ "r.*"
+			+ "FROM " + DbRequisition.TABLE_NAME + " r "
+			+ "WHERE r." + DbRequisition.CN_SENT + " IS NULL OR r." + DbRequisition.CN_SENT + " = 0";
 }

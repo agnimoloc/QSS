@@ -7,6 +7,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbHREmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbNotification;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
@@ -20,11 +21,13 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceType;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbTown;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarningReason;
 import com.churpi.qualityss.client.dto.AddressDTO;
 import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.dto.EquipmentDTO;
+import com.churpi.qualityss.client.dto.HREmployeeDTO;
 import com.churpi.qualityss.client.dto.NotificationDTO;
 import com.churpi.qualityss.client.dto.QuestionDTO;
 import com.churpi.qualityss.client.dto.ReviewDTO;
@@ -36,10 +39,12 @@ import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
 import com.churpi.qualityss.client.dto.ServiceTypeDTO;
 import com.churpi.qualityss.client.dto.StateDTO;
 import com.churpi.qualityss.client.dto.TownDTO;
+import com.churpi.qualityss.client.dto.WarningReasonDTO;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
@@ -83,6 +88,11 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbSurveyQuestionAnswer.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbImageToSend.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbNotification.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbWarningReason.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbServiceWarning.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbHREmployee.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbServiceFile.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbRequisition.CREATE_TABLE);
 	}
 
 	@Override
@@ -323,6 +333,37 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 					}else{
 						db.delete(DbNotification.TABLE_NAME, where, args);
 					}
+				}
+			}
+			
+			if(data.getMotivoAmonestacion() != null){
+				//db.delete(DbWarningReason.TABLE_NAME, null, null);
+				for(WarningReasonDTO warningReason : data.getMotivoAmonestacion()){
+					ContentValues values = new ContentValues();
+					values.put(DbWarningReason.CN_DESCRIPTION, warningReason.getDescripcion());
+					String where = DbWarningReason._ID + "=?"; 
+					String[] args = new String[]{String.valueOf(warningReason.getMotivoAmonestacionId())};
+					count = db.update(DbWarningReason.TABLE_NAME, values, 
+							where, 
+							args);
+					if(count == 0){
+						values.put(DbWarningReason._ID, warningReason.getMotivoAmonestacionId());
+						db.insert(DbWarningReason.TABLE_NAME, null, values);
+					}
+				}
+			}
+			if(data.getRepresentantesRH() != null){
+				for(HREmployeeDTO hremployee : data.getRepresentantesRH()){
+					Cursor c = db.query(DbHREmployee.TABLE_NAME, null, 
+							DbHREmployee._ID + "=?", 
+							new String[]{String.valueOf(hremployee.getElementoId())}, 
+							null, null, null);
+					if(!c.moveToFirst()){
+						ContentValues values = new ContentValues();
+						values.put(DbHREmployee._ID, hremployee.getElementoId());
+						db.insert(DbHREmployee.TABLE_NAME, null, values);
+					}
+					c.close();
 				}
 			}
 

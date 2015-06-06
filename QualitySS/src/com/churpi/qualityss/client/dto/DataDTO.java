@@ -12,7 +12,25 @@ public class DataDTO {
 	SectionDTO[] Secciones;
 	ServiceTypeDTO[] TiposServicio;
 	NotificationDTO[] Notificaciones;
-			
+	WarningReasonDTO[] MotivoAmonestacion;
+	HREmployeeDTO[] RepresentantesRH;
+		
+	public HREmployeeDTO[] getRepresentantesRH() {
+		return RepresentantesRH;
+	}
+
+	public void setRepresentantesRH(HREmployeeDTO[] representantesRH) {
+		RepresentantesRH = representantesRH;
+	}
+
+	public WarningReasonDTO[] getMotivoAmonestacion() {
+		return MotivoAmonestacion;
+	}
+
+	public void setMotivoAmonestacion(WarningReasonDTO[] motivoAmonestacion) {
+		MotivoAmonestacion = motivoAmonestacion;
+	}
+
 	public NotificationDTO[] getNotificaciones() {
 		return Notificaciones;
 	}

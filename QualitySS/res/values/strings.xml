@@ -101,6 +101,7 @@
     <string name="cnd_comment_button">Boton de comentario</string>
     <string name="cnd_btn_take_photo">Tomar una foto</string>
     <string name="mnu_comments">Comentarios</string>
+    <string name="mnu_requisition">Requisicion</string>    
     <string name="inst_comment_inventory">Ingresa los comentarios para el item del inventario seleccionado</string>
     <string name="inst_comment_inventory_result">Ingresa los comentarios para el resultado del inventario</string>
     <string name="inst_comment_review">Ingresa los comentarios para el elemento del pase de revista seleccionado</string>
@@ -128,5 +129,21 @@
     <string name="title_activity_notifications">Notificaciones</string>
     <string name="img_info">Imagen de información</string>
     <string name="btn_back">Atras</string>
-
+    <string name="title_activity_requirement">Requisición</string>
+    <string name="fld_agreement">Acuerdo y/o Compromiso</string>
+    <string name="fld_assigned">Responsable</string>
+    <string name="fld_place">Lugar</string>
+    <string name="fld_progress">Avance</string>
+    <string name="fld_date_start">Fecha de Inicio</string>
+    <string name="fld_status">Status</string>
+    <string name="fld_date_end">Fecha de Terminacion</string>
+    <string name="btn_create_requirement">Crear requisición</string>
+    <string name="title_requisition_list">Requisiciones</string>
+    <string name="title_requisition_detail">Detalle de la requisición</string>
+    <string name="img_btn_add">Agregar</string>
+    <string name="img_btn_info">informacion</string>
+	<string name="ttl_confirm_create_requisition">Confirmar Requisición</string>
+	<string name="msg_confirm_requisition">¿Está seguro de crear esta requisición para %1$s con el acuerdo/compromiso \'%2$s\'?</string>
+	<string name="msg_fault_requisition_data">El acuerdo/compromiso, el responsable y la fecha de inicio son requeridos</string>
+	
 </resources>
