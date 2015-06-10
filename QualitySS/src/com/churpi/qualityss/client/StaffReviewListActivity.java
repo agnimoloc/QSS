@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -40,7 +41,9 @@ public class StaffReviewListActivity extends Activity {
 
 	int serviceInstanceId;
 	int employeeId;
+	int tmpEmployeeId;
 	String employeeName;
+	String action;
 
 	private final int REQUEST_BARCODE = 0;
 	private final int REQUEST_INVENTORY = 1;
@@ -52,6 +55,8 @@ public class StaffReviewListActivity extends Activity {
 		setContentView(R.layout.activity_staff_review_list);
 
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
+		
+		action = getIntent().getAction();
 
 		initCursor();
 
@@ -65,11 +70,18 @@ public class StaffReviewListActivity extends Activity {
 				CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		grid.setAdapter(adapter);
 		grid.setOnItemClickListener(onSelected);
+		
+		if(action == null || Constants.ACTION_SERVICE.compareTo(action) != 0){
+			Button button = (Button)findViewById(android.R.id.button1);
+			button.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0){
+			getMenuInflater().inflate(R.menu.comment_menu, menu);
+		}
 		return true;
 	}
 
@@ -80,8 +92,8 @@ public class StaffReviewListActivity extends Activity {
 			addComments();
 			return true;
 		}
-		if (id == R.id.requisition_detail) {
-			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
+		if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, action);
 			return true;
 		}
 
@@ -92,9 +104,14 @@ public class StaffReviewListActivity extends Activity {
 		c = (Cursor)DbTrans.read(this, new DbTrans.Db(){
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				return db.rawQuery(
+				if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0){
+					return db.rawQuery(
 						DbQuery.EMPLOYEES_BY_SERVICE,
 						new String[]{String.valueOf(serviceInstanceId)});
+				}else{
+					return db.rawQuery(
+						DbQuery.ALL_EMPLOYEES,null);
+				}
 			}
 		});
 	}
@@ -118,13 +135,11 @@ public class StaffReviewListActivity extends Activity {
 				return;
 			}
 
-			int tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployeeInstance.CN_EMPLOYEE));;
+			tmpEmployeeId = c.getInt(c.getColumnIndex(DbEmployeeInstance.CN_EMPLOYEE));
 
-			if(employeeId != tmpEmployeeId ){
+			if(employeeId != tmpEmployeeId && 
+					action != null && Constants.ACTION_SERVICE.compareTo(action) == 0 ){
 				employeeId = tmpEmployeeId;
-				Ses.getInstance(getBaseContext()).setEmployeeId(tmpEmployeeId);
-				employeeName = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
-				Ses.getInstance(getParent()).setEmployeeName(employeeName);
 
 				Intent intent = new Intent("com.google.zxing.client.android.SCAN");
 				intent.setPackage("com.google.zxing.client.android");
@@ -220,7 +235,13 @@ public class StaffReviewListActivity extends Activity {
 	}
 
 	private void openStaffInventoryActivity(boolean barcodeChequed){
-		startEmployee(barcodeChequed);
+		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0){
+			startEmployee(barcodeChequed);
+		}
+		Ses.getInstance(getBaseContext()).setEmployeeId(tmpEmployeeId);
+		employeeName = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
+		Ses.getInstance(getParent()).setEmployeeName(employeeName);
+
 		startActivityForResult(
 				WorkflowHelper.process(this, 
 						R.id.gridView1,
@@ -233,7 +254,7 @@ public class StaffReviewListActivity extends Activity {
 				WorkflowHelper.process(
 						StaffReviewListActivity.this,
 						android.R.id.button1,
-						Constants.ACTION_SERVICE
+						action
 				)
 		);
 	}

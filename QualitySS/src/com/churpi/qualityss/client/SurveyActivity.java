@@ -1,5 +1,6 @@
 package com.churpi.qualityss.client;
 
+import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
@@ -99,6 +100,10 @@ public class SurveyActivity extends Activity {
 		int id = item.getItemId();
 		if (id == R.id.action_comments) {
 			addComments();
+			return true;
+		}
+		if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

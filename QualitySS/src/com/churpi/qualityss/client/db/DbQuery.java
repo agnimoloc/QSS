@@ -23,6 +23,9 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbTown;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarning;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarningDetail;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarningReason;
 
 public class DbQuery {
 	
@@ -87,20 +90,7 @@ public class DbQuery {
 	public static final String STAFF_INVENTORY_NULL_RESULT = 
 			STAFF_INVENTORY 
 			+ " AND eii." + DbEmployeeEquipmentInventory.CN_CHECKED + " IS NULL "; 
-	
-	/*public static final String SERVICE_INVENTORY =
-			"SELECT e." + DbEquipment._ID 
-					+ ", ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
-					+ ", e." + DbEquipment.CN_DESCRIPTION + " "
-					+ ", ei." + DbServiceEquipmentInventory.CN_COMMENT + " "
-			+ "FROM " + DbServiceEquipment.TABLE_NAME + " ee "
-			+ "INNER JOIN " + DbEquipment.TABLE_NAME + " e ON "
-				+ "e." + DbEquipment._ID + " = ee." + DbServiceEquipment.CN_EQUIPMENT + " "
-			+ "LEFT JOIN " + DbServiceEquipmentInventory.TABLE_NAME + " ei ON "
-				+ "e." + DbEquipment._ID + " = ei." + DbServiceEquipmentInventory.CN_EQUIPMENT + " AND "
-				+ "ei." + DbServiceEquipmentInventory.CN_SERVICE_INSTANCE + " = ? " 
-			+ "WHERE ee." + DbServiceEquipment.CN_SERVICE + " = ? AND ee." + DbServiceEquipment.CN_ACTIVITY_TYPE + " = ?";*/
-	
+		
 	public static final String SERVICE_INVENTORY =
 			"SELECT e." + DbEquipment._ID 
 					+ ", ei." + DbServiceEquipmentInventory.CN_CHECKED + " "
@@ -273,10 +263,49 @@ public class DbQuery {
 				+ "r." + DbRequisition.CN_AGREEMENT + ","
 				+ "e." + DbEmployee.CN_NAME + " "
 			+ "FROM " + DbRequisition.TABLE_NAME + " r "
-			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON e." + DbEmployee._ID + " = r." + DbRequisition.CN_ASSIGN_EMPLOYEE;
+			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON e." + DbEmployee._ID + " = r." + DbRequisition.CN_ASSIGN_EMPLOYEE + " "
+			+ "WHERE r." + DbRequisition.CN_SERVICE + " = ?";
+	
 	public static final String GET_REQUISITION_TO_SEND = 
 			"SELECT "
 				+ "r.*"
 			+ "FROM " + DbRequisition.TABLE_NAME + " r "
 			+ "WHERE r." + DbRequisition.CN_SENT + " IS NULL OR r." + DbRequisition.CN_SENT + " = 0";
+
+	public static final String GET_WARNING_LIST = 
+			"SELECT "
+				+ "w." + DbWarning._ID + ","
+				+ "w." + DbWarning.CN_CREATION_DATE + ","
+				+ "wr." + DbWarningReason.CN_DESCRIPTION + " AS " + DbWarningDetail.CN_WARNING_REASON + ", "
+				+ "w." + DbWarning.CN_NOTE + " "
+			+ "FROM " + DbWarning.TABLE_NAME + " w "
+			+ "INNER JOIN " + DbWarningDetail.TABLE_NAME + " wd ON wd." + DbWarningDetail.CN_WARNING + " = w." + DbWarning._ID + " "
+			+ "INNER JOIN " + DbWarningReason.TABLE_NAME + " wr ON wr." + DbWarningReason._ID + " = wd." + DbWarningDetail.CN_WARNING_REASON + " "
+			+ "WHERE w." + DbWarning.CN_EMPLOYEE_INSTANCE + " = ?";
+
+	public static final String GET_WARNING_REASON_LIST = 
+			"SELECT "
+				+ "wr." + DbWarningReason._ID + ", "
+				+ "wr." + DbWarningReason.CN_DESCRIPTION + ", "
+				+ "wd." + DbWarningDetail.CN_NOTE + ", "
+				+ "wd." + DbWarningDetail._ID + " AS " + DbWarningDetail.CN_WARNING_REASON + " "
+			+ "FROM " + DbWarningReason.TABLE_NAME + " wr "
+			+ "LEFT JOIN " + DbWarningDetail.TABLE_NAME + " wd ON wd." + DbWarningDetail.CN_WARNING_REASON + " = wr." + DbWarningReason._ID + " AND wd." + DbWarningDetail.CN_WARNING + " = ?";
+	
+	public static final String ALL_EMPLOYEES = 
+			"SELECT "
+				+ "0 AS " + DbEmployeeInstance._ID + ", "
+				+ "0 AS " + DbEmployeeInstance.CN_BARCODECHECK + ", "
+				+ "e." + DbEmployee._ID + " AS " + DbEmployeeInstance.CN_EMPLOYEE +", "
+				+ "'' AS " + DbEmployeeInstance.CN_INVENTORY_COMMENT + ", "
+				+ "'' AS " + DbEmployeeInstance.CN_REVIEW_COMMENT + ", "
+				+ "'' AS  " + DbEmployeeInstance.CN_SERVICE_INSTANCE + ", "
+				+ "NULL AS " + DbEmployeeInstance.CN_STATUS + ", "
+				+ "'' AS  " + DbEmployeeInstance.CN_SURVEY_COMMENT + ", "
+				+ "e." + DbEmployee.CN_CODE + ", "
+				+ "e." + DbEmployee.CN_NAME + ", "
+				+ "e." + DbEmployee.CN_PLATE + " "
+			+ "FROM " + DbEmployee.TABLE_NAME + " e "
+			+ "ORDER BY e." + DbEmployee.CN_NAME;
 }
+

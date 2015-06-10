@@ -52,7 +52,6 @@ public class InventoryListAdapter extends SimpleCursorAdapter {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		
 		ViewGroup layout;
 		if(convertView == null){
 			layout = (ViewGroup)mLayoutInflater.inflate(mLayout, parent, false);

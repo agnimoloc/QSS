@@ -138,7 +138,7 @@ public class PullPushDataService extends IntentService {
 							jRequisition.put("FechaInicio", DateHelper.getJSONDate(requisition.getFechaInicio()));
 							if(requisition.getFechaTerminacion() != null)
 								jRequisition.put("FechaTerminacion", DateHelper.getJSONDate(requisition.getFechaTerminacion()));
-							if(requisition.getServicioId() != null && requisition.getServicioId() >0)
+							if(requisition.getServicioId() > 0)
 								jRequisition.put("ServicioId", requisition.getServicioId());							
 							jRequisition.put("UniqueKey", requisition.getUniqueKey());
 							

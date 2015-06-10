@@ -124,11 +124,24 @@
         <activity
             android:name=".RequisitionDetailActivity"
             android:label="@string/title_requisition_detail"
-            android:parentActivityName=".RequisitionListActivity" 
-            android:windowSoftInputMode="stateHidden">
+            android:parentActivityName=".RequisitionListActivity"
+            android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.churpi.qualityss.client.RequisitionListActivity" />
+        </activity>
+        <activity
+            android:name=".WarningListActivity"
+            android:label="@string/title_warning_list" >
+        </activity>
+        <activity
+            android:name=".WarningDetailActivity"
+            android:label="@string/title_warning_detail"
+            android:parentActivityName=".WarningListActivity"
+            android:windowSoftInputMode="stateHidden"  >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.churpi.qualityss.client.WarningListActivity" />
         </activity>
     </application>
 

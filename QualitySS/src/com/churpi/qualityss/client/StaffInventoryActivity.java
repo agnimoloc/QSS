@@ -126,6 +126,10 @@ public class StaffInventoryActivity extends Activity {
 			addComments();
 			return true;
 		}
+		if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 	

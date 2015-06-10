@@ -6,10 +6,11 @@
     two-pane version on Large screens.
 
     For more on layout aliases, see:
-    http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
+    http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
     -->
 
     <item name="activity_sector_list" type="layout">@layout/activity_sector_twopane</item>
     <item name="activity_requisition_list" type="layout">@layout/activity_requisition_twopane</item>
+    <item name="activity_warning_list" type="layout">@layout/activity_warning_twopane</item>
 
 </resources>

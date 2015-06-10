@@ -18,7 +18,7 @@ public class Config {
 	public static final int SERVER_GET_FILE_TIMEOUT = 1000 * 60;
 	public static final int SERVER_GET_DATA_TIMEOUT = 10000;
 	
-	public static final int REFRESH_TIME = 6000;
+	public static final int REFRESH_TIME = 60000;
 	
 	public static final int HOURS_TO_RESET_SENT_SERVICE = 1;
 	
