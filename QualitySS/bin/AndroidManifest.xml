@@ -137,10 +137,26 @@
         <activity
             android:name=".WarningDetailActivity"
             android:label="@string/title_warning_detail"
-            android:parentActivityName=".WarningListActivity" >
+            android:parentActivityName=".WarningListActivity"
+            android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.churpi.qualityss.client.WarningListActivity" />
+        </activity>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.churpi.qualityss.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <activity
+            android:name=".ServiceHistoryActivity"
+            android:label="@string/title_activity_service_history" >
         </activity>
     </application>
 

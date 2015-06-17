@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+
 public class DateHelper {
 
 	private static String DATE_FORMAT = "yyyyMMddHHmmss";
@@ -14,6 +15,13 @@ public class DateHelper {
 	
 	public static String getCurrentTime(){
 		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);													
+		return format.format(calendar.getTime());
+	}
+	
+	public static String getCurrentTimeAdd(int field, int value){
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(field, value);
 		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);													
 		return format.format(calendar.getTime());
 	}

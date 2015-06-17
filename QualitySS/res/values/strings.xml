@@ -25,6 +25,8 @@
     <string name="fld_customer">Cliente</string>
     <string name="fld_phone">Telefono</string>
     <string name="fld_description">Descripción</string>
+    <string name="fld_service">Servicio</string>
+    <string name="fld_employee">Elemento</string>
     <string name="btn_maps">Como llegar</string>
     <string name="btn_start_service">Iniciar Servicio</string>
     <string name="title_activity_general_review">GeneralReviewActivity</string>
@@ -41,7 +43,7 @@
     <string name="ttl_photo">Imagen</string>
     <string name="img_content_description">Imagen guardada en la aplicación</string>
     <string name="btn_take_new_photo">Tomar nueva foto</string>
-    <string name="title_activity_staff_review_list">Revisión de Elementos</string>
+    <string name="title_activity_staff_review_list">Selecciona un elemento</string>
     <string name="ttl_staff_review_list">Revisión de Personal</string>
     <string name="finish">Finalizar</string>
     <string name="img_staff_image">Imagen del personal</string>
@@ -101,7 +103,8 @@
     <string name="cnd_comment_button">Boton de comentario</string>
     <string name="cnd_btn_take_photo">Tomar una foto</string>
     <string name="mnu_comments">Comentarios</string>
-    <string name="mnu_requisition">Requisicion</string>
+    <string name="mnu_requisition">Requisición</string>
+    <string name="mnu_warning">Crear Amonestación</string>
     <string name="inst_comment_inventory">Ingresa los comentarios para el item del inventario seleccionado</string>
     <string name="inst_comment_inventory_result">Ingresa los comentarios para el resultado del inventario</string>
     <string name="inst_comment_review">Ingresa los comentarios para el elemento del pase de revista seleccionado</string>
@@ -113,6 +116,8 @@
     <string name="msg_send_imgs_start">Iniciando envío&#8230;</string>
     <string name="msg_send_imgs_sending">Enviando imagen&#8230;</string>
     <string name="msg_send_imgs_error_response">Problemas en la respuesta del servidor</string>
+    <string name="msg_warning_other_desc_required">Se encuentra seleccionado Otro, la descripcion de Otro es requerida</string>
+    <string name="msg_warning_at_least_one_warning">Al menos se tiene que seleccionar un motivo de amonestación</string>
     <string name="title_activity_summary">Resumen para %s</string>
     <string name="sum_inventory_fault">Inventario faltante:</string>
     <string name="sum_review_summary">Pase de revista para revisar:</string>
@@ -145,10 +150,17 @@
     <string name="ttl_confirm_create_requisition">Confirmar Requisición</string>
     <string name="msg_confirm_requisition">¿Está seguro de crear esta requisición para %1$s con el acuerdo/compromiso \'%2$s\'?</string>
     <string name="msg_fault_requisition_data">El acuerdo/compromiso, el responsable y la fecha de inicio son requeridos</string>
-    <string name="title_warning_list">Warnings</string>
-    <string name="title_warning_detail">Warning Detail</string>
+    <string name="msg_confirm_warning">¿Está seguro de crear esta amonestación para %1$s con los siguientes motivos?: %2$s</string>
+    <string name="msg_warning_created">Amonestación creada.</string>
+    <string name="msg_without_documents">No hay documentos relacionados</string>
+    <string name="title_warning_list">Amonestaciones de %s</string>
+    <string name="title_warning_detail">Amonestación para %s</string>
+    <string name="title_warning_dialog_create_title">Crear Amonestación</string>
     <string name="btn_create_warning">Crear Amonestación</string>
     <string name="lbl_notes">Observaciones</string>
     <string name="lbl_warning_reason">Motivo de la amonestación</string>
+    <string name="lbl_others">Otros:</string>
+    <string name="title_activity_service_history">Historico de servicios</string>
+    <string name="inst_service_history">Selecciona un servicio para ver el detalle</string>
 
 </resources>

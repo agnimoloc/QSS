@@ -13,12 +13,14 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswerService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSection;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceType;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
@@ -41,7 +43,8 @@ public class DbQuery {
 				+ "sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE +" = ? "
 			+ "LEFT JOIN " + DbServiceInstance.TABLE_NAME + " i ON "
 				+ "i." + DbServiceInstance.CN_SERVICE + " = sc." + DbServiceConfiguration.CN_SERVICE + " AND "
-				+ "i." + DbServiceInstance.CN_ACTIVITY_TYPE + " = sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE + " "
+				+ "i." + DbServiceInstance.CN_ACTIVITY_TYPE + " = sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE + " AND "
+				+ "(i." + DbServiceInstance.CN_FINISH_DATETIME + ">? OR i." + DbServiceInstance.CN_STATUS + " LIKE '" + DbServiceInstance.ServiceStatus.CURRENT + "')" 
 			+ "WHERE s." + DbService.CN_SECTOR + " = ?";
 	
 	public static final String EMPLOYEES_BY_SERVICE = 
@@ -133,7 +136,7 @@ public class DbQuery {
 			+ "LEFT JOIN " + DbReviewQuestionAnswerEmployee.TABLE_NAME + " ra ON "
 				+ "ra." + DbReviewQuestionAnswerEmployee.CN_EMPLOYEE_INSTANCE + " = ei." + DbEmployeeInstance._ID + " AND "
 				+ "q." + DbQuestion._ID + " = ra." + DbReviewQuestionAnswerEmployee.CN_QUESTION + " "
-			+ " WHERE si." + DbEmployeeInstance._ID + " = ? ";
+			+ " WHERE ei." + DbEmployeeInstance._ID + " = ? ";
 	
 	public static final String STAFF_REVIEW_NULL_RESULT =
 			STAFF_REVIEW + 
@@ -261,10 +264,14 @@ public class DbQuery {
 					+ "WHEN 2 THEN 'Cerrado' "
 				+ "END AS " + DbRequisition.CN_STATUS + ","
 				+ "r." + DbRequisition.CN_AGREEMENT + ","
-				+ "e." + DbEmployee.CN_NAME + " "
+				+ "e." + DbEmployee.CN_NAME + ", "
+				+ "s." + DbService.CN_DESCRIPTION + ", "
+				+ "ee." + DbEmployee.CN_NAME + " AS " + DbRequisition.CN_EMPLOYEE + " "
 			+ "FROM " + DbRequisition.TABLE_NAME + " r "
 			+ "INNER JOIN " + DbEmployee.TABLE_NAME + " e ON e." + DbEmployee._ID + " = r." + DbRequisition.CN_ASSIGN_EMPLOYEE + " "
-			+ "WHERE r." + DbRequisition.CN_SERVICE + " = ?";
+			+ "LEFT JOIN " + DbService.TABLE_NAME + " s ON s." + DbService._ID + " = r." + DbRequisition.CN_SERVICE + " "
+			+ "LEFT JOIN " + DbEmployee.TABLE_NAME + " ee ON ee." + DbEmployee._ID + " = r." + DbRequisition.CN_EMPLOYEE + " "
+			+ "WHERE (?1='0' OR r." + DbRequisition.CN_SERVICE + " = ?1) AND (?2='0' OR r." + DbRequisition.CN_EMPLOYEE + "=?2)";
 	
 	public static final String GET_REQUISITION_TO_SEND = 
 			"SELECT "
@@ -281,7 +288,8 @@ public class DbQuery {
 			+ "FROM " + DbWarning.TABLE_NAME + " w "
 			+ "INNER JOIN " + DbWarningDetail.TABLE_NAME + " wd ON wd." + DbWarningDetail.CN_WARNING + " = w." + DbWarning._ID + " "
 			+ "INNER JOIN " + DbWarningReason.TABLE_NAME + " wr ON wr." + DbWarningReason._ID + " = wd." + DbWarningDetail.CN_WARNING_REASON + " "
-			+ "WHERE w." + DbWarning.CN_EMPLOYEE_INSTANCE + " = ?";
+			+ "WHERE w." + DbWarning.CN_EMPLOYEE + " = ? "
+			+ "ORDER BY w." + DbWarning.CN_CREATION_DATE + " DESC";
 
 	public static final String GET_WARNING_REASON_LIST = 
 			"SELECT "
@@ -307,5 +315,50 @@ public class DbQuery {
 				+ "e." + DbEmployee.CN_PLATE + " "
 			+ "FROM " + DbEmployee.TABLE_NAME + " e "
 			+ "ORDER BY e." + DbEmployee.CN_NAME;
+	
+	public static final String GET_WARNINGS_TO_SEND = 
+			"SELECT "
+				+ "w." + DbWarning._ID + ", "
+				+ "w." + DbWarning.CN_EMPLOYEE + ", "
+				+ "w." + DbWarning.CN_CREATION_DATE + ", "
+				+ "wd." + DbWarningDetail.CN_WARNING_REASON + ", "
+				+ "wd." + DbWarningDetail.CN_NOTE + ", "
+				+ "w." + DbWarning.CN_SERVICE + " "
+			+ "FROM " + DbWarning.TABLE_NAME + " w "
+			+ "INNER JOIN " + DbWarningDetail.TABLE_NAME + " wd ON w." + DbWarning._ID + " = wd." + DbWarningDetail.CN_WARNING + " "
+			+ "WHERE w." + DbWarning.CN_SENT + " IS NULL OR w." + DbWarning.CN_SENT + " = 0";
+	
+	public static final String GET_SECTOR_BY_ACTIVITYTYPE = 
+			"SELECT DISTINCT "
+				+ "se." + DbSector._ID + ", "
+				+ "se." + DbSector.CN_NAME + " "
+			+ "FROM " + DbService.TABLE_NAME + " s "
+			+ "INNER JOIN " + DbSector.TABLE_NAME + " se ON "
+				+ "se." + DbSector._ID + " = s." + DbService.CN_SECTOR + " "
+			+ "INNER JOIN " + DbServiceConfiguration.TABLE_NAME + " sc ON "
+				+ "sc." + DbServiceConfiguration.CN_SERVICE + " = s." + DbService._ID + " AND "
+				+ "sc." + DbServiceConfiguration.CN_ACTIVITY_TYPE + "=? "
+			+ "ORDER BY se." + DbSector.CN_NAME;
+	
+	public static final String GET_SERVICE_HISTORY_LIST = 
+			"SELECT "
+					+ "si." + DbServiceInstance._ID + ", "
+					+ "at." + DbServiceType.CN_TITLE + " || ' - ' || "
+					+ "se." + DbSector.CN_NAME + " AS " + DbServiceType.CN_TITLE + ", "
+					+ "substr(si." + DbServiceInstance.CN_FINISH_DATETIME + ",7,2)||'/'||"
+					+ "substr(si." + DbServiceInstance.CN_FINISH_DATETIME + ",5,2)||'/'||"
+					+ "substr(si." + DbServiceInstance.CN_FINISH_DATETIME + ",1,4) AS "
+							+  DbServiceInstance.CN_FINISH_DATETIME + ", "
+					+ "s." + DbService.CN_DESCRIPTION + " "
+			+ "FROM " + DbService.TABLE_NAME + " s "
+			+ "INNER JOIN " + DbServiceInstance.TABLE_NAME + " si ON "
+				+ "si." + DbServiceInstance.CN_SERVICE + " = s." + DbService._ID + " AND "
+				+ "si." + DbServiceInstance.CN_STATUS + " IS NOT NULL AND "
+				+ "si." + DbServiceInstance.CN_STATUS + " <> '" + DbServiceInstance.ServiceStatus.CURRENT + "' "
+			+ "INNER JOIN " + DbServiceType.TABLE_NAME + " at ON "
+				+ "at." + DbServiceType._ID + " = si." + DbServiceInstance.CN_ACTIVITY_TYPE + " "
+			+ "INNER JOIN " + DbSector.TABLE_NAME + " se ON "
+				+ "se." + DbSector._ID + " = s." + DbService.CN_SECTOR + " "
+			+ "ORDER BY si." + DbServiceInstance.CN_FINISH_DATETIME + " DESC "; 
 }
 

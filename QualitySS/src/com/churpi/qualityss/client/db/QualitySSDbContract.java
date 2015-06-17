@@ -549,23 +549,12 @@ public final class QualitySSDbContract {
 						+ "FOREIGN KEY(" + _ID + ") "  
 						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "));";
 	}	
-	public static abstract class DbServiceFile implements BaseColumns {
-		public static final String TABLE_NAME = "service_file";
-		public static final String CN_NAME = "name";
-		public static final String CN_URL = "url";
-		
-		public static final String CREATE_TABLE = 
-				"CREATE TABLE " + TABLE_NAME + "("
-						+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
-						+ CN_NAME + " TEXT,"
-						+ CN_URL  + " TEXT);";
-	}	
 	
 	public static abstract class DbRequisition implements BaseColumns {
 		public static final String TABLE_NAME = "requisition";
 		public static final String CN_ASSIGN_EMPLOYEE = "assign_employee";
 		public static final String CN_AGREEMENT = "agreement";
-		public static final String CN_PLACE = "place";
+		public static final String CN_EMPLOYEE = "employeeId";
 		public static final String CN_PROGRESS = "progress";
 		public static final String CN_STATUS = "status";
 		public static final String CN_START_DATE = "start_date";
@@ -580,16 +569,18 @@ public final class QualitySSDbContract {
 						+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
 						+ CN_ASSIGN_EMPLOYEE + " INTEGER,"
 						+ CN_AGREEMENT + " TEXT,"
-						+ CN_PLACE + " TEXT,"
+						+ CN_EMPLOYEE + " INTEGER,"
 						+ CN_PROGRESS + " TEXT,"
 						+ CN_STATUS + " TEXT,"
 						+ CN_START_DATE + " TEXT,"
 						+ CN_END_DATE + " TEXT,"
-						+ CN_SERVICE  + " TEXT,"
+						+ CN_SERVICE  + " INTEGER,"
 						+ CN_SENT  + " INTEGER,"
 						+ CN_CREATION_DATE  + " TEXT,"
 						+ CN_CREATOR + " INTEGER,"
 						+ "FOREIGN KEY(" + CN_ASSIGN_EMPLOYEE + ") "  
+						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "),"
+						+ "FOREIGN KEY(" + CN_EMPLOYEE + ") "  
 						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "),"
 						+ "FOREIGN KEY(" + CN_CREATOR + ") "  
 						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "),"
@@ -598,7 +589,8 @@ public final class QualitySSDbContract {
 	}		
 	public static abstract class DbWarning implements BaseColumns {
 		public static final String TABLE_NAME = "warning";
-		public static final String CN_EMPLOYEE_INSTANCE = "employee_instance";
+		public static final String CN_EMPLOYEE = "employeeId";
+		public static final String CN_SERVICE = "serviceId";
 		public static final String CN_NOTE = "note";
 		public static final String CN_SENT = "sent";
 		public static final String CN_CREATION_DATE = "creation_date";
@@ -607,13 +599,16 @@ public final class QualitySSDbContract {
 		public static final String CREATE_TABLE = 
 				"CREATE TABLE " + TABLE_NAME + "("
 						+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
-						+ CN_EMPLOYEE_INSTANCE + " INTEGER,"
+						+ CN_EMPLOYEE + " INTEGER,"
+						+ CN_SERVICE + " INTEGER,"
 						+ CN_NOTE + " TEXT,"
 						+ CN_SENT + " INTEGER,"
 						+ CN_CREATION_DATE  + " TEXT,"
 						+ CN_CREATOR + " INTEGER,"
-						+ "FOREIGN KEY(" + CN_EMPLOYEE_INSTANCE + ") "  
-						+ "REFERENCES "+ DbEmployeeInstance.TABLE_NAME + "(" + DbEmployeeInstance._ID + "),"
+						+ "FOREIGN KEY(" + CN_EMPLOYEE + ") "  
+						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "),"
+						+ "FOREIGN KEY(" + CN_SERVICE + ") "  
+						+ "REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + "),"
 						+ "FOREIGN KEY(" + CN_CREATOR + ") "  
 						+ "REFERENCES "+ DbEmployee.TABLE_NAME + "(" + DbEmployee._ID + "));";
 	}
@@ -634,5 +629,21 @@ public final class QualitySSDbContract {
 						+ "REFERENCES "+ DbWarning.TABLE_NAME + "(" + DbWarning._ID + "),"
 						+ "FOREIGN KEY(" + CN_WARNING_REASON + ") "  
 						+ "REFERENCES "+ DbWarningReason.TABLE_NAME + "(" + DbWarningReason._ID + "));";
+	}
+	
+	public static abstract class DbServiceFile implements BaseColumns {
+		public static final String TABLE_NAME = "service_file";
+		public static final String CN_NAME = "name";
+		public static final String CN_URL = "url";
+		public static final String CN_SERVICE = "serviceId";
+		
+		public static final String CREATE_TABLE = 
+				"CREATE TABLE " + TABLE_NAME + "("
+						+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
+						+ CN_SERVICE + " INTEGER,"
+						+ CN_NAME + " TEXT,"
+						+ CN_URL + " TEXT,"
+						+ "FOREIGN KEY(" + CN_SERVICE + ") "  
+						+ "REFERENCES "+ DbService.TABLE_NAME + "(" + DbService._ID + "));";
 	}		
 }

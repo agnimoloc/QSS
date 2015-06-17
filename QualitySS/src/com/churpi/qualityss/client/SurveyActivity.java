@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,7 +42,6 @@ public class SurveyActivity extends Activity {
 
 	Cursor c;
 	SimpleCursorAdapter adapter ;
-	ActionMode mActionMode;
 
 
 	@Override
@@ -71,7 +69,7 @@ public class SurveyActivity extends Activity {
 			ContextMenuInfo menuInfo) {
 
 
-		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		getMenuInflater().inflate(R.menu.comment_survey, menu);
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 
@@ -85,6 +83,11 @@ public class SurveyActivity extends Activity {
 			String comment = c.getString(c.getColumnIndex(DbSurveyQuestionAnswer.CN_COMMENT));
 
 			WorkflowHelper.getComments(SurveyActivity.this, comment, getString(R.string.inst_comment_survey), REQUEST_SURVEY_COMMENT);
+		}else if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, Constants.ACTION_EMPLOYEE);
+			return true;
+		}else if(id == R.id.action_warning){
+			WorkflowHelper.getWarning(this, Constants.ACTION_EMPLOYEE);
 		}
 		return super.onContextItemSelected(item);
 	}

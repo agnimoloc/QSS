@@ -5,17 +5,18 @@ import java.util.Date;
 
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.db.DbActions;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbCustomer;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance.ServiceStatus;
 import com.churpi.qualityss.client.dto.AddressDTO;
 import com.churpi.qualityss.client.dto.CustomerDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceInstanceDTO;
+import com.churpi.qualityss.client.helper.Alerts;
 import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
@@ -124,10 +125,13 @@ public class ServiceDetailActivity extends Activity {
 				try{
 					c = db.query(DbServiceInstance.TABLE_NAME, null, 
 							DbServiceInstance.CN_SERVICE + "=? AND " +
-							DbServiceInstance.CN_ACTIVITY_TYPE + "=?"
+							DbServiceInstance.CN_ACTIVITY_TYPE + "=? AND (" +
+							DbServiceInstance.CN_STATUS + "='"+DbServiceInstance.ServiceStatus.CURRENT+"' OR " +
+							DbServiceInstance.CN_FINISH_DATETIME + ">?)"
 							, new String[]{
 								String.valueOf(mServiceId),
-								String.valueOf(Ses.getInstance(context).getActivityType())
+								String.valueOf(Ses.getInstance(context).getActivityType()),
+								DateHelper.getCurrentTimeAdd(Calendar.HOUR_OF_DAY, Config.HOURS_TO_RESET_SENT_SERVICE * -1)
 							}, 
 							null, null, null);
 					if(c.moveToFirst())
@@ -144,7 +148,8 @@ public class ServiceDetailActivity extends Activity {
 				return si;
 			}
 		});
-		if(DbActions.checkClearService(this, serviceInstance)){
+		/*if(DbActions.checkClearService(this, serviceInstance)){*/
+		if(serviceInstance.getStatus()==null || serviceInstance.getStatus().compareTo(ServiceStatus.CURRENT) == 0){
 			if(serviceInstance.getStatus()==null){
 				DbTrans.write(this, serviceInstance, new DbTrans.Db() {
 					@Override
@@ -171,6 +176,7 @@ public class ServiceDetailActivity extends Activity {
 						si.setServicioConfiguracionId(serviceConfigurationID);
 						si.setEmpleadoRevision(userEmployeeId);
 						si.setFechaInicio(currentDate);
+						si.setFechaFin(currentDate);
 						si.setServicioId(mService.getServicioId());
 						si.setStatus(DbServiceInstance.ServiceStatus.CURRENT);
 						si.setTipo(Ses.getInstance(context).getActivityType());
@@ -210,6 +216,7 @@ public class ServiceDetailActivity extends Activity {
 	}
 
 	public void onClick_documents(View v){
-		Toast.makeText(this, "No hay documentos para mostrar", Toast.LENGTH_SHORT).show();
+		Alerts.showDocuments(this, Ses.getInstance(this).getServiceId());
+		//Toast.makeText(this, "No hay documentos para mostrar", Toast.LENGTH_SHORT).show();
 	}	
 }

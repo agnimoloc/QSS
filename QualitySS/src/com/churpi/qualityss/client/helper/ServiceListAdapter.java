@@ -1,9 +1,7 @@
 package com.churpi.qualityss.client.helper;
 
 import java.io.File;
-import java.util.Calendar;
 
-import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.R;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
@@ -55,13 +53,14 @@ public class ServiceListAdapter extends SimpleCursorAdapter{
 			} else if(DbServiceInstance.ServiceStatus.FINALIZED.compareTo(status)==0){
 				layout.setBackgroundColor(mContext.getResources().getColor(R.color.finalized));
 			} else if(DbServiceInstance.ServiceStatus.SENT.compareTo(status)==0){
-				Calendar cal = Calendar.getInstance();
+				layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
+				/*Calendar cal = Calendar.getInstance();
 				cal.setTime(DateHelper.getDateFromDb(c.getString(c.getColumnIndex(DbServiceInstance.CN_FINISH_DATETIME))));
 				cal.add(Calendar.HOUR_OF_DAY, Config.HOURS_TO_RESET_SENT_SERVICE);				
 				long diff = cal.getTime().getTime() - Calendar.getInstance().getTime().getTime();
 				if(diff >0 ){
 					layout.setBackgroundColor(mContext.getResources().getColor(R.color.sent));
-				}
+				}*/
 			}
 		}
 

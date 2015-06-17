@@ -1,8 +1,12 @@
 package com.churpi.qualityss.client;
 
+import java.util.Calendar;
+
+import com.churpi.qualityss.Config;
 import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
+import com.churpi.qualityss.client.helper.DateHelper;
 import com.churpi.qualityss.client.helper.ServiceListAdapter;
 import com.churpi.qualityss.client.helper.Ses;
 import com.churpi.qualityss.client.helper.WorkflowHelper;
@@ -59,10 +63,12 @@ public class SectorDetailFragment extends Fragment {
 		return (Cursor)DbTrans.read(getActivity(), new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+				String datePast = DateHelper.getCurrentTimeAdd(Calendar.HOUR_OF_DAY, Config.HOURS_TO_RESET_SENT_SERVICE * -1);
 				return db.rawQuery(
 						DbQuery.SERVICES_BY_SECTOR, 
 						new String[]{
 								String.valueOf(Ses.getInstance(context).getActivityType()),
+								datePast ,
 								String.valueOf(sectorId)
 						}
 				);

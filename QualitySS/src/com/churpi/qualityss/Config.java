@@ -9,16 +9,19 @@ public class Config {
 	private static final String SERVER_URL = BuildConfig.DEBUG ?  
 			"http://giatest2.cloudapp.net":"http://giatest2.cloudapp.net";
 	private static final String SERVER_GET_DATA = "api/ServiceApi/GetServices";
+	private static final String SERVER_GET_IMAGES = "Content/Files/SPImages";
+	private static final String SERVER_GET_DOCUMENTS = "Content/Files";
 	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPassword";
 	private static final String SERVER_SEND_DATA = "api/EvaluacionApi/SendServices";
 	private static final String SERVER_SEND_FILE = "api/FileUpload";
+	
 	
 	public static final String SERVER_GET_FILE_FLD_TIMESTAMP = "timestamp";
 	
 	public static final int SERVER_GET_FILE_TIMEOUT = 1000 * 60;
 	public static final int SERVER_GET_DATA_TIMEOUT = 10000;
 	
-	public static final int REFRESH_TIME = 60000;
+	public static final int REFRESH_TIME = 600000;
 	
 	public static final int HOURS_TO_RESET_SENT_SERVICE = 1;
 	
@@ -29,13 +32,15 @@ public class Config {
 		public static final int SEND_DATA = 3;
 		public static final int DOWNLOAD_FILE = 4;
 		public static final int SEND_FILE = 5;
+		public static final int GET_IMAGES = 6;
+		public static final int GET_DOCUMENTS = 7;
 	}
 	
-	public class FileType{
+	/*public class FileType{
 		public static final int SERVICE_IMAGE = 0;
 		public static final int EMPLOYEE_IMAGE = 1;
 		public static final int DOCUMENT_IMAGE = 2;
-	}
+	}*/
 	
 	public static String getUrl(int serverAction, String... args){
 		Uri.Builder builder = Uri.parse(SERVER_URL).buildUpon();
@@ -56,6 +61,10 @@ public class Config {
 			builder.appendPath(args[1]);
 		}else if(serverAction == ServerAction.SEND_FILE){
 			builder.appendEncodedPath(SERVER_SEND_FILE);
+		}else if(serverAction == ServerAction.GET_IMAGES){
+			builder.appendEncodedPath(SERVER_GET_IMAGES);
+		}else if(serverAction == ServerAction.GET_DOCUMENTS){
+			builder.appendEncodedPath(SERVER_GET_DOCUMENTS);
 		}
 		return builder.build().toString();
 	}

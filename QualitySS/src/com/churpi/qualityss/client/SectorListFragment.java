@@ -1,7 +1,9 @@
 package com.churpi.qualityss.client;
 
+import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSector;
+import com.churpi.qualityss.client.helper.Ses;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -81,10 +83,9 @@ public class SectorListFragment extends ListFragment {
 		c = (Cursor)DbTrans.read(getActivity(), new DbTrans.Db(){
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				return db.query(
-						DbSector.TABLE_NAME, 
-						new String[]{DbSector._ID, DbSector.CN_NAME}, 
-						null, null, null, null, null, null);				
+				return db.rawQuery(
+						DbQuery.GET_SECTOR_BY_ACTIVITYTYPE,
+						new String[]{String.valueOf(Ses.getInstance(getActivity()).getActivityType())});				
 			}
 		});
 		

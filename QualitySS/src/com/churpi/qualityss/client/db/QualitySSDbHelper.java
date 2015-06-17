@@ -17,6 +17,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbService;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceConfiguration;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEmployee;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipment;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceFile;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceType;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbState;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestion;
@@ -36,6 +37,7 @@ import com.churpi.qualityss.client.dto.SectorDTO;
 import com.churpi.qualityss.client.dto.ServiceConfigurationDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
 import com.churpi.qualityss.client.dto.ServiceEmployeeDTO;
+import com.churpi.qualityss.client.dto.ServiceFilesDTO;
 import com.churpi.qualityss.client.dto.ServiceTypeDTO;
 import com.churpi.qualityss.client.dto.StateDTO;
 import com.churpi.qualityss.client.dto.TownDTO;
@@ -94,7 +96,7 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 		db.execSQL(QualitySSDbContract.DbServiceFile.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbRequisition.CREATE_TABLE);
 		db.execSQL(QualitySSDbContract.DbWarning.CREATE_TABLE);
-		db.execSQL(QualitySSDbContract.DbWarningDetail.CREATE_TABLE);
+		db.execSQL(QualitySSDbContract.DbWarningDetail.CREATE_TABLE);		
 	}
 
 	@Override
@@ -366,6 +368,28 @@ public class QualitySSDbHelper extends SQLiteOpenHelper {
 						db.insert(DbHREmployee.TABLE_NAME, null, values);
 					}
 					c.close();
+				}
+			}
+			if(data.getArchivosServicio() != null){
+				for(ServiceFilesDTO serviceFiles : data.getArchivosServicio()){
+					if(serviceFiles.getArchivosReferencia()!= null && serviceFiles.getArchivosReferencia().keySet() != null){
+						for(String key : serviceFiles.getArchivosReferencia().keySet()){
+							ContentValues values = new ContentValues();
+							values.put(DbServiceFile.CN_URL, serviceFiles.getArchivosReferencia().get(key));
+							
+							int countFiles = db.update(DbServiceFile.TABLE_NAME, values, 
+									DbServiceFile.CN_SERVICE + "=? AND " + DbServiceFile.CN_NAME + "=?", 
+									new String[]{
+										String.valueOf(serviceFiles.getServicioId()),
+										key
+									});
+							if(countFiles == 0){
+								values.put(DbServiceFile.CN_NAME, key);
+								values.put(DbServiceFile.CN_SERVICE, serviceFiles.getServicioId());
+								db.insert(DbServiceFile.TABLE_NAME, null, values);
+							}
+						}
+					}
 				}
 			}
 

@@ -57,6 +57,9 @@ public class StaffReviewListActivity extends Activity {
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 		
 		action = getIntent().getAction();
+		if(action != null && Constants.ACTION_EMPLOYEE.compareTo(action)==0){
+			action = Constants.ACTION_SERVICE;
+		}
 
 		initCursor();
 
@@ -79,8 +82,11 @@ public class StaffReviewListActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0){
+		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0 ){
 			getMenuInflater().inflate(R.menu.comment_menu, menu);
+		}
+		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0 ){
+			menu.removeItem(R.id.action_warning);
 		}
 		return true;
 	}
@@ -91,10 +97,11 @@ public class StaffReviewListActivity extends Activity {
 		if (id == R.id.action_comments) {
 			addComments();
 			return true;
-		}
-		if (id == R.id.action_requisition) {
+		}else if (id == R.id.action_requisition) {
 			WorkflowHelper.getRequisition(this, action);
 			return true;
+		}else if(id == R.id.action_warning){
+			WorkflowHelper.getWarning(this, action);
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -235,7 +242,7 @@ public class StaffReviewListActivity extends Activity {
 	}
 
 	private void openStaffInventoryActivity(boolean barcodeChequed){
-		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0){
+		if(action != null && Constants.ACTION_SERVICE.compareTo(action) == 0 ){
 			startEmployee(barcodeChequed);
 		}
 		Ses.getInstance(getBaseContext()).setEmployeeId(tmpEmployeeId);
@@ -245,7 +252,7 @@ public class StaffReviewListActivity extends Activity {
 		startActivityForResult(
 				WorkflowHelper.process(this, 
 						R.id.gridView1,
-						Constants.ACTION_EMPLOYEE),REQUEST_INVENTORY);
+						action == null? null: Constants.ACTION_EMPLOYEE),REQUEST_INVENTORY);
 	}
 
 	public void onClick_finish(View v){

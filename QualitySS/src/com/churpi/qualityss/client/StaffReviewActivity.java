@@ -42,6 +42,7 @@ public class StaffReviewActivity extends Activity {
 	int employeeInstanceId;
 	int serviceInstanceId;
 	String employeeName;
+	String mAction;
 	QuestionDTO currentQuestion;
 
 	private static final int REQUEST_PHOTO = 0;
@@ -56,7 +57,9 @@ public class StaffReviewActivity extends Activity {
 
 		serviceInstanceId = Ses.getInstance(this).getServiceInstanceId();
 		Button button = (Button)findViewById(R.id.button4);
-		if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+		mAction = getIntent().getAction();
+		
+		if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 			employeeInstanceId = Ses.getInstance(this).getEmployeeInstanceId();
 			employeeName = Ses.getInstance(this).getEmployeeName();
 			button.setVisibility(View.GONE);			
@@ -73,10 +76,10 @@ public class StaffReviewActivity extends Activity {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				Cursor c = null;
-				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					c = db.rawQuery(DbQuery.STAFF_REVIEW, 
 							new String[]{String.valueOf(employeeInstanceId)});
-				}else if(getIntent().getAction().compareTo(Constants.ACTION_SERVICE)==0){
+				}else if(mAction.compareTo(Constants.ACTION_SERVICE)==0){
 					c = db.rawQuery(DbQuery.SERVICE_REVIEW, 
 							new String[]{String.valueOf(serviceInstanceId)});
 
@@ -113,6 +116,9 @@ public class StaffReviewActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		if(mAction.compareTo(Constants.ACTION_SERVICE) == 0){
+			menu.removeItem(R.id.action_warning);
+		}
 		return true;
 	}
 
@@ -122,10 +128,11 @@ public class StaffReviewActivity extends Activity {
 		if (id == R.id.action_comments) {
 			addComments();
 			return true;
-		}
-		if (id == R.id.action_requisition) {
-			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
+		}else if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, mAction);
 			return true;
+		}else if(id == R.id.action_warning){
+			WorkflowHelper.getWarning(this, mAction);
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -190,13 +197,13 @@ public class StaffReviewActivity extends Activity {
 	}
 	
 	private void moveNext(){
-		if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+		if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 			startActivity(
-				WorkflowHelper.process(this, android.R.id.button3, getIntent().getAction())
+				WorkflowHelper.process(this, android.R.id.button3, mAction)
 				);
 		}else{
 			startActivity(
-					WorkflowHelper.process(this, android.R.id.button2, getIntent().getAction())
+					WorkflowHelper.process(this, android.R.id.button2, mAction)
 					);
 		}
 	}
@@ -208,7 +215,7 @@ public class StaffReviewActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				QuestionDTO currentQuestion = (QuestionDTO)parameter;
 
-				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					DbEmployeeInstance.setStatus(db, employeeInstanceId, DbEmployeeInstance.EmployeeStatus.CURRENT);
 
 					ContentValues values = new ContentValues();
@@ -266,7 +273,7 @@ public class StaffReviewActivity extends Activity {
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
 				String comment = (String)parameter;
 				ContentValues values = new ContentValues();
-				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					values.put(DbEmployeeInstance.CN_REVIEW_COMMENT, comment);
 					db.update(DbEmployeeInstance.TABLE_NAME, 
 							values, 
@@ -306,13 +313,12 @@ public class StaffReviewActivity extends Activity {
 
 	private File getDestImage(int id){
 		String fileName = null;
-		String action = getIntent().getAction();
-		if(action.compareTo(Constants.ACTION_EMPLOYEE)== 0){
+		if(mAction.compareTo(Constants.ACTION_EMPLOYEE)== 0){
 			fileName = String.format(Constants.PHOTO_REVIEW_EMPLOYEE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					Ses.getInstance(this).getEmployeeId(),
 					id);
-		}else if(action.compareTo(Constants.ACTION_SERVICE)== 0){
+		}else if(mAction.compareTo(Constants.ACTION_SERVICE)== 0){
 			fileName = String.format(Constants.PHOTO_REVIEW_SERVICE ,
 					Ses.getInstance(this).getServiceInstanceKey(),
 					id);			
@@ -325,7 +331,7 @@ public class StaffReviewActivity extends Activity {
 		String comment = (String) DbTrans.read(this, new DbTrans.Db() {
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				if(getIntent().getAction().compareTo(Constants.ACTION_EMPLOYEE)==0){
+				if(mAction.compareTo(Constants.ACTION_EMPLOYEE)==0){
 					Cursor cur = db.query(
 							DbEmployeeInstance.TABLE_NAME, 
 							new String[]{DbEmployeeInstance.CN_REVIEW_COMMENT}, 

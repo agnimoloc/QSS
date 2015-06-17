@@ -14,7 +14,17 @@ public class DataDTO {
 	NotificationDTO[] Notificaciones;
 	WarningReasonDTO[] MotivoAmonestacion;
 	HREmployeeDTO[] RepresentantesRH;
+	ServiceFilesDTO[] ArchivosServicio;
 		
+	
+	public ServiceFilesDTO[] getArchivosServicio() {
+		return ArchivosServicio;
+	}
+
+	public void setArchivosServicio(ServiceFilesDTO[] archivosServicio) {
+		ArchivosServicio = archivosServicio;
+	}
+
 	public HREmployeeDTO[] getRepresentantesRH() {
 		return RepresentantesRH;
 	}

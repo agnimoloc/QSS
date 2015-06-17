@@ -48,19 +48,15 @@ public final class Constants {
 	public static final String IMG_EMPLOYEE = "imgEmp";
 	public static final String DOC_DIR = "docServ";
 	
-	public static final int ACTIVITY_TYPE_PATRIMONY = 1;
+	/*public static final int ACTIVITY_TYPE_PATRIMONY = 1;
 	public static final int ACTIVITY_TYPE_FIRE = 2;
-	public static final int ACTIVITY_TYPE_HEALTH = 3;
+	public static final int ACTIVITY_TYPE_HEALTH = 3;*/
 	public static final int ACTIVITY_TYPE_REQUISITION = -1;
 	public static final int ACTIVITY_TYPE_WARNING = -2;
+	public static final int ACTIVITY_TYPE_SERVICE_HISTORY = -3;
 	
 	public static final String ACTION_EMPLOYEE = "employee";
 	public static final String ACTION_SERVICE = "service";
-	
-	/*public static final String EXTRA_TYPE = "extraType";
-	public static final String EXTRA_SERVICE_ID = "extraServiceId";*/
-	
-	
 	
 	
 }

@@ -17,6 +17,8 @@ import java.util.Map;
 
 
 
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +34,7 @@ import com.churpi.qualityss.client.db.DbQuery;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbRequisition;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarning;
 import com.churpi.qualityss.client.db.QualitySSDbHelper;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEmployeeEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbEquipment;
@@ -42,6 +45,7 @@ import com.churpi.qualityss.client.db.QualitySSDbContract.DbReviewQuestionAnswer
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceEquipmentInventory;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceInstance;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbSurveyQuestionAnswer;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbWarningDetail;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.RequisitionDTO;
 import com.churpi.qualityss.client.dto.ServiceInstanceDTO;
@@ -65,6 +69,8 @@ public class PullPushDataService extends IntentService {
 	private final String JSON_LIST_SERVICES = "Servicios";
 	private final String JSON_LIST_REQUISITIONS = "Requisiciones";
 	private final String JSON_REQUISITION_ID = "RequisicionId";
+	private final String JSON_LIST_WARNINGS = "Amonestaciones";
+	private final String JSON_WARNING_ID = "AmonestacionId";
 	private final String JSON_LIST_EMPLOYEES = "EvaluacionElemento";
 	private final String JSON_EMPLOYEE_ID = "ElementoId";
 	private final String JSON_SERVICE_INSTANCE_KEY = "Key";
@@ -129,23 +135,48 @@ public class PullPushDataService extends IntentService {
 							JSONObject jRequisition = new JSONObject();
 							jRequisition.put(JSON_REQUISITION_ID, requisition.getId());
 							jRequisition.put("ResponsableId", requisition.getResponsableId());
+							if(requisition.getServicioId() >0){
+								jRequisition.put("ServicioId", requisition.getServicioId());
+							}
+							if(requisition.getElementoId() >0){
+								jRequisition.put("ElementoId", requisition.getServicioId());
+							}
 							jRequisition.put("Acuerdo_Compromiso", requisition.getAcuerdo_Compromiso());
-							/*if(requisition.getLugar() != null)
-								jRequisition.put("Lugar", requisition.getLugar());*/
+							jRequisition.put("Status", requisition.getStatus());
 							if(requisition.getAvance() != null)
 								jRequisition.put("Avance", requisition.getAvance());							
-							jRequisition.put("Status", requisition.getStatus());
 							jRequisition.put("FechaInicio", DateHelper.getJSONDate(requisition.getFechaInicio()));
-							if(requisition.getFechaTerminacion() != null)
+							/*if(requisition.getFechaTerminacion() != null)
 								jRequisition.put("FechaTerminacion", DateHelper.getJSONDate(requisition.getFechaTerminacion()));
 							if(requisition.getServicioId() > 0)
 								jRequisition.put("ServicioId", requisition.getServicioId());							
-							jRequisition.put("UniqueKey", requisition.getUniqueKey());
+							jRequisition.put("UniqueKey", requisition.getUniqueKey());*/
+							
 							
 							jRequisitions.put(jRequisition);							
 						}while(sCursor.moveToNext());
 					}
 					sCursor.close();
+					sCursor = db.rawQuery(DbQuery.GET_WARNINGS_TO_SEND, null);
+					if(sCursor.moveToFirst()){
+						JSONArray jWarnings = new JSONArray();
+						json.put(JSON_LIST_WARNINGS, jWarnings);
+						do{
+							JSONObject jWarning = new JSONObject();
+							jWarning.put(JSON_WARNING_ID, sCursor.getInt(sCursor.getColumnIndex(DbWarning._ID)));
+							jWarning.put("ElementoId", sCursor.getInt(sCursor.getColumnIndex(DbWarning.CN_EMPLOYEE)));
+							jWarning.put("Fecha", DateHelper.getJSONDate(sCursor.getString(sCursor.getColumnIndex(DbWarning.CN_CREATION_DATE))));
+							jWarning.put("MotivoId", sCursor.getInt(sCursor.getColumnIndex(DbWarningDetail.CN_WARNING_REASON)));
+							jWarning.put("OtroMotivo", sCursor.getInt(sCursor.getColumnIndex(DbWarningDetail.CN_NOTE)));
+							if(sCursor.isNull(sCursor.getColumnIndex(DbWarning.CN_SERVICE))){
+								int serviceId = sCursor.getInt(sCursor.getColumnIndex(DbWarning.CN_SERVICE));
+								jWarning.put("ServicioId", serviceId);
+							}
+							jWarnings.put(jWarning);							
+						}while(sCursor.moveToNext());
+					}
+					sCursor.close();
+
 				} catch (JSONException e) {
 					Toast.makeText(context, context.getString(R.string.msg_error_json_to_send), Toast.LENGTH_SHORT).show();
 					e.printStackTrace();
@@ -154,8 +185,7 @@ public class PullPushDataService extends IntentService {
 			}
 		});
 
-		if(!json.isNull(JSON_LIST_SERVICES) || !json.isNull(JSON_LIST_REQUISITIONS)){	
-			
+		if(!json.isNull(JSON_LIST_SERVICES) || !json.isNull(JSON_LIST_REQUISITIONS) || !json.isNull(JSON_LIST_WARNINGS) ){	
 			
 			
 			JsonObjectRequestResponseString request = new JsonObjectRequestResponseString(
@@ -196,6 +226,19 @@ public class PullPushDataService extends IntentService {
 														DbRequisition._ID + "=?", 
 														new String[]{ String.valueOf(requisitionId) });											
 											}
+										}
+										if(!json.isNull(JSON_LIST_WARNINGS)){
+											JSONArray warnings= json.getJSONArray(JSON_LIST_WARNINGS);
+											for(int i = 0; i < warnings.length(); i++){
+												JSONObject warning = (JSONObject) warnings.get(i);
+												ContentValues values = new ContentValues();
+												values.put(DbWarning.CN_SENT, 1);
+												int warningId = warning.getInt(JSON_WARNING_ID); 
+												db.update(DbWarning.TABLE_NAME, values, 
+														DbWarning._ID + "=?", 
+														new String[]{ String.valueOf(warningId) });											
+											}
+										
 										}
 									} catch (JSONException e) {
 										e.printStackTrace();
@@ -253,11 +296,11 @@ public class PullPushDataService extends IntentService {
 					@Override
 					public void onResponse(DataDTO data) {
 						if(data != null){
-							DownloadFileReciever.setDataDTO(data);
 							sendBroadCastResult(mContext, Constants.PULL_PUSH_DATA_REFRESH, mContext.getString(R.string.msg_update_database), 50);
 							setPreferencesByData(mContext, data);
 							QualitySSDbHelper dbHelper = new QualitySSDbHelper(mContext);
 							dbHelper.updateDBfromValue(data);
+							DownloadFileReciever.setDataDTO(data);
 						}else{
 							String errorMsg = mContext.getString(R.string.ttl_error);
 							Toast.makeText(mContext, "no", Toast.LENGTH_LONG).show();

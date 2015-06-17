@@ -46,6 +46,7 @@ public class StaffInventoryActivity extends Activity {
 	
 	private Cursor c;
 	private InventoryListAdapter adapter = null;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +117,9 @@ public class StaffInventoryActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.comment_menu, menu);
+		if(mAction.compareTo(Constants.ACTION_SERVICE) == 0){
+			menu.removeItem(R.id.action_warning);
+		}
 		return true;
 	}
 
@@ -125,10 +129,11 @@ public class StaffInventoryActivity extends Activity {
 		if (id == R.id.action_comments) {
 			addComments();
 			return true;
-		}
-		if (id == R.id.action_requisition) {
-			WorkflowHelper.getRequisition(this, Constants.ACTION_SERVICE);
+		}else if (id == R.id.action_requisition) {
+			WorkflowHelper.getRequisition(this, mAction);
 			return true;
+		}else if(id == R.id.action_warning){
+			WorkflowHelper.getWarning(this, mAction);
 		}
 		return super.onOptionsItemSelected(item);
 	}

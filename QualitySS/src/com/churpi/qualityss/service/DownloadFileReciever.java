@@ -6,14 +6,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.churpi.qualityss.Config;
 import com.churpi.qualityss.Constants;
-import com.churpi.qualityss.client.BuildConfig;
+import com.churpi.qualityss.client.db.DbTrans;
+import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceFile;
 import com.churpi.qualityss.client.dto.DataDTO;
 import com.churpi.qualityss.client.dto.EmployeeDTO;
 import com.churpi.qualityss.client.dto.ServiceDTO;
-import com.churpi.qualityss.client.helper.Ses;
+import com.churpi.qualityss.client.dto.ServiceFilesDTO;
 
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
@@ -22,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.LongSparseArray;
 
@@ -30,16 +34,29 @@ public class DownloadFileReciever extends BroadcastReceiver {
 	DownloadManager dm;
 	Context mContext;
 	LongSparseArray<FileRetrieve> enqueue;
+	private static final int SERVICE_IMAGE = 0;
+	private static final int EMPLOYEE_IMAGE = 1;
+	private static final int DOCUMENT_FILE = 2;
 
 	private class FileRetrieve{
 		int fileType;
 		String fileName;
+		Map<String, String> extraData;
+		
+		public FileRetrieve(int fileType, String fileName, Map<String, String> extra){
+			this.fileType = fileType;
+			this.fileName = fileName;
+			this.extraData = extra;
+		}
+						
+		public Map<String, String> getExtraData() {
+			return extraData;
+		}
+
 		public int getFileType() {
 			return fileType;
 		}
-		public void setFileType(int fileType) {
-			this.fileType = fileType;
-		}
+		
 		public String getFileName() {
 			return fileName;
 		}
@@ -65,36 +82,46 @@ public class DownloadFileReciever extends BroadcastReceiver {
 	public void downloadFiles(){
 		if(globalData != null){
 			for(ServiceDTO service : globalData.getServicios()){
-				downloadFile(Config.FileType.SERVICE_IMAGE, "S"+ service.getCode()+".jpg");
-
+				downloadFile(SERVICE_IMAGE, "S" + service.getCode().trim() + ".jpg", null);
+				
 			}
 			for(EmployeeDTO employee : globalData.getElementos()){
-				downloadFile(Config.FileType.EMPLOYEE_IMAGE, employee.getCode()+".jpg");
+				downloadFile(EMPLOYEE_IMAGE, employee.getCode().trim() + ".jpg", null);
 			}
-			//TODO: add way to save documents
+			
+			if(globalData.getArchivosServicio() != null){
+				for(ServiceFilesDTO serviceFiles : globalData.getArchivosServicio() ){
+					if(serviceFiles.getArchivosReferencia() != null && serviceFiles.getArchivosReferencia().keySet() != null){
+						for(String key : serviceFiles.getArchivosReferencia().keySet()){
+							Map<String, String> extra = new HashMap<String, String>();
+							extra.put(DbServiceFile.CN_SERVICE, String.valueOf(serviceFiles.getServicioId()));
+							extra.put(DbServiceFile.CN_NAME, key);
+							downloadFile(DOCUMENT_FILE, 
+									serviceFiles.getArchivosReferencia().get(key),
+									extra);
+						}
+					}
+						
+				}
+			}
+
 		}
 	}
 
-	public void downloadFile(int fileType, String fileName){		
+	public void downloadFile(int fileType, String fileName, Map<String, String> extraData){		
 		String url = "";
 
-		if(fileType == Config.FileType.DOCUMENT_IMAGE){
+		if(fileType == DOCUMENT_FILE){
 			//url = Constants.getPref(mContext).getString(Constants.PREF_IMAGEURL, "");
-			url = Ses.getInstance(mContext).getImgURL();
-		}else if(fileType == Config.FileType.EMPLOYEE_IMAGE){
-			url = Ses.getInstance(mContext).getImgURL();
-		}else if(fileType == Config.FileType.SERVICE_IMAGE){
-			url = Ses.getInstance(mContext).getImgURL();
+			url = Config.getUrl(Config.ServerAction.GET_DOCUMENTS);
+		}else if(fileType == EMPLOYEE_IMAGE || fileType == SERVICE_IMAGE){
+			url = Config.getUrl(Config.ServerAction.GET_IMAGES);
 		}
 
-		if(BuildConfig.DEBUG){
-			url = "http://192.168.1.69/GiaWebSite/ServiceImages";
-		}
 		url = Config.getUrl(Config.ServerAction.DOWNLOAD_FILE, url, fileName);
 		Request request = new Request( Uri.parse(url));
-		FileRetrieve fileMeta = new FileRetrieve();
-		fileMeta.setFileName(fileName);
-		fileMeta.setFileType(fileType);
+		FileRetrieve fileMeta = new FileRetrieve(fileType, fileName, extraData);
+		
 		enqueue.put(dm.enqueue(request), fileMeta);
 	}
 
@@ -113,12 +140,38 @@ public class DownloadFileReciever extends BroadcastReceiver {
 					if (DownloadManager.STATUS_SUCCESSFUL == status) {
 						FileRetrieve fileMeta = enqueue.get(referenceId);
 						File to = null;
-						if(fileMeta.getFileType() == Config.FileType.EMPLOYEE_IMAGE){
-							to = context.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE);	
-						}else if(fileMeta.getFileType() == Config.FileType.SERVICE_IMAGE){
+						if(fileMeta.getFileType() == EMPLOYEE_IMAGE){
+							to = context.getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE);
+						}else if(fileMeta.getFileType() == SERVICE_IMAGE){
 							to = context.getDir(Constants.IMG_SERVICE, Context.MODE_PRIVATE);	
-						}else if(fileMeta.getFileType() == Config.FileType.DOCUMENT_IMAGE){
-							to = context.getDir(Constants.DOC_DIR, Context.MODE_PRIVATE);	
+						}else if(fileMeta.getFileType() == DOCUMENT_FILE){
+							to = new File(context.getFilesDir(),Constants.DOC_DIR);
+							if(!to.exists()){
+								to.mkdir();
+							}
+							DbTrans.write(context, fileMeta, new DbTrans.Db() {								
+								@Override
+								public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
+									FileRetrieve fileMeta = (FileRetrieve)parameter;
+									File file = new File(fileMeta.getFileName());
+									fileMeta.setFileName(file.getName());
+									Cursor c = db.query(DbServiceFile.TABLE_NAME,
+											new String[]{ DbServiceFile._ID },
+											DbServiceFile.CN_SERVICE + "=? AND "+ DbServiceFile.CN_NAME + "=?",
+											new String[]{
+												fileMeta.getExtraData().get(DbServiceFile.CN_SERVICE), 
+												fileMeta.getExtraData().get(DbServiceFile.CN_NAME)},
+											null,null,null);
+									if(c.moveToFirst()){
+										String[] parts = fileMeta.getFileName().split("\\.");
+										fileMeta.setFileName(
+												String.valueOf(c.getInt(c.getColumnIndex(DbServiceFile._ID)) 
+												+ "." + parts[parts.length-1]));
+									}
+									c.close();
+									return null;
+								}
+							});
 						}
 						to = new File(to, fileMeta.getFileName());
 						if(to != null){
