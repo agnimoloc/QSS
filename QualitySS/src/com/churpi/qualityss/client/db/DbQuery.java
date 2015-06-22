@@ -323,7 +323,9 @@ public class DbQuery {
 				+ "w." + DbWarning.CN_CREATION_DATE + ", "
 				+ "wd." + DbWarningDetail.CN_WARNING_REASON + ", "
 				+ "wd." + DbWarningDetail.CN_NOTE + ", "
-				+ "w." + DbWarning.CN_SERVICE + " "
+				+ "w." + DbWarning.CN_SERVICE + ", "
+				+ "w." + DbWarning.CN_CREATOR + ", "
+				+ "w." + DbWarning.CN_CREATION_DATE + " "
 			+ "FROM " + DbWarning.TABLE_NAME + " w "
 			+ "INNER JOIN " + DbWarningDetail.TABLE_NAME + " wd ON w." + DbWarning._ID + " = wd." + DbWarningDetail.CN_WARNING + " "
 			+ "WHERE w." + DbWarning.CN_SENT + " IS NULL OR w." + DbWarning.CN_SENT + " = 0";
@@ -359,6 +361,22 @@ public class DbQuery {
 				+ "at." + DbServiceType._ID + " = si." + DbServiceInstance.CN_ACTIVITY_TYPE + " "
 			+ "INNER JOIN " + DbSector.TABLE_NAME + " se ON "
 				+ "se." + DbSector._ID + " = s." + DbService.CN_SECTOR + " "
-			+ "ORDER BY si." + DbServiceInstance.CN_FINISH_DATETIME + " DESC "; 
+			+ "ORDER BY si." + DbServiceInstance.CN_FINISH_DATETIME + " DESC ";
+	
+	public static final String GET_EMPLOYEE_BY_SERVICE_PICKER = 
+			"SELECT * FROM (SELECT "
+			+ "e." + DbEmployee._ID +", "
+			+ "e." + DbEmployee.CN_NAME +", "
+			+ "e." + DbEmployee.CN_CODE +" "
+			+ "FROM " + DbEmployee.TABLE_NAME + " e "
+			+ "INNER JOIN " + DbServiceEmployee.TABLE_NAME + " se ON "
+				+ "se." + DbServiceEmployee.CN_EMPLOYEE + " = e." + DbEmployee._ID + " "
+				+ "AND se." + DbServiceEmployee.CN_SERVICE + " = ? "
+			+ "UNION "
+			+ "SELECT "
+				+ "0 AS [" + DbEmployee._ID +"], "
+				+ "'' AS [" + DbEmployee.CN_NAME +"], "
+				+ "'' AS [" + DbEmployee.CN_CODE +"]"
+			+ ") AS T ORDER BY " + DbEmployee.CN_NAME + " ASC";
 }
 

@@ -3,20 +3,28 @@ package com.churpi.qualityss.client;
 import java.io.File;
 import java.net.URI;
 
+import com.churpi.qualityss.client.helper.ImageHelper;
+import com.churpi.qualityss.client.helper.ResizeImageTask;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 public class ShowPhotoActivity extends Activity {
 
-	public static final String FILE_URI = "file_path";
-	public static final String SHOW_NEW_BUTTON = "show_new";
+	protected static final String FILE_URI = "file_path";
+	protected static final String SHOW_BUTTONS = "show_buttons";
+	
+	private static final int REQUEST_PHOTO = 0;
 	
 	private Uri uri;
 	
@@ -26,49 +34,15 @@ public class ShowPhotoActivity extends Activity {
 		setContentView(R.layout.activity_show_photo);
 		
 		Bundle extras = getIntent().getExtras();
-		boolean showButton = extras.getBoolean(SHOW_NEW_BUTTON, false); 
+		boolean showButton = extras.getBoolean(SHOW_BUTTONS, false); 
 		uri = (Uri)extras.get(FILE_URI);
 		if(showButton){
 			Button text = (Button)findViewById(android.R.id.button2);
 			text.setVisibility(View.VISIBLE);
 		}
 		
-		File file = new File(URI.create(uri.toString()));
-		ImageView image = (ImageView)findViewById(R.id.imageView1);
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-		options.inSampleSize = calculateInSampleSize(options, 500, 500);
-		options.inJustDecodeBounds = false;
-		Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-
-		image.setImageBitmap(bmp);
-		
-		
+		loadPhoto();
 	}
-	public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-		// Raw height and width of image
-		final int height = options.outHeight;
-		final int width = options.outWidth;
-		int inSampleSize = 1;
-
-		if (height > reqHeight || width > reqWidth) {
-
-			final int halfHeight = height / 2;
-			final int halfWidth = width / 2;
-
-			// Calculate the largest inSampleSize value that is a power of 2 and keeps both
-			// height and width larger than the requested height and width.
-			while ((halfHeight / inSampleSize) > reqHeight
-					&& (halfWidth / inSampleSize) > reqWidth) {
-				inSampleSize *= 2;
-			}
-    }
-
-    return inSampleSize;
-}
 	
 	public void onClick_Ok(View v){
 		setResult(RESULT_CANCELED);
@@ -76,10 +50,77 @@ public class ShowPhotoActivity extends Activity {
 	}
 	
 	public void onClick_New(View v){
-		Intent data = new Intent();
-		data.putExtra(FILE_URI, uri);
-		setResult(RESULT_OK, data);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setTitle(R.string.ttl_override_image);
+		dialogBuilder.setMessage(R.string.msg_override_image);
+		dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				takePhoto();
+			}
+			
+		});
+		dialogBuilder.create().show();
+	}
+	
+	public void onClick_delete(View v){
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setTitle(R.string.ttl_delete_image);
+		dialogBuilder.setMessage(R.string.msg_delete_image);
+		dialogBuilder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				deletePhoto();
+			}
+			
+		});
+		dialogBuilder.create().show();
+		
+	}
+	
+	private void takePhoto(){
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	    if (intent.resolveActivity(getPackageManager()) != null) {
+	    	intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+	    	startActivityForResult(intent, REQUEST_PHOTO);
+	    }
+	}
+	private void deletePhoto(){
+		File file = new File(URI.create(uri.toString()));
+		file.delete();
+		setResult(RESULT_OK);
 		finish();
+	}
+	
+	private void loadPhoto(){
+		File file = new File(URI.create(uri.toString()));
+		ImageView image = (ImageView)findViewById(R.id.imageView1);
+
+		ResizeImageTask task = new ResizeImageTask(image);
+		task.execute(file.getAbsolutePath(), "500");	
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {	
+		if(requestCode == REQUEST_PHOTO && resultCode == RESULT_OK){
+			loadPhoto();
+		}
 	}
 
 }

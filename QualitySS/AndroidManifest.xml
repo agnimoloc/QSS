@@ -158,6 +158,10 @@
             android:name=".ServiceHistoryActivity"
             android:label="@string/title_activity_service_history" >
         </activity>
+        <activity
+            android:name=".ImageGalleryActivity"
+            android:label="@string/title_activity_image_gallery" >
+        </activity>
     </application>
 
 </manifest>

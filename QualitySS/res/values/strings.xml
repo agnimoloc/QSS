@@ -162,5 +162,11 @@
     <string name="lbl_others">Otros:</string>
     <string name="title_activity_service_history">Historico de servicios</string>
     <string name="inst_service_history">Selecciona un servicio para ver el detalle</string>
+    <string name="title_activity_image_gallery">Imagenes</string>
+    <string name="ttl_override_image">Sobreescribir Imagen</string>
+    <string name="msg_override_image">¿Desea sustituir la imagen guardada?</string>
+    <string name="ttl_delete_image">Eliminar Imagen</string>
+    <string name="msg_delete_image">¿Desea eliminar la imagen guardada?, imagen borrada ya no se puede recuperar</string>
+    <string name="btn_delete">Borrar</string>
 
 </resources>

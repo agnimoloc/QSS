@@ -182,14 +182,15 @@ public class StaffReviewActivity extends Activity {
 	public void onClick_takephoto(View v){
 		currentQuestion = (QuestionDTO)((View)((View)v.getParent()).getParent()).getTag();		
 		File dest = getDestImage(currentQuestion.getPreguntaId());
-		if(dest.exists()){
+		/*if(dest.exists()){
 			Intent showPhotoIntent = new Intent(this, ShowPhotoActivity.class);
 			showPhotoIntent.putExtra(ShowPhotoActivity.FILE_URI, Uri.fromFile(dest));
 			showPhotoIntent.putExtra(ShowPhotoActivity.SHOW_NEW_BUTTON, true);
 			startActivityForResult(showPhotoIntent,REQUEST_IMAGE_SHOW);
 		}else{
 			WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);
-		}
+		}*/
+		WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);
 	}
 	
 	public void onClick_next(View v){

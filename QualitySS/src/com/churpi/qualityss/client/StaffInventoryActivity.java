@@ -171,11 +171,12 @@ public class StaffInventoryActivity extends Activity {
 	public void onClick_TakePhoto(View v){
 		int id = (Integer)v.getTag();
 		File dest = getDestImage(id);
-		if(dest.exists()){
+		/*if(dest.exists()){
 			WorkflowHelper.showPhoto(this, dest, REQUEST_IMAGE_SHOW);
 		}else{
 			WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);
-		}
+		}*/
+		WorkflowHelper.takePhoto(this, dest, REQUEST_PHOTO);		
 	}
 	
 	public void onClick_Comment(View v){

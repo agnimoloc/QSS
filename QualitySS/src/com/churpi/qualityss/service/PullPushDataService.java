@@ -19,6 +19,7 @@ import java.util.Map;
 
 
 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,8 +150,8 @@ public class PullPushDataService extends IntentService {
 							/*if(requisition.getFechaTerminacion() != null)
 								jRequisition.put("FechaTerminacion", DateHelper.getJSONDate(requisition.getFechaTerminacion()));
 							if(requisition.getServicioId() > 0)
-								jRequisition.put("ServicioId", requisition.getServicioId());							
-							jRequisition.put("UniqueKey", requisition.getUniqueKey());*/
+								jRequisition.put("ServicioId", requisition.getServicioId());*/							
+							jRequisition.put("UniqueKey", requisition.getUniqueKey());
 							
 							
 							jRequisitions.put(jRequisition);							
@@ -168,6 +169,11 @@ public class PullPushDataService extends IntentService {
 							jWarning.put("Fecha", DateHelper.getJSONDate(sCursor.getString(sCursor.getColumnIndex(DbWarning.CN_CREATION_DATE))));
 							jWarning.put("MotivoId", sCursor.getInt(sCursor.getColumnIndex(DbWarningDetail.CN_WARNING_REASON)));
 							jWarning.put("OtroMotivo", sCursor.getInt(sCursor.getColumnIndex(DbWarningDetail.CN_NOTE)));
+							
+							String uniqueKey = "AMO_" + 
+									String.valueOf(sCursor.getInt(sCursor.getColumnIndex(DbWarning.CN_CREATOR))) + "_" + 
+									sCursor.getString(sCursor.getColumnIndex(DbWarning.CN_CREATION_DATE));							
+							jWarning.put("UniqueKey", uniqueKey);							
 							if(sCursor.isNull(sCursor.getColumnIndex(DbWarning.CN_SERVICE))){
 								int serviceId = sCursor.getInt(sCursor.getColumnIndex(DbWarning.CN_SERVICE));
 								jWarning.put("ServicioId", serviceId);

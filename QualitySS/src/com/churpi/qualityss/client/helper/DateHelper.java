@@ -18,6 +18,11 @@ public class DateHelper {
 		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);													
 		return format.format(calendar.getTime());
 	}
+	public static String getCurrentTimeFormatted(){
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat format = new SimpleDateFormat(STRING_DATE_FORMAT);													
+		return format.format(calendar.getTime());
+	}
 	
 	public static String getCurrentTimeAdd(int field, int value){
 		Calendar calendar = Calendar.getInstance();

@@ -10,14 +10,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.churpi.qualityss.client.ShowPhotoActivity" >
 
-    <TextView
-        android:id="@android:id/text1"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="@string/ttl_photo"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <ImageButton
+        android:id="@android:id/custom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:contentDescription="@string/btn_delete"
+        android:src="@android:drawable/ic_menu_delete"
+        android:onClick="onClick_delete" />
 
     <ImageView
         android:id="@+id/imageView1"
