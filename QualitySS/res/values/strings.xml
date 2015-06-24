@@ -168,5 +168,7 @@
     <string name="ttl_delete_image">Eliminar Imagen</string>
     <string name="msg_delete_image">¿Desea eliminar la imagen guardada?, imagen borrada ya no se puede recuperar</string>
     <string name="btn_delete">Borrar</string>
+    <string name="sum_inventory_service">Resumen del inventario del servicio</string>
+    <string name="sum_inventory_employee">Resumen del inventario del empleado</string>
 
 </resources>
