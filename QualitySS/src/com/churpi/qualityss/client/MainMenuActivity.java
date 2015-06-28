@@ -85,21 +85,21 @@ public class MainMenuActivity extends Activity {
 		menu.add(d);*/
 		
 		d = new MenuAdapter.MenuItem();		
-		d.setResourceId(R.drawable.ic_launcher);
+		d.setResourceId(R.drawable.requisicion);
 		d.setKey(Constants.ACTIVITY_TYPE_REQUISITION);
 		d.setTitle("Requisición");
 		
 		menu.add(d);
 
 		d = new MenuAdapter.MenuItem();		
-		d.setResourceId(R.drawable.ic_launcher);
+		d.setResourceId(R.drawable.mazo);
 		d.setKey(Constants.ACTIVITY_TYPE_WARNING);
 		d.setTitle("Amonestación");
 		
 		menu.add(d);
 		
 		d = new MenuAdapter.MenuItem();		
-		d.setResourceId(R.drawable.ic_launcher);
+		d.setResourceId(R.drawable.historico_reportes);
 		d.setKey(Constants.ACTIVITY_TYPE_SERVICE_HISTORY);
 		d.setTitle("Histórico de servicios");
 		
