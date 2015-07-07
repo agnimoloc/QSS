@@ -242,6 +242,21 @@ public class SummaryActivity extends Activity {
 		String reviewComment = c.getString(c.getColumnIndex(DbEmployeeInstance.CN_REVIEW_COMMENT));
 		String surveyComment = c.getString(c.getColumnIndex(DbEmployeeInstance.CN_SURVEY_COMMENT));
 		
+		File dir = new File(
+				getDir(Constants.IMG_EMPLOYEE, Context.MODE_PRIVATE), 
+				c.getString(c.getColumnIndex(DbEmployee.CN_CODE)).trim() + ".jpg");
+		ImageView img = (ImageView)parent.findViewById(android.R.id.icon);
+		if(dir.exists()){
+			img.setImageURI(Uri.fromFile(dir));
+		}else{
+			img.setImageResource(R.drawable.no_image_element);
+		}
+		
+		String employeeName = c.getString(c.getColumnIndex(DbEmployee.CN_NAME));
+		TextView text = (TextView)parent.findViewById(android.R.id.text1);
+		text.setText(employeeName);
+		
+		
 		Cursor cInventory = db.rawQuery(DbQuery.EMPLOYEE_INVENTORY_FAULT, 
 				new String[]{ String.valueOf(employeeInstanceId)});
 		if(cInventory.moveToFirst()){

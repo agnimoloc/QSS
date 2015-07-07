@@ -1,5 +1,8 @@
 package com.churpi.qualityss.client;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -87,18 +90,28 @@ public class LoginActivity extends Activity {
 				Config.getUrl(Config.ServerAction.GET_AUTHENTICATE, account, password)
 				, new Response.Listener<String>() {
 					@Override
-					public void onResponse(String employeeIdStr) {
-						int employeeId = Integer.parseInt(employeeIdStr);
-						if(employeeId != 0){
+					public void onResponse(String jsonResponse) {
+						if(jsonResponse != null && jsonResponse.length() > 0){
+							JSONObject json;
+							try {
+								json = new JSONObject(jsonResponse);
 							
-							Ses.getInstance(getBaseContext())
-							.edit()
-							.setAccount(account)
-							.setPassHashcode(password.hashCode())
-							.setEmployee(employeeId)
-							.commit();
-					
-							startMainActivity();
+								JSONObject elemento = json.getJSONObject("Elemento");
+								int employeeId = Integer.parseInt(elemento.getString("ElementoId"));
+								
+								Ses.getInstance(getBaseContext())
+								.edit()
+								.setAccount(account)
+								.setPassHashcode(password.hashCode())
+								.setEmployee(employeeId)
+								.setPermissions(json.getJSONArray("Permisos").toString())
+								.commit();
+						
+								startMainActivity();
+							} catch (JSONException e) {
+								Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
+								e.printStackTrace();
+							}
 						}else{
 							Toast.makeText(getBaseContext(), getString(R.string.msg_invalid_login), Toast.LENGTH_LONG).show();
 						}

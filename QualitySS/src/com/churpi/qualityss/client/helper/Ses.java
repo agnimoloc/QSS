@@ -23,6 +23,7 @@ public class Ses {
 	public static final String PREF_EMPLOYEE_NAME = "EMPLOYEE_NAME";
 	public static final String PREF_SERVICE_INSTANCE_ID = "SERVICE_INSTANCE_ID";
 	public static final String PREF_SERVICE_INSTANCE_KEY = "SERVICE_INSTANCE_KEY";
+	public static final String PREF_PERMISSIONS = "PERMISSIONS";
 	
 	private String account;
 	private int passHashcode;
@@ -38,8 +39,18 @@ public class Ses {
 	private String serviceDescription;
 	private String employeeName;
 	private String serviceInstanceKey;
+	private String permissions;
 	private boolean filledDb;	
 	
+	
+	public String getPermissions() {
+		return permissions;
+	}
+	public Ses setPermissions(String permissions) {
+		putString(PREF_PERMISSIONS, permissions);
+		this.permissions = permissions;
+		return this;
+	}
 	public int getEmployeeInstanceId() {
 		return employeeInstanceId;
 	}
@@ -192,6 +203,7 @@ public class Ses {
 		employeeName = pref.getString(PREF_EMPLOYEE_NAME, null);
 		serviceInstanceId = pref.getInt(PREF_SERVICE_INSTANCE_ID, -1);
 		serviceDescription = pref.getString(PREF_SERVICE_DESC, null);
+		permissions = pref.getString(PREF_PERMISSIONS, null);
 	}
 	
 	private SharedPreferences getPref(){

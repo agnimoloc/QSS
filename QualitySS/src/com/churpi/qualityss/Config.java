@@ -11,9 +11,9 @@ public class Config {
 	private static final String SERVER_GET_DATA = "api/ServiceApi/GetServices";
 	private static final String SERVER_GET_IMAGES = "Content/Files/SPImages";
 	private static final String SERVER_GET_DOCUMENTS = "Content/Files";
-	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPassword";
+	private static final String SERVER_AUTHENTICATE = "api/ServiceApi/ValidateUserPasswordPermisos";
 	private static final String SERVER_SEND_DATA = "api/EvaluacionApi/SendServices";
-	private static final String SERVER_SEND_FILE = "api/FileUpload";
+	private static final String SERVER_SEND_FILE = "api/FileUpload/post";
 	
 	
 	public static final String SERVER_GET_FILE_FLD_TIMESTAMP = "timestamp";

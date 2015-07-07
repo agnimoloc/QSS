@@ -3,6 +3,10 @@ package com.churpi.qualityss.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.churpi.qualityss.Constants;
 import com.churpi.qualityss.client.db.DbTrans;
 import com.churpi.qualityss.client.db.QualitySSDbContract.DbServiceType;
@@ -36,27 +40,56 @@ public class MainMenuActivity extends Activity {
 		
 		menu = new ArrayList<MenuAdapter.MenuItem>();
 		
-		DbTrans.read(this, new DbTrans.Db() {
+		List<Integer> access = new ArrayList<Integer>();
+		try {
+			JSONArray list = new JSONArray(Ses.getInstance(getApplicationContext()).getPermissions());
+			for(int i = 0; i < list.length(); i++){
+				JSONObject item = list.getJSONObject(i);
+				if(item.getBoolean("Acceso")){
+					String name = item.getString("Nombre"); 
+					
+					if(name.compareTo("requisicion")==0)
+						access.add(Constants.ACTIVITY_TYPE_REQUISITION);
+
+					if(name.compareTo("Proteccioncivilybomberos")==0)
+						access.add(Constants.ACTIVITY_TYPE_FIRE);
+
+					if(name.compareTo("bienesinmuebles")==0)
+						access.add(Constants.ACTIVITY_TYPE_PATRIMONY);
+
+					if(name.compareTo("custodias")==0)
+						access.add(Constants.ACTIVITY_TYPE_CUSTODY);
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		DbTrans.read(this, access, new DbTrans.Db() {
 			
 			@Override
 			public Object onDo(Context context, Object parameter, SQLiteDatabase db) {
-				
-				//Cursor c = db.rawQuery(DbQuery.GET_ACTIVITIES, null);
-				Cursor c = db.query(DbServiceType.TABLE_NAME, null, null, null, null, null, null);
-				if(c.moveToFirst()){
-					do{
-						int activityType = c.getInt(c.getColumnIndex(DbServiceType._ID));
-						String title = c.getString(c.getColumnIndex(DbServiceType.CN_TITLE));
-						MenuAdapter.MenuItem d = new MenuAdapter.MenuItem();
-						d.setKey(activityType);
-						d.setResourceId(resoruceTypes[activityType-1]);						
-						d.setTitle(title);
-						
-						menu.add(d);
-												
-					}while(c.moveToNext());
+				@SuppressWarnings("unchecked")
+				ArrayList<Integer> access = (ArrayList<Integer>)parameter;
+				if(access != null){
+					Cursor c = db.query(DbServiceType.TABLE_NAME, null, null, null, null, null, null);
+					if(c.moveToFirst()){
+						do{
+							int activityType = c.getInt(c.getColumnIndex(DbServiceType._ID));
+							if(access.contains(activityType)){
+								String title = c.getString(c.getColumnIndex(DbServiceType.CN_TITLE));
+								MenuAdapter.MenuItem d = new MenuAdapter.MenuItem();
+								d.setKey(activityType);
+								d.setResourceId(resoruceTypes[activityType-1]);						
+								d.setTitle(title);
+
+								menu.add(d);
+							}
+						}while(c.moveToNext());
+					}
+					c.close();
 				}
-				c.close();
 				return null;
 			}
 		});
@@ -84,12 +117,16 @@ public class MainMenuActivity extends Activity {
 		
 		menu.add(d);*/
 		
-		d = new MenuAdapter.MenuItem();		
-		d.setResourceId(R.drawable.requisicion);
-		d.setKey(Constants.ACTIVITY_TYPE_REQUISITION);
-		d.setTitle("Requisición");
-		
-		menu.add(d);
+		if(((ArrayList<Integer>)access) != null){ 
+			if(access.contains(Constants.ACTIVITY_TYPE_REQUISITION)){
+				d = new MenuAdapter.MenuItem();		
+				d.setResourceId(R.drawable.requisicion);
+				d.setKey(Constants.ACTIVITY_TYPE_REQUISITION);
+				d.setTitle("Requisición");
+
+				menu.add(d);
+			}
+		}
 
 		d = new MenuAdapter.MenuItem();		
 		d.setResourceId(R.drawable.mazo);
